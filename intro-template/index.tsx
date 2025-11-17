@@ -83,7 +83,7 @@ export default function IntroTemplate() {
 
                   {isLocalHost ? (
                     <div className="text-xs text-gray-700">
-                      Start editing your content structure in
+                      Start editing your content structure in STAGING
                       <div className="bg-slate-200 w-fit px-2">
                         <pre>sanity.config.ts</pre>
                       </div>
