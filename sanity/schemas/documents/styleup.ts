@@ -2,8 +2,8 @@ import { DocumentIcon } from '@sanity/icons'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 export default defineType({
-  name: 'project',
-  title: 'Project',
+  name: 'styleUp',
+  title: 'Style Up',
   type: 'document',
   icon: DocumentIcon,
   fields: [
@@ -22,18 +22,6 @@ export default defineType({
       options: {
         dateFormat: 'YYYY-MM-DD'
       }
-    }),
-    defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: { source: 'title', maxLength: 96 },
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'credits',
-      title: 'Credits',
-      type: 'string',
     }),
     defineField({
       name: 'gallery',
@@ -72,62 +60,6 @@ export default defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-    // defineField({
-    //   name: 'tags',
-    //   title: 'Tags',
-    //   type: 'array',
-    //   of: [{ type: 'string' }],
-    //   options: { layout: 'tags' },
-    // }),
-    defineField({
-      name: 'category',
-      title: 'Category',
-      type: 'reference',
-      to: [{ type: 'category' }],
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'subcategory',
-      title: 'Subcategory',
-      type: 'reference',
-      to: [{ type: 'subcategory' }],
-      options: {
-        filter: ({ document }) => {
-          const doc = document as any
-          const categoryId = doc?.category?._ref
-
-          return categoryId
-            ? {
-                filter: 'parent._ref == $categoryId',
-                params: { categoryId },
-              }
-            : {
-                filter: 'false',
-              }
-        },
-      },
-    }),
-    defineField({
-      name: 'description',
-      title: 'Project Description',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          marks: {
-            annotations: [
-              {
-                name: 'link',
-                type: 'object',
-                title: 'Link',
-                fields: [{ name: 'href', type: 'url', title: 'Url' }],
-              },
-            ],
-          },
-          styles: [],
-        }),
-      ],
-    }),
   ],
   preview: {
     select: {
@@ -135,7 +67,7 @@ export default defineType({
       media: 'coverImage',
     },
     prepare({ title, media }) {
-      return { title, media, subtitle: 'Project' }
+      return { title, media, subtitle: 'Style Up' }
     },
   },
 })
