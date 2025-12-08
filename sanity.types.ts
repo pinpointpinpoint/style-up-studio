@@ -55,35 +55,18 @@ export type Project = {
   _rev: string
   title?: string
   slug?: Slug
-  overview?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
+  credits?: string
+  gallery?: Array<
+    {
       _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: null
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
+    } & GalleryImage
+  >
   coverImage?: {
-    asset?: {
-      _ref: string
-      _type: 'reference'
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-    }
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: 'image'
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'galleryImage'
   }
-  duration?: Duration
-  client?: string
-  site?: string
   tags?: Array<string>
   description?: Array<
     | {
@@ -123,6 +106,22 @@ export type Project = {
         _key: string
       }
   >
+}
+
+export type GalleryImage = {
+  _type: 'galleryImage'
+  image?: {
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: 'image'
+  }
 }
 
 export type Page = {
@@ -191,6 +190,56 @@ export type Duration = {
   _type: 'duration'
   start?: string
   end?: string
+}
+
+export type Contact = {
+  _id: string
+  _type: 'contact'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  email?: string
+  instagram?: string
+}
+
+export type About = {
+  _id: string
+  _type: 'about'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  image?: {
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: 'image'
+  }
+  blurb?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal'
+    listItem?: never
+    markDefs?: Array<{
+      href?: string
+      _type: 'link'
+      _key: string
+    }>
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
 }
 
 export type Settings = {
@@ -407,8 +456,11 @@ export type AllSanitySchemaTypes =
   | Timeline
   | Milestone
   | Project
+  | GalleryImage
   | Page
   | Duration
+  | Contact
+  | About
   | Settings
   | Home
   | SanityImagePaletteSwatch
@@ -452,31 +504,12 @@ export type HomePageQueryResult = {
     _id: string
     _type: 'project'
     coverImage: {
-      asset?: {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-      }
-      media?: unknown
-      hotspot?: SanityImageHotspot
-      crop?: SanityImageCrop
-      _type: 'image'
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'galleryImage'
     } | null
-    overview: Array<{
-      children?: Array<{
-        marks?: Array<string>
-        text?: string
-        _type: 'span'
-        _key: string
-      }>
-      style?: 'normal'
-      listItem?: never
-      markDefs?: null
-      level?: number
-      _type: 'block'
-      _key: string
-    }> | null
+    overview: null
     slug: string | null
     tags: Array<string> | null
     title: string | null
@@ -548,18 +581,12 @@ export type PagesBySlugQueryResult = {
 export type ProjectBySlugQueryResult = {
   _id: string
   _type: 'project'
-  client: string | null
+  client: null
   coverImage: {
-    asset?: {
-      _ref: string
-      _type: 'reference'
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-    }
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: 'image'
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'galleryImage'
   } | null
   description: Array<
     | ({
@@ -599,22 +626,9 @@ export type ProjectBySlugQueryResult = {
         _key: string
       }
   > | null
-  duration: Duration | null
-  overview: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: null
-    level?: number
-    _type: 'block'
-    _key: string
-  }> | null
-  site: string | null
+  duration: null
+  overview: null
+  site: null
   slug: string | null
   tags: Array<string> | null
   title: string | null
