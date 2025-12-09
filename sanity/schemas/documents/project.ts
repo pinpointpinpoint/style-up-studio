@@ -30,11 +30,125 @@ export default defineType({
       options: { source: 'title', maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
+
+    // ------------------------------------------------------------
+    // ⭐ CREDITS (clean + array of objects)
+    // ------------------------------------------------------------
     defineField({
       name: 'credits',
       title: 'Credits',
-      type: 'string',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'credit',
+          title: 'Credit',
+          fields: [
+            defineField({
+              name: 'role',
+              title: 'Role / Title',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'name',
+              title: 'Name',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'link',
+              title: 'External Link (optional)',
+              type: 'url',
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'role',
+              subtitle: 'name',
+            },
+          },
+        }),
+      ],
     }),
+
+    // ------------------------------------------------------------
+    // ⭐ MULTIPLE VIDEO FILES (clean + structured)
+    // ------------------------------------------------------------
+    defineField({
+      name: 'videos',
+      title: 'Project Videos',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'video',
+          title: 'Video Upload',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Video Title (optional)',
+              type: 'string',
+            }),
+            defineField({
+              name: 'file',
+              title: 'Video File',
+              type: 'file',
+              options: {
+                accept: 'video/*'
+              },
+              validation: (Rule) => Rule.required(),
+            })
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'file.asset.originalFilename',
+            }
+          }
+        })
+      ]
+    }),
+
+    // ------------------------------------------------------------
+    // ⭐ MULTIPLE VIDEO URLS (YouTube, Vimeo, TikTok, etc.)
+    // ------------------------------------------------------------
+    defineField({
+      name: 'videoUrls',
+      title: 'Video URLs',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'videoUrlItem',
+          title: 'Video URL',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Video Title (optional)',
+              type: 'string',
+            }),
+            defineField({
+              name: 'url',
+              title: 'URL',
+              type: 'url',
+              description: 'Paste a YouTube, Vimeo, TikTok, etc. link',
+              validation: (Rule) => Rule.required(),
+            })
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'url',
+            }
+          }
+        })
+      ]
+    }),
+
+    // ------------------------------------------------------------
+    // GALLERY
+    // ------------------------------------------------------------
     defineField({
       name: 'gallery',
       title: 'Gallery',
@@ -61,6 +175,7 @@ export default defineType({
       ],
       options: { layout: 'grid' },
     }),
+
     defineField({
       name: 'coverImage',
       title: 'Cover Image',
@@ -72,13 +187,7 @@ export default defineType({
       ],
       validation: (rule) => rule.required(),
     }),
-    // defineField({
-    //   name: 'tags',
-    //   title: 'Tags',
-    //   type: 'array',
-    //   of: [{ type: 'string' }],
-    //   options: { layout: 'tags' },
-    // }),
+
     defineField({
       name: 'category',
       title: 'Category',
@@ -93,7 +202,7 @@ export default defineType({
       to: [{ type: 'subcategory' }],
       options: {
         filter: ({ document }) => {
-          const doc = document as any
+          const doc = document
           const categoryId = doc?.category?._ref
 
           return categoryId
@@ -107,6 +216,7 @@ export default defineType({
         },
       },
     }),
+
     defineField({
       name: 'description',
       title: 'Project Description',
@@ -129,6 +239,7 @@ export default defineType({
       ],
     }),
   ],
+
   preview: {
     select: {
       title: 'title',
