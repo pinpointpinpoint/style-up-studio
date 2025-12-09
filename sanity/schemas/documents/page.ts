@@ -4,7 +4,7 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 export default defineType({
   type: 'document',
   name: 'page',
-  title: 'Page',
+  title: 'Page (not using)',
   icon: DocumentIcon,
   fields: [
     defineField({
