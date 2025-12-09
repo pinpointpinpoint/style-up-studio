@@ -1,5 +1,5 @@
-import { DocumentIcon } from '@sanity/icons'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import {DocumentIcon} from '@sanity/icons'
+import {defineArrayMember, defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'project',
@@ -20,14 +20,14 @@ export default defineType({
       type: 'date',
       validation: (rule) => rule.required(),
       options: {
-        dateFormat: 'YYYY-MM-DD'
-      }
+        dateFormat: 'YYYY-MM-DD',
+      },
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      options: { source: 'title', maxLength: 96 },
+      options: {source: 'title', maxLength: 96},
       validation: (rule) => rule.required(),
     }),
 
@@ -95,19 +95,19 @@ export default defineType({
               title: 'Video File',
               type: 'file',
               options: {
-                accept: 'video/*'
+                accept: 'video/*',
               },
               validation: (Rule) => Rule.required(),
-            })
+            }),
           ],
           preview: {
             select: {
               title: 'title',
               subtitle: 'file.asset.originalFilename',
-            }
-          }
-        })
-      ]
+            },
+          },
+        }),
+      ],
     }),
 
     // ------------------------------------------------------------
@@ -134,16 +134,16 @@ export default defineType({
               type: 'url',
               description: 'Paste a YouTube, Vimeo, TikTok, etc. link',
               validation: (Rule) => Rule.required(),
-            })
+            }),
           ],
           preview: {
             select: {
               title: 'title',
               subtitle: 'url',
-            }
-          }
-        })
-      ]
+            },
+          },
+        }),
+      ],
     }),
 
     // ------------------------------------------------------------
@@ -157,7 +157,7 @@ export default defineType({
       of: [
         defineArrayMember({
           type: 'image',
-          options: { hotspot: true },
+          options: {hotspot: true},
           fields: [
             {
               name: 'caption',
@@ -173,7 +173,7 @@ export default defineType({
           ],
         }),
       ],
-      options: { layout: 'grid' },
+      options: {layout: 'grid'},
     }),
 
     defineField({
@@ -181,10 +181,8 @@ export default defineType({
       title: 'Cover Image',
       type: 'image',
       description: 'Choose a cover image from the gallery.',
-      options: { hotspot: true },
-      fields: [
-        { name: 'alt', title: 'Alt text', type: 'string' },
-      ],
+      options: {hotspot: true},
+      fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
       validation: (rule) => rule.required(),
     }),
 
@@ -192,23 +190,23 @@ export default defineType({
       name: 'category',
       title: 'Category',
       type: 'reference',
-      to: [{ type: 'category' }],
+      to: [{type: 'category'}],
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'subcategory',
       title: 'Subcategory',
       type: 'reference',
-      to: [{ type: 'subcategory' }],
+      to: [{type: 'subcategory'}],
       options: {
-        filter: ({ document }) => {
-          const doc = document
+        filter: ({document}) => {
+          const doc = document as any
           const categoryId = doc?.category?._ref
 
           return categoryId
             ? {
                 filter: 'parent._ref == $categoryId',
-                params: { categoryId },
+                params: {categoryId},
               }
             : {
                 filter: 'false',
@@ -230,7 +228,7 @@ export default defineType({
                 name: 'link',
                 type: 'object',
                 title: 'Link',
-                fields: [{ name: 'href', type: 'url', title: 'Url' }],
+                fields: [{name: 'href', type: 'url', title: 'Url'}],
               },
             ],
           },
@@ -245,8 +243,8 @@ export default defineType({
       title: 'title',
       media: 'coverImage',
     },
-    prepare({ title, media }) {
-      return { title, media, subtitle: 'Project' }
+    prepare({title, media}) {
+      return {title, media, subtitle: 'Project'}
     },
   },
 })
