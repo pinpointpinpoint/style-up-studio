@@ -1,11 +1,11 @@
-import {UserIcon} from '@sanity/icons'
+import {EnvelopeIcon} from '@sanity/icons'
 import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'contact',
   title: 'Contact',
   type: 'document',
-  icon: UserIcon,
+  icon: EnvelopeIcon,
 
   fields: [
     // Hidden singleton title field

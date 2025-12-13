@@ -1,11 +1,11 @@
-import { DocumentIcon } from '@sanity/icons'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import {StarFilledIcon} from '@sanity/icons'
+import {defineArrayMember, defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'styleUp',
   title: 'Style Up',
   type: 'document',
-  icon: DocumentIcon,
+  icon: StarFilledIcon,
   fields: [
     defineField({
       name: 'title',
@@ -20,8 +20,8 @@ export default defineType({
       type: 'date',
       validation: (rule) => rule.required(),
       options: {
-        dateFormat: 'YYYY-MM-DD'
-      }
+        dateFormat: 'YYYY-MM-DD',
+      },
     }),
     defineField({
       name: 'gallery',
@@ -31,7 +31,7 @@ export default defineType({
       of: [
         defineArrayMember({
           type: 'image',
-          options: { hotspot: true },
+          options: {hotspot: true},
           fields: [
             {
               name: 'caption',
@@ -47,17 +47,15 @@ export default defineType({
           ],
         }),
       ],
-      options: { layout: 'grid' },
+      options: {layout: 'grid'},
     }),
     defineField({
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',
       description: 'Choose a cover image from the gallery.',
-      options: { hotspot: true },
-      fields: [
-        { name: 'alt', title: 'Alt text', type: 'string' },
-      ],
+      options: {hotspot: true},
+      fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
       validation: (rule) => rule.required(),
     }),
   ],
@@ -66,8 +64,8 @@ export default defineType({
       title: 'title',
       media: 'coverImage',
     },
-    prepare({ title, media }) {
-      return { title, media, subtitle: 'Style Up' }
+    prepare({title, media}) {
+      return {title, media, subtitle: 'Style Up'}
     },
   },
 })
