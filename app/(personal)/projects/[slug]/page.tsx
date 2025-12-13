@@ -24,18 +24,18 @@ export async function generateMetadata(
     params,
     stega: false,
   })
-  const ogImage = urlForOpenGraphImage(
-    project?.coverImage,
-  )
+  // const ogImage = urlForOpenGraphImage(
+  //   project?.coverImage,
+  // )
 
   return {
-    title: project?.title,
-    description: project?.overview ? toPlainText(project.overview) : (await parent).description,
-    openGraph: ogImage
-      ? {
-          images: [ogImage, ...((await parent).openGraph?.images || [])],
-        }
-      : {},
+    // title: project?.title,
+    // description: project?.overview ? toPlainText(project.overview) : (await parent).description,
+    // openGraph: ogImage
+    //   ? {
+    //       images: [ogImage, ...((await parent).openGraph?.images || [])],
+    //     }
+    //   : {},
   }
 }
 
@@ -95,6 +95,8 @@ export default async function ProjectSlugRoute({params}: Props) {
           />
 
           <div className="divide-inherit grid grid-cols-1 divide-y lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+
+
             {/* Client */}
             {client && (
               <div className="p-3 lg:p-4">
@@ -116,7 +118,7 @@ export default async function ProjectSlugRoute({params}: Props) {
             )}
 
             {/* Tags */}
-            <div className="p-3 lg:p-4">
+            {/* <div className="p-3 lg:p-4">
               <div className="text-xs md:text-sm">Tags</div>
               <div className="text-md flex flex-row flex-wrap md:text-lg">
                 {tags?.map((tag, key) => (
@@ -125,7 +127,7 @@ export default async function ProjectSlugRoute({params}: Props) {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

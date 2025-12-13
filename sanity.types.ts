@@ -13,24 +13,8 @@
  */
 
 // Source: schema.json
-export type Timeline = {
-  _type: 'timeline'
-  items?: Array<{
-    title?: string
-    milestones?: Array<
-      {
-        _key: string
-      } & Milestone
-    >
-    _type: 'item'
-    _key: string
-  }>
-}
-
-export type Milestone = {
-  _type: 'milestone'
-  title?: string
-  description?: string
+export type GalleryItem = {
+  _type: 'galleryItem'
   image?: {
     asset?: {
       _ref: string
@@ -41,10 +25,59 @@ export type Milestone = {
     media?: unknown
     hotspot?: SanityImageHotspot
     crop?: SanityImageCrop
+    caption?: string
+    alt?: string
     _type: 'image'
   }
-  tags?: Array<string>
-  duration?: Duration
+}
+
+export type Post = {
+  _id: string
+  _type: 'post'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  imageUrl?: string
+  postedAt?: string
+}
+
+export type StyleUp = {
+  _id: string
+  _type: 'styleUp'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  date?: string
+  gallery?: Array<{
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    caption?: string
+    alt?: string
+    _type: 'image'
+    _key: string
+  }>
+  coverImage?: {
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
 }
 
 export type Project = {
@@ -54,63 +87,37 @@ export type Project = {
   _updatedAt: string
   _rev: string
   title?: string
+  date?: string
   slug?: Slug
-  credits?: string
-  gallery?: Array<
-    {
-      _key: string
-    } & GalleryImage
-  >
-  coverImage?: {
-    _ref: string
-    _type: 'reference'
-    _weak?: boolean
-    [internalGroqTypeReferenceTo]?: 'galleryImage'
-  }
-  tags?: Array<string>
-  description?: Array<
-    | {
-        children?: Array<{
-          marks?: Array<string>
-          text?: string
-          _type: 'span'
-          _key: string
-        }>
-        style?: 'normal'
-        listItem?: 'bullet' | 'number'
-        markDefs?: Array<{
-          href?: string
-          _type: 'link'
-          _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
+  credits?: Array<{
+    role?: string
+    name?: string
+    link?: string
+    _type: 'credit'
+    _key: string
+  }>
+  videos?: Array<{
+    title?: string
+    file?: {
+      asset?: {
+        _ref: string
+        _type: 'reference'
+        _weak?: boolean
+        [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
       }
-    | ({
-        _key: string
-      } & Timeline)
-    | {
-        asset?: {
-          _ref: string
-          _type: 'reference'
-          _weak?: boolean
-          [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-      }
-  >
-}
-
-export type GalleryImage = {
-  _type: 'galleryImage'
-  image?: {
+      media?: unknown
+      _type: 'file'
+    }
+    _type: 'video'
+    _key: string
+  }>
+  videoUrls?: Array<{
+    title?: string
+    url?: string
+    _type: 'videoUrlItem'
+    _key: string
+  }>
+  gallery?: Array<{
     asset?: {
       _ref: string
       _type: 'reference'
@@ -120,19 +127,37 @@ export type GalleryImage = {
     media?: unknown
     hotspot?: SanityImageHotspot
     crop?: SanityImageCrop
+    caption?: string
+    alt?: string
+    _type: 'image'
+    _key: string
+  }>
+  coverImage?: {
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
     _type: 'image'
   }
-}
-
-export type Page = {
-  _id: string
-  _type: 'page'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  slug?: Slug
-  overview?: Array<{
+  category?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'category'
+  }
+  subcategory?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'subcategory'
+  }
+  description?: Array<{
     children?: Array<{
       marks?: Array<string>
       text?: string
@@ -140,56 +165,40 @@ export type Page = {
       _key: string
     }>
     style?: 'normal'
-    listItem?: never
-    markDefs?: null
+    listItem?: 'bullet' | 'number'
+    markDefs?: Array<{
+      href?: string
+      _type: 'link'
+      _key: string
+    }>
     level?: number
     _type: 'block'
     _key: string
   }>
-  body?: Array<
-    | {
-        children?: Array<{
-          marks?: Array<string>
-          text?: string
-          _type: 'span'
-          _key: string
-        }>
-        style?: 'normal'
-        listItem?: 'bullet' | 'number'
-        markDefs?: Array<{
-          href?: string
-          _type: 'link'
-          _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-      }
-    | ({
-        _key: string
-      } & Timeline)
-    | {
-        asset?: {
-          _ref: string
-          _type: 'reference'
-          _weak?: boolean
-          [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-      }
-  >
 }
 
-export type Duration = {
-  _type: 'duration'
-  start?: string
-  end?: string
+export type Subcategory = {
+  _id: string
+  _type: 'subcategory'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  parent?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'category'
+  }
+}
+
+export type Category = {
+  _id: string
+  _type: 'category'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
 }
 
 export type Contact = {
@@ -242,64 +251,6 @@ export type About = {
   }>
 }
 
-export type Settings = {
-  _id: string
-  _type: 'settings'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  menuItems?: Array<
-    | {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'home'
-      }
-    | {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'page'
-      }
-    | {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'project'
-      }
-  >
-  footer?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote'
-    listItem?: 'bullet' | 'number'
-    markDefs?: Array<{
-      href?: string
-      _type: 'link'
-      _key: string
-    }>
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  ogImage?: {
-    asset?: {
-      _ref: string
-      _type: 'reference'
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-    }
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: 'image'
-  }
-}
-
 export type Home = {
   _id: string
   _type: 'home'
@@ -325,7 +276,7 @@ export type Home = {
     _type: 'block'
     _key: string
   }>
-  showcaseProjects?: Array<{
+  featuredProjects?: Array<{
     _ref: string
     _type: 'reference'
     _weak?: boolean
@@ -453,15 +404,14 @@ export type SanityAssetSourceData = {
 }
 
 export type AllSanitySchemaTypes =
-  | Timeline
-  | Milestone
+  | GalleryItem
+  | Post
+  | StyleUp
   | Project
-  | GalleryImage
-  | Page
-  | Duration
+  | Subcategory
+  | Category
   | Contact
   | About
-  | Settings
   | Home
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -499,83 +449,12 @@ export type HomePageQueryResult = {
     _type: 'block'
     _key: string
   }> | null
-  showcaseProjects: Array<{
-    _key: string
-    _id: string
-    _type: 'project'
-    coverImage: {
-      _ref: string
-      _type: 'reference'
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: 'galleryImage'
-    } | null
-    overview: null
-    slug: string | null
-    tags: Array<string> | null
-    title: string | null
-  }> | null
+  showcaseProjects: null
   title: string | null
 } | null
 // Variable: pagesBySlugQuery
 // Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    body,    overview,    title,    "slug": slug.current,  }
-export type PagesBySlugQueryResult = {
-  _id: string
-  _type: 'page'
-  body: Array<
-    | ({
-        _key: string
-      } & Timeline)
-    | {
-        children?: Array<{
-          marks?: Array<string>
-          text?: string
-          _type: 'span'
-          _key: string
-        }>
-        style?: 'normal'
-        listItem?: 'bullet' | 'number'
-        markDefs?: Array<{
-          href?: string
-          _type: 'link'
-          _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-      }
-    | {
-        asset?: {
-          _ref: string
-          _type: 'reference'
-          _weak?: boolean
-          [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-      }
-  > | null
-  overview: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: null
-    level?: number
-    _type: 'block'
-    _key: string
-  }> | null
-  title: string | null
-  slug: string | null
-} | null
+export type PagesBySlugQueryResult = null
 // Variable: projectBySlugQuery
 // Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    client,    coverImage,    description,    duration,    overview,    site,    "slug": slug.current,    tags,    title,  }
 export type ProjectBySlugQueryResult = {
@@ -583,69 +462,26 @@ export type ProjectBySlugQueryResult = {
   _type: 'project'
   client: null
   coverImage: {
-    _ref: string
-    _type: 'reference'
-    _weak?: boolean
-    [internalGroqTypeReferenceTo]?: 'galleryImage'
+    asset?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+    }
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
   } | null
-  description: Array<
-    | ({
-        _key: string
-      } & Timeline)
-    | {
-        children?: Array<{
-          marks?: Array<string>
-          text?: string
-          _type: 'span'
-          _key: string
-        }>
-        style?: 'normal'
-        listItem?: 'bullet' | 'number'
-        markDefs?: Array<{
-          href?: string
-          _type: 'link'
-          _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-      }
-    | {
-        asset?: {
-          _ref: string
-          _type: 'reference'
-          _weak?: boolean
-          [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-      }
-  > | null
-  duration: null
-  overview: null
-  site: null
-  slug: string | null
-  tags: Array<string> | null
-  title: string | null
-} | null
-// Variable: settingsQuery
-// Query: *[_type == "settings"][0]{    _id,    _type,    footer,    menuItems[]{      _key,      ...@->{        _type,        "slug": slug.current,        title      }    },    ogImage,  }
-export type SettingsQueryResult = {
-  _id: string
-  _type: 'settings'
-  footer: Array<{
+  description: Array<{
     children?: Array<{
       marks?: Array<string>
       text?: string
       _type: 'span'
       _key: string
     }>
-    style?: 'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal'
+    style?: 'normal'
     listItem?: 'bullet' | 'number'
     markDefs?: Array<{
       href?: string
@@ -656,39 +492,16 @@ export type SettingsQueryResult = {
     _type: 'block'
     _key: string
   }> | null
-  menuItems: Array<
-    | {
-        _key: null
-        _type: 'home'
-        slug: null
-        title: string | null
-      }
-    | {
-        _key: null
-        _type: 'page'
-        slug: string | null
-        title: string | null
-      }
-    | {
-        _key: null
-        _type: 'project'
-        slug: string | null
-        title: string | null
-      }
-  > | null
-  ogImage: {
-    asset?: {
-      _ref: string
-      _type: 'reference'
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-    }
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: 'image'
-  } | null
+  duration: null
+  overview: null
+  site: null
+  slug: string | null
+  tags: null
+  title: string | null
 } | null
+// Variable: settingsQuery
+// Query: *[_type == "settings"][0]{    _id,    _type,    footer,    menuItems[]{      _key,      ...@->{        _type,        "slug": slug.current,        title      }    },    ogImage,  }
+export type SettingsQueryResult = null
 // Variable: slugsByTypeQuery
 // Query: *[_type == $type && defined(slug.current)]{"slug": slug.current}
 export type SlugsByTypeQueryResult = Array<{

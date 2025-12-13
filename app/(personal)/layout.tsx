@@ -44,13 +44,21 @@ export const viewport: Viewport = {
 }
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
-  const {data} = await sanityFetch({query: settingsQuery})
+  // const {data} = await sanityFetch({query: settingsQuery})
   return (
     <>
       <div className="flex min-h-screen flex-col bg-white text-black">
-        <Navbar data={data} />
+
+
+
+        <Navbar /*data={data}*/ />
+        
         <div className="mt-20 flex-grow px-4 md:px-16 lg:px-32">{children}</div>
-        <footer className="bottom-0 w-full bg-white py-12 text-center md:py-20">
+
+
+
+        {/* Custom Portable Text:  */}
+        {/* <footer className="bottom-0 w-full bg-white py-12 text-center md:py-20">
           {data?.footer && (
             <CustomPortableText
               id={data._id}
@@ -60,19 +68,32 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
               value={data.footer as unknown as PortableTextBlock[]}
             />
           )}
-        </footer>
-        <Suspense>
-          <IntroTemplate />
-        </Suspense>
+        </footer> */}
+
+
+        {/* Suspense is to show fallback when loading etc. */}
+        {/* <Suspense>
+        </Suspense> */}
+
+
       </div>
-      <Toaster />
+
+
+      {/* Toast element from: https://ui.shadcn.com/ */}
+      {/* <Toaster /> */}
+
+      {/* Sanity Live */}
       <SanityLive onError={handleError} />
+
+      {/*  Draft Mode and Visual Editing */}
       {(await draftMode()).isEnabled && (
         <>
           <DraftModeToast />
           <VisualEditing />
         </>
       )}
+
+      {/* Speed Insights */}
       <SpeedInsights />
     </>
   )

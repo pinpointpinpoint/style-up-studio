@@ -1,11 +1,11 @@
-import {DocumentIcon} from '@sanity/icons'
+import {ProjectsIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
-  icon: DocumentIcon,
+  icon: ProjectsIcon,
   fields: [
     defineField({
       name: 'title',
@@ -30,10 +30,6 @@ export default defineType({
       options: {source: 'title', maxLength: 96},
       validation: (rule) => rule.required(),
     }),
-
-    // ------------------------------------------------------------
-    // ⭐ CREDITS (clean + array of objects)
-    // ------------------------------------------------------------
     defineField({
       name: 'credits',
       title: 'Credits',
@@ -145,10 +141,6 @@ export default defineType({
         }),
       ],
     }),
-
-    // ------------------------------------------------------------
-    // GALLERY
-    // ------------------------------------------------------------
     defineField({
       name: 'gallery',
       title: 'Gallery',
