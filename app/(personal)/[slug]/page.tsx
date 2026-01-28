@@ -49,7 +49,7 @@ export default async function PageSlugRoute({params}: Props) {
 
   return (
     <div>
-      <div className="mb-14">
+      <div className="">
         {/* Header */}
         {/* <Header
           id={data?._id || null}
@@ -70,7 +70,7 @@ export default async function PageSlugRoute({params}: Props) {
           />
         )} */}
       </div>
-      <div className="absolute left-0 w-screen border-t" />
+      <div className="" />
     </div>
   )
 }

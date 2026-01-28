@@ -13,6 +13,30 @@
  */
 
 // Source: schema.json
+export type Subcategory = {
+  _id: string
+  _type: 'subcategory'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  parent?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'category'
+  }
+}
+
+export type Category = {
+  _id: string
+  _type: 'category'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+}
+
 export type GalleryItem = {
   _type: 'galleryItem'
   image?: {
@@ -86,6 +110,7 @@ export type Project = {
   _createdAt: string
   _updatedAt: string
   _rev: string
+  featured?: boolean
   title?: string
   date?: string
   slug?: Slug
@@ -145,18 +170,20 @@ export type Project = {
     alt?: string
     _type: 'image'
   }
-  category?: {
+  categories?: Array<{
     _ref: string
     _type: 'reference'
     _weak?: boolean
+    _key: string
     [internalGroqTypeReferenceTo]?: 'category'
-  }
-  subcategory?: {
+  }>
+  subcategories?: Array<{
     _ref: string
     _type: 'reference'
     _weak?: boolean
+    _key: string
     [internalGroqTypeReferenceTo]?: 'subcategory'
-  }
+  }>
   description?: Array<{
     children?: Array<{
       marks?: Array<string>
@@ -175,30 +202,6 @@ export type Project = {
     _type: 'block'
     _key: string
   }>
-}
-
-export type Subcategory = {
-  _id: string
-  _type: 'subcategory'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  parent?: {
-    _ref: string
-    _type: 'reference'
-    _weak?: boolean
-    [internalGroqTypeReferenceTo]?: 'category'
-  }
-}
-
-export type Category = {
-  _id: string
-  _type: 'category'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
 }
 
 export type Contact = {
@@ -404,12 +407,12 @@ export type SanityAssetSourceData = {
 }
 
 export type AllSanitySchemaTypes =
+  | Subcategory
+  | Category
   | GalleryItem
   | Post
   | StyleUp
   | Project
-  | Subcategory
-  | Category
   | Contact
   | About
   | Home
@@ -507,6 +510,99 @@ export type SettingsQueryResult = null
 export type SlugsByTypeQueryResult = Array<{
   slug: string | null
 }>
+// Variable: allProjectsQuery
+// Query: *[_type == "project"]{    _id,    _type,    title,    date,    "slug": slug.current,    credits[]{      role,      name,      link    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      title,      url    },    coverImage{      alt,      ...,      asset->,    },    gallery[]{      "imageUrl": asset->url,      caption,      alt    },    "category": category->{_id, title},    "subcategory": subcategory->{_id, title},    description[]  } | order(date desc)
+export type AllProjectsQueryResult = Array<{
+  _id: string
+  _type: 'project'
+  title: string | null
+  date: string | null
+  slug: string | null
+  credits: Array<{
+    role: string | null
+    name: string | null
+    link: string | null
+  }> | null
+  videos: Array<{
+    _key: string
+    title: string | null
+    fileUrl: string | null
+  }> | null
+  videoUrls: Array<{
+    title: string | null
+    url: string | null
+  }> | null
+  coverImage: {
+    alt?: string
+    asset: {
+      _id: string
+      _type: 'sanity.imageAsset'
+      _createdAt: string
+      _updatedAt: string
+      _rev: string
+      originalFilename?: string
+      label?: string
+      title?: string
+      description?: string
+      altText?: string
+      sha1hash?: string
+      extension?: string
+      mimeType?: string
+      size?: number
+      assetId?: string
+      uploadId?: string
+      path?: string
+      url?: string
+      metadata?: SanityImageMetadata
+      source?: SanityAssetSourceData
+    } | null
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: 'image'
+  } | null
+  gallery: Array<{
+    imageUrl: string | null
+    caption: string | null
+    alt: string | null
+  }> | null
+  category: null
+  subcategory: null
+  description: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal'
+    listItem?: 'bullet' | 'number'
+    markDefs?: Array<{
+      href?: string
+      _type: 'link'
+      _key: string
+    }>
+    level?: number
+    _type: 'block'
+    _key: string
+  }> | null
+}>
+// Variable: allCategoriesQuery
+// Query: *[_type == "category"]{    _id,    title  }
+export type AllCategoriesQueryResult = Array<{
+  _id: string
+  title: string | null
+}>
+// Variable: allSubCategoriesQuery
+// Query: *[_type == "subcategory"]{    _id,    title,    "parent": parent->{_id,title}  }
+export type AllSubCategoriesQueryResult = Array<{
+  _id: string
+  title: string | null
+  parent: {
+    _id: string
+    title: string | null
+  } | null
+}>
 
 // Query TypeMap
 import '@sanity/client'
@@ -517,5 +613,8 @@ declare module '@sanity/client' {
     '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    client,\n    coverImage,\n    description,\n    duration,\n    overview,\n    site,\n    "slug": slug.current,\n    tags,\n    title,\n  }\n': ProjectBySlugQueryResult
     '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    footer,\n    menuItems[]{\n      _key,\n      ...@->{\n        _type,\n        "slug": slug.current,\n        title\n      }\n    },\n    ogImage,\n  }\n': SettingsQueryResult
     '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult
+    '\n  *[_type == "project"]{\n    _id,\n    _type,\n    title,\n    date,\n    "slug": slug.current,\n    credits[]{\n      role,\n      name,\n      link\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      title,\n      url\n    },\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },\n    gallery[]{\n      "imageUrl": asset->url,\n      caption,\n      alt\n    },\n    "category": category->{_id, title},\n    "subcategory": subcategory->{_id, title},\n    description[]\n  } | order(date desc)': AllProjectsQueryResult
+    '\n    *[_type == "category"]{\n    _id,\n    title\n  }': AllCategoriesQueryResult
+    '\n  *[_type == "subcategory"]{\n    _id,\n    title,\n    "parent": parent->{_id,title}\n  }': AllSubCategoriesQueryResult
   }
 }

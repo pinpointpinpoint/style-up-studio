@@ -36,3 +36,74 @@ export interface ContactPage {
   email: string
   instagram: string
 }
+
+export interface Project {
+  _id: string
+  _type: 'project'
+  featured: boolean
+  title: string
+  slug: {
+    _type: 'slug'
+    current: string
+  }
+  date: string // ISO date string
+  categories: {
+    _id: string,
+    title: string
+  }[], // Or you can make this a reference type if you fetch category data (what does. that mean?)
+  subcategory: {
+    _id: string,
+    title: string,
+    parent: {
+      _id: string
+      title: string
+    }
+  },  // optional
+  coverImage: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+    alt?: string | null
+  }
+  gallery?: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+    alt?: string | null
+  }[]
+  description?: PortableTextBlock[]
+  videoUrls?: {
+    title?: string
+    url: string
+  }[]
+  videos?: {
+    _type: 'video'
+    _key: string
+    title?: string
+    fileUrl: string
+  }[]
+  credits?: {
+    role: string
+    name: string
+    link?: string
+  }[]
+}
+
+export interface Category {
+  _id: string,
+  title: string,
+  subcategories?: Subcategory[]
+}
+
+export interface Subcategory {
+  _id: string,
+  title: string,
+  parent: {
+    _id: string
+    title: string
+  }
+}

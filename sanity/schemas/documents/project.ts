@@ -8,6 +8,15 @@ export default defineType({
   icon: ProjectsIcon,
   fields: [
     defineField({
+      name: 'featured',
+      title: 'Featured Project',
+      type: 'boolean',
+      options: {
+        layout: 'checkbox',
+      },
+      initialValue: false
+    }),
+    defineField({
       name: 'title',
       title: 'Title',
       description: 'This field is the title of your project.',
@@ -173,40 +182,56 @@ export default defineType({
       title: 'Cover Image',
       type: 'image',
       description: 'Choose a cover image from the gallery.',
-      options: {hotspot: true},
+      options: { 
+        hotspot: {
+          previews: [
+            {title: 'Landscape', aspectRatio: 16 / 9},
+            {title: 'Portrait', aspectRatio: 3 / 4},
+          ],
+        }
+      },
       fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
       validation: (rule) => rule.required(),
     }),
-
-    defineField({
-      name: 'category',
-      title: 'Category',
-      type: 'reference',
-      to: [{type: 'category'}],
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'subcategory',
-      title: 'Subcategory',
-      type: 'reference',
-      to: [{type: 'subcategory'}],
-      options: {
-        filter: ({document}) => {
-          const doc = document as any
-          const categoryId = doc?.category?._ref
-
-          return categoryId
-            ? {
-                filter: 'parent._ref == $categoryId',
-                params: {categoryId},
-              }
-            : {
-                filter: 'false',
-              }
-        },
+  defineField({
+    name: 'categories',
+    title: 'Categories',
+    type: 'array',
+    of: [
+      {
+        type: 'reference',
+        to: [{ type: 'category' }],
       },
-    }),
+    ],
+    validation: (Rule) => Rule.min(1),
+  }),
+  defineField({
+  name: 'subcategory',
+  title: 'Subcategory',
+  type: 'reference',
+  to: [{ type: 'subcategory' }],
+  options: {
+    filter: ({ document }) => {
+      // Get all selected category IDs from the categories array
+      const doc = document as { categories?: { _ref: string }[] }
 
+      const categoryIds = doc?.categories?.map((c: any) => c._ref) || []
+
+      if (categoryIds.length > 0) {
+        return {
+          filter: 'parent._ref in $categoryIds',
+          params: { categoryIds },
+        }
+      }
+
+      // Return empty if no category is selected
+      return {
+        filter: '_id == $none',
+        params: { none: 'none' },
+      }
+    },
+  },
+}),
     defineField({
       name: 'description',
       title: 'Project Description',

@@ -1,5 +1,6 @@
 import {dataset, projectId} from '@/sanity/lib/api'
 import createImageUrlBuilder from '@sanity/image-url'
+import { SanityImageSource } from '@sanity/image-url/lib/types/types'
 import type {Image} from 'sanity'
 
 const imageBuilder = createImageUrlBuilder({
@@ -14,6 +15,10 @@ export const urlForImage = (source: Image | null | undefined) => {
   }
 
   return imageBuilder?.image(source).auto('format').fit('max')
+}
+
+export function urlFor(source: SanityImageSource) {
+  return imageBuilder.image(source)
 }
 
 export function urlForOpenGraphImage(image: Image | null | undefined) {
@@ -31,5 +36,30 @@ export function resolveHref(documentType?: string, slug?: string | null): string
     default:
       console.warn('Invalid document type:', documentType)
       return undefined
+  }
+}
+
+export function getYouTubeId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+
+    // youtu.be/VIDEO_ID
+    if (parsed.hostname === 'youtu.be') {
+      return parsed.pathname.slice(1);
+    }
+
+    // youtube.com/watch?v=VIDEO_ID
+    if (parsed.searchParams.get('v')) {
+      return parsed.searchParams.get('v');
+    }
+
+    // youtube.com/embed/VIDEO_ID
+    if (parsed.pathname.startsWith('/embed/')) {
+      return parsed.pathname.split('/embed/')[1];
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 }

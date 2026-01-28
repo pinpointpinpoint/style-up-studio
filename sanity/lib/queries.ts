@@ -68,3 +68,86 @@ export const settingsQuery = defineQuery(`
 export const slugsByTypeQuery = defineQuery(`
   *[_type == $type && defined(slug.current)]{"slug": slug.current}
 `)
+
+export const allProjectsQuery = defineQuery(`
+  *[_type == "project"]{
+    _id,
+    _type,
+    featured,
+    title,
+    date,
+    "slug": slug.current,
+    credits[]{
+      role,
+      name,
+      link
+    },
+    videos[]{
+      _key,
+      title,
+      "fileUrl": file.asset->url
+    },
+    videoUrls[]{
+      title,
+      url
+    },
+    coverImage{
+      alt,
+      ...,
+      asset->,
+    },
+    gallery[]{
+      "imageUrl": asset->url,
+      caption,
+      alt
+    },
+    "categories": categories[]->{_id, title},
+    "subcategory": subcategory->{
+      _id, 
+      title, 
+      "parent": parent->{
+        _id,
+        title
+      }
+    },
+    description[]
+  } | order(date desc)`
+)
+
+// export const allCategoriesQuery = defineQuery(`
+//     *[_type == "category"]{
+//     _id,
+//     title
+//   }`
+// )
+
+// export const allSubCategoriesQuery = defineQuery(`
+//   *[_type == "subcategory"]{
+//     _id,
+//     title,
+//     "parent": parent->{_id,title}
+//   }`
+// )
+
+export const allCategoriesQuery = defineQuery(`
+  *[_type == "category"]{
+    _id,
+    title,
+    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{
+      _id,
+      title
+    }
+  }
+`)
+
+export const allStyleUpsQuery = defineQuery(`
+*[_type == "styleUp"]{
+  _id,
+  title,
+    coverImage{
+      alt,
+      ...,
+      asset->,
+    },}
+
+  `)
