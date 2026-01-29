@@ -140,7 +140,7 @@ export function Navbar(/*props: NavbarProps*/) {
         !isCollapsed &&
             <div className='see_more'>
               <div>↑</div>
-              <button onClick={collapseNav}>Enter</button>
+              <button onClick={collapseNav}>WORK</button>
             </div>
 
       }

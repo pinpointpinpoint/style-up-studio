@@ -58,8 +58,12 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
           >
             <Image
               src={urlFor(su.coverImage)?.width(300).height(300).url()}
-              alt={su.coverImage.alt}
+              height={300}
+              width={300}
               style={{ width: '100%', display: 'block' }}
+                          alt={typeof su.coverImage.alt === 'string' 
+                        ? su.coverImage.alt 
+                        : `Cover image for ${su.title}`}
             />
 
 
@@ -73,7 +77,8 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
             <Image
               ref={zoomRef}
               src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
-              alt={hovered.coverImage.alt}
+              height={LARGE_HEIGHT}
+              width={LARGE_WIDTH}
               style={{
                 position: 'absolute',
                 width: `${LARGE_WIDTH}px`,
@@ -84,7 +89,13 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
                 maxWidth: 'none',
                 maxHeight: 'none',
               }}
-            />
+                          alt={typeof hovered.coverImage.alt === 'string' 
+                        ? hovered.coverImage.alt 
+                        : `Cover image for ${hovered.title}`}
+                                  
+
+
+/>
             <div className="style_title">
               <p>{hovered.title.toUpperCase()}</p>
             </div>

@@ -235,6 +235,8 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
         <div className="work__filter">
             {allCategories.map((cat) => (
 
+                // if the cat is in the current filtered projects, get the count of it
+
                 // Categories
                 <div 
                     key={cat._id} 
@@ -244,11 +246,20 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
                 >
 
                     {/* Category button */}
+                    <div className="work__filter-category">
+                        
                     <button
-                        className={`work__filter-category ${ filter.category === cat._id ? 'work__filter-category--active' : ''}`}
+                        className={`work__filter-category-btn ${ filter.category === cat._id ? 'work__filter-category-btn--active' : ''}`}
                         onClick={() => handleCategoryClick(cat._id)}
                         onFocus={() => handleCategoryHover(cat._id)}
-                    >{cat.title}</button>
+                    >
+                        <span>{cat.title}</span>
+                        <span>
+                            ({cat._id === 'all' && projects?.length})
+                        </span>
+                    </button>
+
+                    </div>
 
                     {/* Subcategories */}
 
@@ -258,15 +269,17 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
                                 hoveredCategory === cat._id ? '--expanded' : ''
                             }`}>
                             {cat.subcategories.map((sub) => (
-                                <button 
-                                    key={sub._id}
-                                    className={`work__filter-subcategory work__filter-subcategory${
-                                        filter.subcategories.includes(sub._id) ? '--active' : ''
-                                    }`}
-                                    onClick={() => handleSubcategoryClick(sub._id, cat._id)}
-                                >
-                                    {sub.title}
-                                </button>
+                                <div className="work__filter-subcategory">
+                                    <button 
+                                        key={sub._id}
+                                        className={`work__filter-subcategory-btn work__filter-subcategory-btn${
+                                            filter.subcategories.includes(sub._id) ? '--active' : ''
+                                        }`}
+                                        onClick={() => handleSubcategoryClick(sub._id, cat._id)}
+                                    >
+                                        {sub.title}
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     }
