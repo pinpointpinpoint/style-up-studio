@@ -221,6 +221,8 @@ h6 {
   border-left: 1px solid black;
 
   overflow-x: hidden;
+
+  padding-top: 30px;
 }
 
 .work__sidebar-title:nth-of-type(2) {
@@ -232,13 +234,13 @@ h6 {
 
 .work__filter {
   position: sticky;
-  top: 30px;
+  top: 0px;
 
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-auto-flow: row dense;
   border-bottom: 1px solid black;
-
+  background-color: white;
   width: 100.3%;
 }
 
@@ -315,6 +317,8 @@ h6 {
 .work__project-details {
   flex: 0 0 auto;
   border-top: 1px solid black;
+  margin-top: 30px;
+
 }
 
 .work__project-details-body > div {
