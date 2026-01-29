@@ -79,11 +79,13 @@ export interface SingleCategory {
 export interface Category {
   _id: string,
   title: string,
-  subcategories?: Subcategory[]
+  subcategories?: Subcategory[],
+  referenceCount: number
 }
 
 export interface Subcategory {
   _id: string,
   title: string,
-  parent: SingleCategory
+  parent: SingleCategory,
+  referenceCount: number
 }

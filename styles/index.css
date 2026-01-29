@@ -159,7 +159,7 @@ h6 {
   display: grid;
   flex: 2;
   grid-template-columns: repeat(4, 1fr);
-  gap: 25px;
+  gap: 30px;
   padding: 30px;
   overflow: auto;
   scrollbar-width: none; 
@@ -250,6 +250,12 @@ h6 {
   width: 100%;
 }
 
+.work__filter-category-btn,
+.work__filter-subcategory-btn {
+  display: flex;
+  justify-content: space-between;
+}
+
 .work__filter-category-btn {
   outline: 1px solid black;
 }
@@ -262,10 +268,10 @@ h6 {
   border-bottom: none;
 }
 
-.work__filter-subcategory, 
+.work__filter-subcategory-btn, 
 .work__filter-category-btn {
   width: 100%;
-  padding: 3px 5px 3px 30px;
+  padding: 3px 6px 3px 30px;
   text-align: left;
 }
 
@@ -278,11 +284,7 @@ h6 {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  
   height: 0;
-  /* transition: height 0.5s ease-in-out; */
-
-  /* display:  */
 }
 
 .work__filter-subcategories--expanded {

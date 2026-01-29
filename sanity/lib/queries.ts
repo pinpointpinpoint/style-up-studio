@@ -133,9 +133,11 @@ export const allCategoriesQuery = defineQuery(`
   *[_type == "category"]{
     _id,
     title,
+    "referenceCount": count(*[_type in ["project"] && references(^._id)]),
     "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{
       _id,
-      title
+      title,
+      "referenceCount": count(*[_type in ["project"] && references(^._id)])
     }
   }
 `)
@@ -149,5 +151,4 @@ export const allStyleUpsQuery = defineQuery(`
       ...,
       asset->,
     },}
-
-  `)
+`)

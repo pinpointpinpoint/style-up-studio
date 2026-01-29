@@ -598,13 +598,15 @@ export type AllProjectsQueryResult = Array<{
   }> | null
 }>
 // Variable: allCategoriesQuery
-// Query: *[_type == "category"]{    _id,    title,    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{      _id,      title    }  }
+// Query: *[_type == "category"]{    _id,    title,    "referenceCount": count(*[_type in ["project"] && references(^._id)]),    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{      _id,      title,      "referenceCount": count(*[_type in ["project"] && references(^._id)])    }  }
 export type AllCategoriesQueryResult = Array<{
   _id: string
   title: string | null
+  referenceCount: number
   subcategories: Array<{
     _id: string
     title: string | null
+    referenceCount: number
   }>
 }>
 // Variable: allStyleUpsQuery
@@ -653,7 +655,7 @@ declare module '@sanity/client' {
     '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    footer,\n    menuItems[]{\n      _key,\n      ...@->{\n        _type,\n        "slug": slug.current,\n        title\n      }\n    },\n    ogImage,\n  }\n': SettingsQueryResult
     '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult
     '\n  *[_type == "project"]{\n    _id,\n    _type,\n    featured,\n    title,\n    date,\n    "slug": slug.current,\n    credits[]{\n      role,\n      name,\n      link\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      title,\n      url\n    },\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },\n    gallery[]{\n      "imageUrl": asset->url,\n      caption,\n      alt\n    },\n    "categories": categories[]->{_id, title},\n    "subcategory": subcategory->{\n      _id, \n      title, \n      "parent": parent->{\n        _id,\n        title\n      }\n    },\n    description[]\n  } | order(date desc)': AllProjectsQueryResult
-    '\n  *[_type == "category"]{\n    _id,\n    title,\n    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{\n      _id,\n      title\n    }\n  }\n': AllCategoriesQueryResult
-    '\n*[_type == "styleUp"]{\n  _id,\n  title,\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },}\n\n  ': AllStyleUpsQueryResult
+    '\n  *[_type == "category"]{\n    _id,\n    title,\n    "referenceCount": count(*[_type in ["project"] && references(^._id)]),\n    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{\n      _id,\n      title,\n      "referenceCount": count(*[_type in ["project"] && references(^._id)])\n    }\n  }\n': AllCategoriesQueryResult
+    '\n*[_type == "styleUp"]{\n  _id,\n  title,\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },}\n': AllStyleUpsQueryResult
   }
 }

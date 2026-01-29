@@ -26,8 +26,8 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
   })
 
   const staticCategories: Category[] = [
-    {_id: 'featured', title: 'Featured', subcategories: []},
-    {_id: 'all', title: 'All', subcategories: []},
+    {_id: 'featured', title: 'Featured', subcategories: [], referenceCount: projects?.filter((proj) => proj.featured).length || 0},
+    {_id: 'all', title: 'All', subcategories: [], referenceCount: projects?.length || 0},
   ]
 
   const allCategories = [...staticCategories, ...categories]
@@ -242,7 +242,7 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                   onFocus={() => handleCategoryHover(cat._id)}
                 >
                   <span>{cat.title}</span>
-                  <span>({cat._id === 'all' && projects?.length})</span>
+                  <span>({cat.referenceCount})</span>
                 </button>
               </div>
 
@@ -262,7 +262,11 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                         }`}
                         onClick={() => handleSubcategoryClick(sub._id, cat._id)}
                       >
-                        {sub.title}
+                        
+                        <span>{sub.title}</span>
+                        <span>({sub.referenceCount})</span>
+
+
                       </button>
                     </div>
                   ))}
