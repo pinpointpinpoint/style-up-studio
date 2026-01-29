@@ -156,14 +156,36 @@ h6 {
 .work__projects {
   display: grid;
   flex: 2;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 25px;
   padding: 30px;
   overflow: auto;
   scrollbar-width: none; 
   max-height: 100%;
   height: fit-content;
+
   /* Firefox */
+}
+
+/* 3 columns on medium screens */
+@media (max-width: 1200px) {
+  .work__projects {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 2 columns on smaller screens */
+@media (max-width: 900px) {
+  .work__projects {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 1 column on mobile */
+@media (max-width: 600px) {
+  .work__projects {
+    grid-template-columns: 1fr;
+  }
 }
 
 .work__projects::-webkit-scrollbar {
@@ -174,6 +196,10 @@ h6 {
 .work__project-card {
   transition: transform 0.1s ease-in-out;
   transform-origin: center;
+}
+
+.work__project-card-img {
+  border: 1px solid black;
 }
 
 .work__project-card--active {

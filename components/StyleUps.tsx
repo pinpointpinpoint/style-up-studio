@@ -1,6 +1,7 @@
 'use client';
 
 import { urlFor } from "@/sanity/lib/utils";
+import Image from "next/image";
 import { FC, useState, useRef } from "react";
 
 interface StyleUpsProps {
@@ -55,8 +56,8 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
             onMouseLeave={() => setHovered(null)}
             onMouseMove={handleMouseMove}
           >
-            <img
-              src={urlFor(su.coverImage)?.url()}
+            <Image
+              src={urlFor(su.coverImage)?.width(300).height(300).url()}
               alt={su.coverImage.alt}
               style={{ width: '100%', display: 'block' }}
             />
@@ -69,7 +70,7 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
       >
 {hovered && hovered.coverImage && (
           <>
-            <img
+            <Image
               ref={zoomRef}
               src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
               alt={hovered.coverImage.alt}

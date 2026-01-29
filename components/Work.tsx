@@ -6,7 +6,6 @@ import { getYouTubeId, urlFor } from "@/sanity/lib/utils";
 import { PortableText } from "next-sanity";
 import Thumbnails from "./Thumbnails";
 
-// Use Next/Image instead of img
 interface WorkProps {
   projects: Project[] | null;
   categories: Category[],

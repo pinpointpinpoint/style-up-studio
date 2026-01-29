@@ -32,6 +32,7 @@ const Thumbnails: React.FC<ThumbnailProps> = ({ handleClick, handleHover, handle
             }
             >
                 <Image 
+                    className="work__project-card-img"
                     src={urlFor(project.coverImage)?.height(500).width(500).auto('format').url()} 
                     width={500}
                     height={500}
