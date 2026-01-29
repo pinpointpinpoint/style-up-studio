@@ -19,7 +19,6 @@ const Thumbnails: React.FC<ThumbnailProps> = ({ handleClick, handleHover, handle
 
   return (
         <button
-            key={project._id} 
             className={`work__project-card 
                     ${activeProject === project ? 'work__project-card--active': ''}
                 `}
@@ -36,8 +35,10 @@ const Thumbnails: React.FC<ThumbnailProps> = ({ handleClick, handleHover, handle
                     src={urlFor(project.coverImage)?.height(500).width(500).auto('format').url()} 
                     width={500}
                     height={500}
-                    alt={project.coverImage.alt || `Cover image for ${project.title}`}
-                />
+                    alt={typeof project.coverImage.alt === 'string' 
+                        ? project.coverImage.alt 
+                        : `Cover image for ${project.title}`}
+                                    />
         </button>
   );
 };

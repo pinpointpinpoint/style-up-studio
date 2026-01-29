@@ -37,60 +37,43 @@ export interface ContactPage {
   instagram: string
 }
 
+export interface Video {
+  fileUrl: string,
+  title?: string,
+  _key: string
+}
+
+export interface VideoUrls {
+  url: string,
+  title?: string,
+}
+
+export interface Credit {
+  link?: string;
+  name: string;
+  role: string;
+}
+
 export interface Project {
-  _id: string
-  _type: 'project'
-  featured: boolean
-  title: string
-  slug: {
-    _type: 'slug'
-    current: string
-  }
-  date: string // ISO date string
-  categories: {
-    _id: string,
-    title: string
-  }[], // Or you can make this a reference type if you fetch category data (what does. that mean?)
-  subcategory: {
-    _id: string,
-    title: string,
-    parent: {
-      _id: string
-      title: string
-    }
-  },  // optional
-  coverImage: {
-    _type: 'image'
-    asset: {
-      _ref: string
-      _type: 'reference'
-    }
-    alt?: string | null
-  }
-  gallery?: {
-    _type: 'image'
-    asset: {
-      _ref: string
-      _type: 'reference'
-    }
-    alt?: string | null
-  }[]
-  description?: PortableTextBlock[]
-  videoUrls?: {
-    title?: string
-    url: string
-  }[]
-  videos?: {
-    _type: 'video'
-    _key: string
-    title?: string
-    fileUrl: string
-  }[]
-  credits?: {
-    role: string
-    name: string
-    link?: string
-  }[]
+  _id: string;
+  _type: string;
+  featured?: boolean;
+  title: string;
+  slug: string;
+  date: string;
+  categories: SingleCategory[];
+  subcategory?: Subcategory;
+  coverImage: Image;
+  gallery?: Image[];
+  description?: PortableTextBlock[];
+  videoUrls?: VideoUrls[];
+  videos?: Video[];
+  credits?: Credit[];
+};
+
+export interface SingleCategory {
+  _id: string,
+  title: string,
 }
 
 export interface Category {
@@ -102,8 +85,5 @@ export interface Category {
 export interface Subcategory {
   _id: string,
   title: string,
-  parent: {
-    _id: string
-    title: string
-  }
+  parent: SingleCategory
 }

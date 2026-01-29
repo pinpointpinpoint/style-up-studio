@@ -12,8 +12,8 @@ import { StyleUps } from './StyleUps'
 import { Category, Project, Subcategory } from '@/types'
 
 export interface HomePageProps {
-  projects: Project[] | null,
-  categories: Category[],
+  projects: any | null,
+  categories: any | null,
   styleUps: any | null
   // home: HomePageQueryResult | null,
 }

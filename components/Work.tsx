@@ -60,7 +60,7 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
 
             const matchesSubcategories =
             filter.subcategories?.length === 0 ||
-            filter.subcategories?.includes(project.subcategory?._id);
+            project.subcategory && filter.subcategories?.includes(project.subcategory._id);
 
             return matchesCategory && matchesSubcategories;
         });
@@ -221,6 +221,7 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
 >
         {filteredProjects.map((project) => (
             <Thumbnails
+                key={project._id}
                 project={project}
                 activeProject={activeProject}
                 rotations={rotations}
