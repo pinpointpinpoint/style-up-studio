@@ -5,6 +5,7 @@ export default defineType({
   name: "post",
   title: "Remix Wall",
   type: "document",
+  // liveEdit: true,
   icon: ConfettiIcon,
   fields: [
     defineField({

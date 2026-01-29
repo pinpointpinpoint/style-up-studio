@@ -6,6 +6,7 @@ export default defineType({
   title: 'Project',
   type: 'document',
   icon: ProjectsIcon,
+  // liveEdit: true,
   fields: [
     defineField({
       name: 'featured',
@@ -203,7 +204,7 @@ export default defineType({
         to: [{ type: 'category' }],
       },
     ],
-    validation: (Rule) => Rule.min(1),
+    validation: (rule) => rule.required(),
   }),
   defineField({
   name: 'subcategory',

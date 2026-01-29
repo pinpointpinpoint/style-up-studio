@@ -6,7 +6,7 @@ export default defineType({
   title: 'Contact',
   type: 'document',
   icon: EnvelopeIcon,
-
+  // liveEdit: true,
   fields: [
     // Hidden singleton title field
     defineField({

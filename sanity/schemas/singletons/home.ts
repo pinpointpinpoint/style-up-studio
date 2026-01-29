@@ -7,7 +7,7 @@ export default defineType({
   type: 'document',
   icon: HomeIcon,
   // Uncomment below to have edits publish automatically as you type
-  liveEdit: true,
+  // liveEdit: true,
   fields: [
     defineField({
       name: 'title',

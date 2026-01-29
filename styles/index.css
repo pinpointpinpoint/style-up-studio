@@ -260,11 +260,11 @@ h6 {
   outline: 1px solid black;
 }
 
-.work__filter-subcategory-btn {
+.work__filter-subcategory {
   border-bottom: 1px solid black;
 }
 
-.work__filter-subcategory-btn:last-child {
+.work__filter-subcategory:last-child {
   border-bottom: none;
 }
 
@@ -321,6 +321,8 @@ h6 {
   border-top: 1px solid black;
   margin-top: 30px;
 
+  height: fit-content;
+
 }
 
 .work__project-details-body > div {
@@ -338,15 +340,17 @@ h6 {
 
 .work__project-details__category,
 .work__project-details__subcategory {
-  color: white;
+  /* color: white; */
 }
 
 .work__project-details__category {
-  background-color: #000000;
+  background-color: #ECC815;
+  color: black;
 }
 
 .work__project-details__subcategory {
-  background-color: #000000;
+  background-color: #8351AF;
+  color: white;
 }
 
 .work__project-images {

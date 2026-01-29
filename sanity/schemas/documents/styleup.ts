@@ -5,6 +5,7 @@ export default defineType({
   name: 'styleUp',
   title: 'Style Up',
   type: 'document',
+  // liveEdit: true,
   icon: StarFilledIcon,
   fields: [
     defineField({

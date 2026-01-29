@@ -4,6 +4,7 @@ export default defineType({
   name: 'subcategory',
   title: 'Subcategory',
   type: 'document',
+  // liveEdit: true,
   fields: [
     defineField({
       name: 'title',
