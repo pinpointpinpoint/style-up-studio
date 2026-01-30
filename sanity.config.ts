@@ -13,8 +13,8 @@ import contact from './sanity/schemas/singletons/contact'
 import category from './sanity/schemas/taxonomy/category'
 import {visionTool} from '@sanity/vision'
 import {defineConfig} from 'sanity'
-import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
-import {presentationTool} from 'sanity/presentation'
+// import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
+// import {presentationTool} from 'sanity/presentation'
 import {structureTool} from 'sanity/structure'
 import galleryImage from './sanity/schemas/objects/galleryImage'
 import subcategory from './sanity/schemas/taxonomy/subcategory'
@@ -52,10 +52,10 @@ export default defineConfig({
     structureTool({
       structure: customPageStructure,
     }),
-    presentationTool({
-      resolve,
-      previewUrl: {previewMode: {enable: '/api/draft-mode/enable'}},
-    }),
+    // presentationTool({
+    //   resolve,
+    //   previewUrl: {previewMode: {enable: '/api/draft-mode/enable'}},
+    // }),
     // Configures the global "new document" button, and document actions, to suit the Settings document singleton
     singletonPlugin([home.name, about.name, contact.name]),
     // Vision lets you query your content with GROQ in the studio
