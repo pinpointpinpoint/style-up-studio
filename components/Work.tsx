@@ -300,8 +300,17 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                       <ul>
                         {displayedProject?.credits.map((credit, idx) => (
                           <li key={idx}>
-                            <span>{credit.role} </span>
-                            <span>{credit.name}</span>
+                            <span>{credit.role}:</span>
+                            {credit.link ?
+                            
+                              <span><a href={credit.link} target="_blank">{credit.name}</a></span>
+                          
+                            :
+
+                              <span>{credit.name}</span>
+
+                            
+                            }
                           </li>
                         ))}
                       </ul>
@@ -314,9 +323,7 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                   <details>
                     <summary>Description</summary>
                     <div>
-                      <ul>
                         <PortableText value={displayedProject.description} />
-                      </ul>
                     </div>
                   </details>
                 </div>

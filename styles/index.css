@@ -40,6 +40,10 @@ h6 {
   /* this is where the hidden message board will be */
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column; 
+  min-height: 0; /* again, allows children to shrink correctly */
+
 }
 
 /* Header */
@@ -84,10 +88,12 @@ h6 {
 
 /* Accordion */
 .accordion {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  min-height: 0; /* again, allows children to shrink correctly */
+
 }
 
 .accordion__item {
@@ -117,20 +123,17 @@ h6 {
   border-top: none;
 }
 
-/* .accordion__item:has(+ .accordion__item--active)
-  .accordion__header {
-  border-top: none;
-} */
-
 .accordion__content {
-  height: 100%;
+  flex: 1;
+  display: flex;
+  min-height: 0; /* again, allows children to shrink correctly */
+  flex-direction: row;
 }
 
 /* Work */
 
 .work {
   display: flex;
-  height: calc(100%);
   transition: height 2s ease;
 }
 
@@ -142,9 +145,8 @@ h6 {
   padding: 30px;
   overflow: auto;
   scrollbar-width: none; 
-  max-height: 100%;
-  height: fit-content;
-
+  /* height: calc(100% - 37px); */
+  align-content: start;
   /* Firefox */
 }
 
@@ -190,18 +192,13 @@ h6 {
 /* Sidebar */
 
 .work__sidebar {
-  height: 100%;
   flex: 1;
-  max-width: 400px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow-y: auto;
   border-left: 1px solid black;
-
   overflow-x: hidden;
-
-  padding-top: 30px;
 }
 
 .work__sidebar-title:nth-of-type(2) {
@@ -221,6 +218,9 @@ h6 {
   border-bottom: 1px solid black;
   background-color: white;
   width: 100.3%;
+  background-color: white;
+    padding-top: 30px;
+
 }
 
 .work__filter-category-group {
@@ -307,7 +307,7 @@ h6 {
 .work__project-details-body > div {
   border-bottom: 1px solid black;
   /* less padding to the left */
-  padding: 5px 5px 5px 30px;
+  padding: 5px 30px 5px 30px;
 }
 
 .work__project-details__categories {
@@ -331,6 +331,37 @@ h6 {
   background-color: #8351AF;
   color: white;
 }
+
+.work__project-details-credits div,
+.work__project-details-description div
+{
+  padding-top: 10px;
+}
+
+
+.work__project-details-credits li {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+details>summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+}
+
+summary::-webkit-details-marker {
+  display: none
+}
+
+summary::after {
+  content: '↓';
+}
+details[open] summary:after {
+  content: " ↑";
+}
+
 
 .work__project-images {
   display: flex;
