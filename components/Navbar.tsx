@@ -103,7 +103,7 @@ export function Navbar(/*props: NavbarProps*/) {
   }
 
   return (
-    <header className={`nav nav${isCollapsed ? '--collapsed' : ''}`}>
+    <header className='nav'>
       <div className='nav__item'>
         <button onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}><h1>ABOUT →</h1></button>
         <SlideOutMenu isOpen={openMenu === 'about'} direction="left" onClose={closeMenu}>
@@ -114,8 +114,6 @@ export function Navbar(/*props: NavbarProps*/) {
           </div>
         </SlideOutMenu>
       </div>
-      {/* <img className='nav__logo' alt="Style Up Studio" width="700px" src="logo.svg"/> */}
-
       <a href="/"><img className='nav__logo' alt="Style Up Studio" width="400px" src="logo_vertical.png"/></a>
       <div className='nav__item'>
         <button onClick={() => setOpenMenu(openMenu === 'contact' ? null : 'contact')}><h1>← CONTACT</h1></button>
@@ -135,15 +133,6 @@ export function Navbar(/*props: NavbarProps*/) {
           </div>
         </SlideOutMenu>      
       </div>
-      {
-
-        !isCollapsed &&
-            <div className='see_more'>
-              <div>↑</div>
-              <button onClick={collapseNav}>WORK</button>
-            </div>
-
-      }
     </header>
     // <header
     //   className="sticky top-0 z-10 flex flex-wrap items-center gap-x-5 bg-white/80 px-4 py-4 backdrop-blur md:px-16 md:py-5 lg:px-32"

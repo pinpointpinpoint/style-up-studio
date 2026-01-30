@@ -70,7 +70,7 @@ export const slugsByTypeQuery = defineQuery(`
 `)
 
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project"]{
+  *[_type == "project" && !(_id in path("drafts.**"))]{
     _id,
     _type,
     featured,
@@ -130,7 +130,7 @@ export const allProjectsQuery = defineQuery(`
 // )
 
 export const allCategoriesQuery = defineQuery(`
-  *[_type == "category"]{
+  *[_type == "category" && !(_id in path("drafts.**"))]{
     _id,
     title,
     "referenceCount": count(*[_type in ["project"] && references(^._id)]),
@@ -143,7 +143,8 @@ export const allCategoriesQuery = defineQuery(`
 `)
 
 export const allStyleUpsQuery = defineQuery(`
-*[_type == "styleUp"]{
+*[_type == "styleUp" && !(_id in path("drafts.**"))
+]{
   _id,
   title,
     coverImage{
