@@ -1,10 +1,31 @@
 'use client'
 
-import {Category, Project} from '@/types'
+import {Category, Project, Video, VideoUrls} from '@/types'
 import {FC, useEffect, useState, useMemo} from 'react'
 import {getYouTubeId, urlFor} from '@/sanity/lib/utils'
 import {PortableText} from 'next-sanity'
 import Thumbnails from './Thumbnails'
+import {allProjectsQuery} from '@/sanity/lib/queries'
+import Image from 'next/image'
+import {Image as ImageType} from 'sanity'
+import PlayButton from '../public/play.svg'
+import VideoPlayer from './VideoPlayer'
+
+import ReactPlayer from 'react-player'
+import {
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaVolumeRange,
+  MediaPlaybackRateButton,
+  MediaPlayButton,
+  MediaSeekBackwardButton,
+  MediaSeekForwardButton,
+  MediaMuteButton,
+  MediaFullscreenButton,
+} from "media-chrome/react";
+
 
 interface WorkProps {
   projects: Project[] | null
@@ -12,6 +33,8 @@ interface WorkProps {
 }
 
 export const Work: FC<WorkProps> = ({projects, categories}) => {
+    const [playing, setPlaying] = useState(false);
+
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [rotations, setRotations] = useState<Record<string, number>>({})
@@ -26,7 +49,12 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
   })
 
   const staticCategories: Category[] = [
-    {_id: 'featured', title: 'Featured', subcategories: [], referenceCount: projects?.filter((proj) => proj.featured).length || 0},
+    {
+      _id: 'featured',
+      title: 'Featured',
+      subcategories: [],
+      referenceCount: projects?.filter((proj) => proj.featured).length || 0,
+    },
     {_id: 'all', title: 'All', subcategories: [], referenceCount: projects?.length || 0},
   ]
 
@@ -34,6 +62,40 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
 
   const displayedProject =
     hoveredProject && hoveredProject !== activeProject ? hoveredProject : activeProject
+
+  type ImageAsset = {
+    kind: string
+    value: ImageType // replace with your actual image type
+  }
+
+  type VideoUrlAsset = {
+    kind: string
+    value: VideoUrls
+  }
+
+  type VideoAsset = {
+    kind: string
+    value: Video // replace with your actual video type
+  }
+
+  type ProjectAsset = ImageAsset | VideoUrlAsset | VideoAsset
+
+  const allProjectAssets: any[] = [
+    ...(displayedProject?.gallery ?? []).map((image) => ({
+      kind: 'image',
+      value: image as ImageType,
+    })),
+
+    ...(displayedProject?.videoUrls ?? []).map((videoUrl) => ({
+      kind: 'videoUrl',
+      value: videoUrl as VideoUrls,
+    })),
+
+    ...(displayedProject?.videos ?? []).map((video) => ({
+      kind: 'video',
+      value: video as Video,
+    })),
+  ]
 
   const filteredProjects = useMemo(() => {
     if (!projects) return []
@@ -64,14 +126,15 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
   }, [projects, filter])
 
   useEffect(() => {
+    console.log(allProjectAssets)
     if (!isLocked || !activeProject) return
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       console.log(target)
 
-      const activeCard = document.querySelector('.work__project-card--active');
-      const projectDetails = document.querySelector('.work__project-details');
+      const activeCard = document.querySelector('.work__project-card--active')
+      const projectDetails = document.querySelector('.work__project-details')
 
       if (activeCard && !activeCard.contains(target) && !projectDetails?.contains(target)) {
         setActiveProject(null)
@@ -206,6 +269,28 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
     setIsLocked(true)
   }
 
+    function withYouTubeParams(url: string) {
+      const u = new URL(url);
+
+      u.searchParams.set("modestbranding", "1");
+      u.searchParams.set("controls", "0");
+      u.searchParams.set("rel", "0");
+      u.searchParams.set("playsinline", "1");
+      u.searchParams.set("cc_load_policy", "0");
+
+      console.log(u)
+      return u.toString();
+  }
+
+
+  const [playingMap, setPlayingMap] = useState<Record<string, boolean>>({});
+
+const handlePlay = (key: string) => {
+  setPlayingMap((prev) => ({ ...prev, [key]: true }));
+};
+
+
+
   return (
     <div className="work">
       <div className="work__projects">
@@ -262,11 +347,8 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                         }`}
                         onClick={() => handleSubcategoryClick(sub._id, cat._id)}
                       >
-                        
                         <span>{sub.title}</span>
                         <span>({sub.referenceCount})</span>
-
-
                       </button>
                     </div>
                   ))}
@@ -301,16 +383,15 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                         {displayedProject?.credits.map((credit, idx) => (
                           <li key={idx}>
                             <span>{credit.role}:</span>
-                            {credit.link ?
-                            
-                              <span><a href={credit.link} target="_blank">{credit.name}</a></span>
-                          
-                            :
-
+                            {credit.link ? (
+                              <span>
+                                <a href={credit.link} target="_blank">
+                                  {credit.name}
+                                </a>
+                              </span>
+                            ) : (
                               <span>{credit.name}</span>
-
-                            
-                            }
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -323,7 +404,7 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                   <details>
                     <summary>Description</summary>
                     <div>
-                        <PortableText value={displayedProject.description} />
+                      <PortableText value={displayedProject.description} />
                     </div>
                   </details>
                 </div>
@@ -332,7 +413,8 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
 
             {/* If there is only one thing, make it take the whole widht? but if there is mroe have the horizontal scrolling */}
             <div
-              className="work__project-images"
+              className="work__project-assets"
+              // className="video-wrapper"
               onWheel={(e) => {
                 const el = e.currentTarget
 
@@ -345,9 +427,125 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                 el.scrollLeft += e.deltaY
               }}
             >
-              {/* {activeProject?.gallery && } */}
 
-              {displayedProject?.videoUrls &&
+            {/* <Image
+              className="play"
+              alt="Play button"
+              src={PlayButton}
+            />
+
+            <Image
+              alt={
+                typeof displayedProject.coverImage.alt === 'string'
+                  ? displayedProject.coverImage.alt
+                  : `Cover image for ${displayedProject.title}`
+              }
+              style={{ objectFit: "cover" }}
+              fill
+              src={urlFor(displayedProject.coverImage)
+                .auto('format')
+                .url()}
+            /> */}
+
+
+            
+                  
+              {allProjectAssets.map((asset, idx) => {
+                switch (asset.kind) {
+                  case 'image':
+                    return <Image key={idx} src={asset.value.image} alt={asset.value.alt} />;
+                  case 'videoUrl':
+
+
+  return (
+    <MediaController
+      key={asset.value._key}
+      style={{ width: "100%", aspectRatio: "16/9", position: "relative" }}
+    >
+
+      <ReactPlayer
+        slot="media"
+        light={true}
+        controls={true}
+        playIcon={<div style={{background: "white", padding: "10px", border: "1px solid black"}}>Play</div>}
+        onClickPreview={() => setPlaying(true)}
+        style={{ width: "100%", height: "100%", aspectRatio: "16/9" }}
+        playing={playing}
+        src={`https://www.youtube.com/watch?v=${getYouTubeId(asset.value.url)}`}
+      />
+
+      {/* <MediaControlBar>
+        <MediaTimeRange />
+        <MediaTimeDisplay showDuration />
+        <MediaMuteButton />
+        <MediaVolumeRange />
+        <MediaFullscreenButton />
+      </MediaControlBar> */}
+    </MediaController>
+  );
+
+
+                    // <div
+                    //   key={asset.value._key} 
+                    //   style={{ position: "relative", width: "100%", aspectRatio: "16/9", cursor: "pointer" }}
+                    //   onClick={() => setPlaying(true)}
+                    // >
+                    //   <ReactPlayer 
+                    //     src={`https://www.youtube.com/watch?v=${getYouTubeId(asset.value.url)}`}
+                    //     // light={true} 
+                    //     playing={playing} 
+                    //     controls={false} 
+                    //     width="100%" 
+                    //     height="100%" 
+                    //           onClickPreview={() => setPlaying(true)} // optional
+
+                    //   />
+                    //   {!playing && (
+                    //     <div
+                    //       style={{
+                    //         position: "absolute",
+                    //         inset: 0,
+                    //         display: "flex",
+                    //         alignItems: "center",
+                    //         justifyContent: "center",
+                    //         fontSize: 60,
+                    //         color: "white",
+                    //         background: "rgba(0,0,0,0.3)",
+                    //       }}
+                    //     >
+                    //       ▶
+                    //     </div>
+                    //   )}
+                    // </div>
+
+                      // <VideoPlayer key={asset.value._key} type="youtube" src={`https://www.youtube.com/embed/${getYouTubeId(asset.value.url)}`} />
+                      
+
+                  case 'video':
+                    return (
+                      <ReactPlayer 
+                        style={{ width: '100%', height: 'auto', aspectRatio: '16/9' }}
+                        key={asset.value._key} 
+                        src={asset.value.fileUrl} 
+                        controls={false}
+                      />
+
+                      // <VideoPlayer key={asset.value._key} type="mp4" src={asset.value.fileUrl} />
+
+                      // <video
+                      //   controls
+                      //   key={asset.value._key}
+                      //   width="100%"
+                      //   height="250px"
+                      // >
+                      //   <source src={asset.value.fileUrl} type="video/mp4" />
+                      //   Your browser does not support the video tag.
+                      // </video>
+                    )
+                }
+              })}
+
+              {/* {displayedProject?.videoUrls &&
                 displayedProject?.videoUrls.map((videoUrl, idx) => (
                   <div className="work__project-video-embed" key={idx}>
                     <iframe
@@ -355,9 +553,9 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                       allowFullScreen
                     />
                   </div>
-                ))}
+                ))} */}
 
-              {displayedProject?.videos &&
+              {/* {displayedProject?.videos &&
                 displayedProject?.videos.map((video, idx) => (
                   <video
                     controls
@@ -367,10 +565,8 @@ export const Work: FC<WorkProps> = ({projects, categories}) => {
                     <source src={video.fileUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
-                ))}
+                ))} */}
             </div>
-            {/* <div>(4)</div> */}
-
             {/* calculate total count of all assets and display here */}
           </div>
         )}

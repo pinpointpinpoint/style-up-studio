@@ -57,7 +57,7 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
             onMouseMove={handleMouseMove}
           >
             <Image
-              src={urlFor(su.coverImage)?.width(300).height(300).url()}
+              src={urlFor(su.coverImage)?.auto('format').url()}
               height={300}
               width={300}
               style={{ width: '100%', display: 'block' }}

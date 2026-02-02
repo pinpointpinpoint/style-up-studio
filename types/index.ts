@@ -46,6 +46,7 @@ export interface Video {
 export interface VideoUrls {
   url: string,
   title?: string,
+  _key: string
 }
 
 export interface Credit {

@@ -101,7 +101,7 @@ export default defineType({
               title: 'Video File',
               type: 'file',
               options: {
-                accept: 'video/*',
+                accept: 'video/mp4' 
               },
               validation: (Rule) => Rule.required(),
             }),

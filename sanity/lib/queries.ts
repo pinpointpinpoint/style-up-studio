@@ -88,6 +88,7 @@ export const allProjectsQuery = defineQuery(`
       "fileUrl": file.asset->url
     },
     videoUrls[]{
+      _key,
       title,
       url
     },
@@ -97,6 +98,7 @@ export const allProjectsQuery = defineQuery(`
       asset->,
     },
     gallery[]{
+      _key,
       "imageUrl": asset->url,
       caption,
       alt
