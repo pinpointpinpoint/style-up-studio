@@ -35,6 +35,8 @@ interface WorkProps {
 export const Work: FC<WorkProps> = ({projects, categories}) => {
     const [playing, setPlaying] = useState(false);
 
+
+    
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [rotations, setRotations] = useState<Record<string, number>>({})
@@ -455,36 +457,33 @@ const handlePlay = (key: string) => {
                   case 'image':
                     return <Image key={idx} src={asset.value.image} alt={asset.value.alt} />;
                   case 'videoUrl':
+                  return (
+                    <MediaController
+                      key={asset.value._key}
+                      style={{ width: "100%", aspectRatio: "16/9", position: "relative" }}
+                    >
+                      <ReactPlayer
+                        slot="media"
+                        light={true}
+                        controls={false}
+                        playIcon={<div style={{background: "white", padding: "10px", border: "1px solid black"}}>Play</div>}
+                        onClickPreview={() => setPlaying(true)}
+                        style={{ width: "100%", height: "100%", aspectRatio: "16/9" }}
+                        playing={playing}
+                        src={`https://www.youtube.com/watch?v=${getYouTubeId(asset.value.url)}`}
+                      />
+                      
+                          <MediaControlBar 
+                          >
+                            <MediaTimeRange />
+                            <MediaTimeDisplay showDuration />
+                            <MediaMuteButton />
+                            <MediaVolumeRange />
+                            <MediaFullscreenButton />
+                          </MediaControlBar>
+                    </MediaController>
 
-
-  return (
-    <MediaController
-      key={asset.value._key}
-      style={{ width: "100%", aspectRatio: "16/9", position: "relative" }}
-    >
-
-      <ReactPlayer
-        slot="media"
-        light={true}
-        controls={true}
-        playIcon={<div style={{background: "white", padding: "10px", border: "1px solid black"}}>Play</div>}
-        onClickPreview={() => setPlaying(true)}
-        style={{ width: "100%", height: "100%", aspectRatio: "16/9" }}
-        playing={playing}
-        src={`https://www.youtube.com/watch?v=${getYouTubeId(asset.value.url)}`}
-      />
-
-      {/* <MediaControlBar>
-        <MediaTimeRange />
-        <MediaTimeDisplay showDuration />
-        <MediaMuteButton />
-        <MediaVolumeRange />
-        <MediaFullscreenButton />
-      </MediaControlBar> */}
-    </MediaController>
-  );
-
-
+                  );
                     // <div
                     //   key={asset.value._key} 
                     //   style={{ position: "relative", width: "100%", aspectRatio: "16/9", cursor: "pointer" }}
@@ -523,12 +522,32 @@ const handlePlay = (key: string) => {
 
                   case 'video':
                     return (
-                      <ReactPlayer 
-                        style={{ width: '100%', height: 'auto', aspectRatio: '16/9' }}
-                        key={asset.value._key} 
-                        src={asset.value.fileUrl} 
+
+
+                                          <MediaController
+                      key={asset.value._key}
+                      style={{ width: "100%", aspectRatio: "16/9", position: "relative" }}
+                    >
+                      <ReactPlayer
+                        slot="media"
+                        light={true}
                         controls={false}
+                        playIcon={<div style={{background: "white", padding: "10px", border: "1px solid black"}}>Play</div>}
+                        onClickPreview={() => setPlaying(true)}
+                        style={{ width: "100%", height: "100%", aspectRatio: "16/9" }}
+                        playing={playing}
+                        src={asset.value.fileUrl} 
                       />
+                      
+                          <MediaControlBar 
+                          >
+                            <MediaTimeRange />
+                            <MediaTimeDisplay showDuration />
+                            <MediaMuteButton />
+                            <MediaVolumeRange />
+                            <MediaFullscreenButton />
+                          </MediaControlBar>
+                    </MediaController>
 
                       // <VideoPlayer key={asset.value._key} type="mp4" src={asset.value.fileUrl} />
 
