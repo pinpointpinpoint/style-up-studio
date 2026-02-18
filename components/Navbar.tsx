@@ -105,21 +105,21 @@ export function Navbar(/*props: NavbarProps*/) {
   return (
     <header className='nav'>
       <div className='nav__item'>
-        <button onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}><h1>ABOUT →</h1></button>
+        <button onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}><h1>ABOUT</h1></button>
         <SlideOutMenu isOpen={openMenu === 'about'} direction="left" onClose={closeMenu}>
           <div className='flex justify-between w-full'>
               <div className='text-[12px] w-1/2 text-left'>
                 Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore, at. Voluptas reiciendis fugiat voluptatum iusto omnis.</div>
-              <button onClick={closeMenu}>ABOUT ←</button>
+              <button onClick={closeMenu}><h1>ABOUT</h1></button>
           </div>
         </SlideOutMenu>
       </div>
-      <a href="/"><img className='nav__logo' alt="Style Up Studio" width="400px" src="logo_vertical.png"/></a>
+      <a href="/"><img className='nav__logo' alt="Style Up Studio" width="400px" src="logo2.svg"/></a>
       <div className='nav__item'>
-        <button onClick={() => setOpenMenu(openMenu === 'contact' ? null : 'contact')}><h1>← CONTACT</h1></button>
+        <button onClick={() => setOpenMenu(openMenu === 'contact' ? null : 'contact')}><h1>CONTACT</h1></button>
         <SlideOutMenu isOpen={openMenu === 'contact'} direction="right" onClose={closeMenu}>
           <div className='flex justify-between w-full'>
-            <button onClick={closeMenu}>CONTACT →</button>
+            <button onClick={closeMenu}><h1>CONTACT</h1></button>
             <div className="flex gap-20 text-right text-[12px]">
               <div className='flex flex-col'>
                 <div>Email:</div>

@@ -1,84 +1,49 @@
-import { useEffect, useRef } from "react";
+import React, { useRef, useEffect, useState } from 'react';
+import ReactPlayer from 'react-player'
 
-type VideoPlayerProps = {
-  type: "youtube" | "mp4";
-  src: string; // For YouTube, this is the VIDEO_ID
+const generateThumbnail = (videoSrc: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.src = videoSrc;
+    video.crossOrigin = 'anonymous';
+    video.currentTime = 1; // pick 1 second for thumbnail
+
+    video.addEventListener('loadeddata', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imgData = canvas.toDataURL('image/jpeg');
+      resolve(imgData);
+    });
+
+    video.addEventListener('error', (e) => reject(e));
+  });
 };
 
-export default function VideoPlayer({ type, src }: VideoPlayerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const playerRef = useRef<any>(null);
+const VideoPlayerWithDynamicThumbnail = ({ videoSrc }: { videoSrc: string }) => {
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
 
-  // YouTube setup
   useEffect(() => {
-    if (type !== "youtube") return;
+    generateThumbnail(videoSrc).then(setThumbnail);
+  }, [videoSrc]);
 
-    // Load script only if not already loaded
-    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      document.body.appendChild(tag);
-    }
-
-    // Function to create the player
-    const createPlayer = () => {
-      if ((window as any).YT && containerRef.current) {
-        playerRef.current = new (window as any).YT.Player(containerRef.current, {
-          videoId: src,
-          playerVars: {
-            autoplay: 0,
-            controls: 0,        // hide YouTube controls
-            modestbranding: 1,
-            rel: 0,
-          },
-        });
-      }
-    };
-
-    // Check every 100ms until YT is ready
-    let interval = setInterval(() => {
-      if ((window as any).YT && (window as any).YT.Player) {
-        createPlayer();
-        clearInterval(interval);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [src, type]);
-
-  // Play button handler
-  const play = () => {
-    if (type === "youtube") {
-      playerRef.current?.playVideo();
-    } else if (type === "mp4") {
-      videoRef.current?.play();
-    }
-  };
+// UPDATE PLAYING STUFF FOR VIDEOS (NOT YOUTUBE URLS)
 
   return (
-    <div style={{ position: "relative", width: "100%", aspectRatio: "16/9" }}>
-      {type === "mp4" && (
-        <video
-          ref={videoRef}
-          src={src}
-          style={{ width: "100%", height: "100%" }}
-          controls={false}
-        />
-      )}
-      {type === "youtube" && <div ref={containerRef} />}
-      <button
-        onClick={play}
-        style={{
-          position: "absolute",
-          bottom: 10,
-          right: 10,
-          padding: "8px 12px",
-          zIndex: 10,
-        }}
-      >
-        Play
-      </button>
-    </div>
+    <ReactPlayer
+      src={videoSrc}
+      playing={playing}
+      controls
+      playIcon={<div style={{background: "white", padding: "3px 15px", border: "1px solid black"}}>Play</div>}
+      light={thumbnail || true} // fallback if not loaded yet
+      onClickPreview={() => setPlaying(true)}
+      width="100%"
+      height="100%"
+    />
   );
-}
+};
+
+export default VideoPlayerWithDynamicThumbnail;

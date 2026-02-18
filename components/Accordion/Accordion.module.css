@@ -1,0 +1,66 @@
+.accordion {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;   /* anchor to bottom */
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+
+.accordion .item {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.accordion .item.open {
+  flex-grow: 1;
+  /* height: calc(100% - 60px); */
+}
+
+.accordion .item .header {
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 0px 30px;
+  text-align: left;
+  border-top: 1px solid black;  
+  /* font-size: 18px; */
+    height: 30px;  
+}
+
+.accordion .item .header.active {
+  background: rgb(0, 0, 0);
+  color: white;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.accordion .item .content {
+  flex-grow: 1;
+  display: flex;
+  min-height: 0;
+  flex-direction: row;
+  
+}
+
+.accordion .item.hint .header {
+  cursor: pointer;
+}
+
+@keyframes easter-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(8px);
+  }
+}
+
+.hint {
+  animation-timing-function: cubic-bezier(.34,1.56,.64,1);
+  animation: easter-bounce 1.1s cubic-bezier(.4,0,.2,1);
+}
+
