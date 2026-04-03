@@ -3,7 +3,7 @@ import { PortableText } from 'next-sanity'
 import { Project } from '@/types'
 import Image from 'next/image'
 import ReactPlayer from 'react-player'
-import VideoPlayer from './VideoPlayer'
+import VideoPlayer from './VideoPlayer/VideoPlayer'
 import { getYouTubeId } from '@/sanity/lib/utils'
 
 const Modal = ({ onClose, data, renderAsset }: { onClose: any, data: any, renderAsset: any }) => {
@@ -28,7 +28,7 @@ const Modal = ({ onClose, data, renderAsset }: { onClose: any, data: any, render
                     </div>
                     <button onClick={onClose}>[Close]</button>
                 </div>
-                <div className="modal_asset">{data.map(renderAsset)}</div>
+                <div className="modal__asset">{data.map(renderAsset)}</div>
             </div>
         </div>
     )

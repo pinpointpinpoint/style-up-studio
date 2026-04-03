@@ -1,57 +1,62 @@
-'use client'
+'use client';
 
-import { motion, AnimatePresence } from 'framer-motion'
-import React from 'react'
+import { useEffect, useRef } from 'react'
+import {AnimatePresence, motion} from 'framer-motion';
+
 
 interface SlideOutMenuProps {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
-  direction?: 'left' | 'right'
+  direction?: 'left' | 'right' 
 }
 
-export const SlideOutMenu: React.FC<SlideOutMenuProps> = ({
-  isOpen,
-  onClose,
-  children,
-  direction = 'right',
-}) => {
-  const initialX = direction === 'right' ? '100%' : '-100%'
+export function SlideOutMenu({ isOpen, onClose, children, direction}: SlideOutMenuProps) {
+  const initialX = direction === 'right' ? '100%' : '-100%';
+  const menuRef = useRef<HTMLDivElement>(null);
+
+
+
+  
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+  if (!isOpen) return;
+  const handleClickOutside = (e: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      onClose();
+    }
+  };
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, [isOpen, onClose]);
+
+
+
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 bg-black/50 z-40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-
-          {/* Menu Panel */}
-          <motion.div
-            className={`fixed top-0 h-full w-80 bg-white z-50 shadow-lg flex flex-col p-4 ${
-              direction === 'left' ? 'left-0 border-r' : 'right-0 border-l'
-            }`}
-            initial={{ x: initialX }}
-            animate={{ x: 0 }}
-            exit={{ x: initialX }}
-            transition={{ type: 'tween', duration: 0.3 }}
-          >
-            <button
-              onClick={onClose}
-              className="mb-4 self-end text-sm font-semibold"
-            >
-              CLOSE ✕
-            </button>
-
-            <div className="flex-1 overflow-y-auto">{children}</div>
-          </motion.div>
-        </>
-      )}
+      { isOpen && 
+        <motion.div
+          ref={menuRef}
+          initial={{ x: initialX }}
+          animate={{ x: 0 }}
+          exit={{ x: initialX }}
+          transition={{ type: 'tween', duration: 0.3 }}
+          className={`nav__item-content ${
+            direction === 'left' ? 'left-0' : 'right-0'
+          }`}
+        >
+            {children}
+        </motion.div>
+    }
     </AnimatePresence>
   )
 }

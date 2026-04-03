@@ -31,6 +31,34 @@ export type GalleryItem = {
     }
 }
 
+export type Publication = {
+    _id: string
+    _type: 'publication'
+    _createdAt: string
+    _updatedAt: string
+    _rev: string
+    name?: string
+}
+
+export type Brand = {
+    _id: string
+    _type: 'brand'
+    _createdAt: string
+    _updatedAt: string
+    _rev: string
+    name?: string
+}
+
+export type Personality = {
+    _id: string
+    _type: 'personality'
+    _createdAt: string
+    _updatedAt: string
+    _rev: string
+    name?: string
+    active?: boolean
+}
+
 export type Post = {
     _id: string
     _type: 'post'
@@ -86,37 +114,37 @@ export type Project = {
     _createdAt: string
     _updatedAt: string
     _rev: string
-    featured?: boolean
     title?: string
+    client?: string
     date?: string
     slug?: Slug
-    credits?: Array<{
-        role?: string
-        name?: string
-        link?: string
-        _type: 'credit'
+    projectType?: {
+        _ref: string
+        _type: 'reference'
+        _weak?: boolean
+        [internalGroqTypeReferenceTo]?: 'projectType'
+    }
+    featured?: boolean
+    personalities?: Array<{
+        _ref: string
+        _type: 'reference'
+        _weak?: boolean
         _key: string
+        [internalGroqTypeReferenceTo]?: 'personality'
     }>
-    videos?: Array<{
-        title?: string
-        file?: {
-            asset?: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
-            }
-            media?: unknown
-            _type: 'file'
-        }
-        _type: 'video'
+    publications?: Array<{
+        _ref: string
+        _type: 'reference'
+        _weak?: boolean
         _key: string
+        [internalGroqTypeReferenceTo]?: 'publication'
     }>
-    videoUrls?: Array<{
-        title?: string
-        url?: string
-        _type: 'videoUrlItem'
+    brands?: Array<{
+        _ref: string
+        _type: 'reference'
+        _weak?: boolean
         _key: string
+        [internalGroqTypeReferenceTo]?: 'brand'
     }>
     gallery?: Array<{
         asset?: {
@@ -129,8 +157,25 @@ export type Project = {
         hotspot?: SanityImageHotspot
         crop?: SanityImageCrop
         caption?: string
-        alt?: string
         _type: 'image'
+        _key: string
+    }>
+    videos?: Array<{
+        asset?: {
+            _ref: string
+            _type: 'reference'
+            _weak?: boolean
+            [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+        }
+        media?: unknown
+        title?: string
+        _type: 'file'
+        _key: string
+    }>
+    videoUrls?: Array<{
+        title?: string
+        url?: string
+        _type: 'videoUrlItem'
         _key: string
     }>
     coverImage?: {
@@ -143,21 +188,7 @@ export type Project = {
         media?: unknown
         hotspot?: SanityImageHotspot
         crop?: SanityImageCrop
-        alt?: string
         _type: 'image'
-    }
-    categories?: Array<{
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        _key: string
-        [internalGroqTypeReferenceTo]?: 'category'
-    }>
-    subcategory?: {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'subcategory'
     }
     description?: Array<{
         children?: Array<{
@@ -177,26 +208,19 @@ export type Project = {
         _type: 'block'
         _key: string
     }>
+    credits?: Array<{
+        role?: string
+        name?: string
+        link?: string
+        _type: 'credit'
+        _key: string
+    }>
+    orderRank?: string
 }
 
-export type Subcategory = {
+export type ProjectType = {
     _id: string
-    _type: 'subcategory'
-    _createdAt: string
-    _updatedAt: string
-    _rev: string
-    title?: string
-    parent?: {
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        [internalGroqTypeReferenceTo]?: 'category'
-    }
-}
-
-export type Category = {
-    _id: string
-    _type: 'category'
+    _type: 'projectType'
     _createdAt: string
     _updatedAt: string
     _rev: string
@@ -277,13 +301,6 @@ export type Home = {
         level?: number
         _type: 'block'
         _key: string
-    }>
-    featuredProjects?: Array<{
-        _ref: string
-        _type: 'reference'
-        _weak?: boolean
-        _key: string
-        [internalGroqTypeReferenceTo]?: 'project'
     }>
 }
 
@@ -407,11 +424,13 @@ export type SanityAssetSourceData = {
 
 export type AllSanitySchemaTypes =
     | GalleryItem
+    | Publication
+    | Brand
+    | Personality
     | Post
     | StyleUp
     | Project
-    | Subcategory
-    | Category
+    | ProjectType
     | Contact
     | About
     | Home
@@ -429,7 +448,7 @@ export type AllSanitySchemaTypes =
 export declare const internalGroqTypeReferenceTo: unique symbol
 // Source: ./sanity/lib/queries.ts
 // Variable: homePageQuery
-// Query: *[_type == "home"][0]{    _id,    _type,    overview,    showcaseProjects[]{      _key,      ...@->{        _id,        _type,        coverImage,        overview,        "slug": slug.current,        tags,        title,      }    },    title,  }
+// Query: *[_type == "home"][0]{    _id,    _type,    overview,    title,  }
 export type HomePageQueryResult = {
     _id: string
     _type: 'home'
@@ -451,7 +470,6 @@ export type HomePageQueryResult = {
         _type: 'block'
         _key: string
     }> | null
-    showcaseProjects: null
     title: string | null
 } | null
 // Variable: pagesBySlugQuery
@@ -462,7 +480,7 @@ export type PagesBySlugQueryResult = null
 export type ProjectBySlugQueryResult = {
     _id: string
     _type: 'project'
-    client: null
+    client: string | null
     coverImage: {
         asset?: {
             _ref: string
@@ -473,7 +491,6 @@ export type ProjectBySlugQueryResult = {
         media?: unknown
         hotspot?: SanityImageHotspot
         crop?: SanityImageCrop
-        alt?: string
         _type: 'image'
     } | null
     description: Array<{
@@ -510,12 +527,13 @@ export type SlugsByTypeQueryResult = Array<{
     slug: string | null
 }>
 // Variable: allProjectsQuery
-// Query: *[_type == "project" && !(_id in path("drafts.**"))]{    _id,    _type,    featured,    title,    date,    "slug": slug.current,    credits[]{      role,      name,      link    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      _key,      title,      url    },    coverImage{      alt,      ...,      asset->,    },    gallery[]{      _key,      "imageUrl": asset->url,      caption,      alt    },    "categories": categories[]->{_id, title},    "subcategory": subcategory->{      _id,       title,       "parent": parent->{        _id,        title      }    },    description[]  } | order(date desc)
+// Query: *[_type == "project" && !(_id in path("drafts.**"))]{    _id,    _type,    featured,    title,    client,    date,    "slug": slug.current,    credits[]{      role,      name,      link    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      _key,      title,      url    },    coverImage{      alt,      ...,      asset->,    },    gallery[]{      _key,      "imageUrl": asset->url,      caption,      alt    },    "categories": categories[]->{_id, title},    "subcategory": subcategory->{      _id,       title,       "parent": parent->{        _id,        title      }    },    description[]  } | order(date desc)
 export type AllProjectsQueryResult = Array<{
     _id: string
     _type: 'project'
     featured: boolean | null
     title: string | null
+    client: string | null
     date: string | null
     slug: string | null
     credits: Array<{
@@ -526,7 +544,7 @@ export type AllProjectsQueryResult = Array<{
     videos: Array<{
         _key: string
         title: string | null
-        fileUrl: string | null
+        fileUrl: null
     }> | null
     videoUrls: Array<{
         _key: string
@@ -534,7 +552,7 @@ export type AllProjectsQueryResult = Array<{
         url: string | null
     }> | null
     coverImage: {
-        alt?: string
+        alt: null
         asset: {
             _id: string
             _type: 'sanity.imageAsset'
@@ -566,20 +584,91 @@ export type AllProjectsQueryResult = Array<{
         _key: string
         imageUrl: string | null
         caption: string | null
-        alt: string | null
+        alt: null
     }> | null
-    categories: Array<{
-        _id: string
-        title: string | null
+    categories: null
+    subcategory: null
+    description: Array<{
+        children?: Array<{
+            marks?: Array<string>
+            text?: string
+            _type: 'span'
+            _key: string
+        }>
+        style?: 'normal'
+        listItem?: 'bullet' | 'number'
+        markDefs?: Array<{
+            href?: string
+            _type: 'link'
+            _key: string
+        }>
+        level?: number
+        _type: 'block'
+        _key: string
     }> | null
-    subcategory: {
-        _id: string
+}>
+// Variable: featuredProjectsQuery
+// Query: *[_type == "project" && featured == true && !(_id in path("drafts.**"))]  | order(orderRank asc, date desc){    _id,    _type,    featured,    title,    client,    date,    "slug": slug.current,    credits[]{      role,      name,      link    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      _key,      title,      url    },    coverImage{      alt,      ...,      asset->,    },    gallery[]{      _key,      "imageUrl": asset->url,      caption,      alt    },    "categories": categories[]->{_id, title},    "subcategory": subcategory->{      _id,       title,       "parent": parent->{        _id,        title      }    },    description[]  }
+export type FeaturedProjectsQueryResult = Array<{
+    _id: string
+    _type: 'project'
+    featured: boolean | null
+    title: string | null
+    client: string | null
+    date: string | null
+    slug: string | null
+    credits: Array<{
+        role: string | null
+        name: string | null
+        link: string | null
+    }> | null
+    videos: Array<{
+        _key: string
         title: string | null
-        parent: {
+        fileUrl: null
+    }> | null
+    videoUrls: Array<{
+        _key: string
+        title: string | null
+        url: string | null
+    }> | null
+    coverImage: {
+        alt: null
+        asset: {
             _id: string
-            title: string | null
+            _type: 'sanity.imageAsset'
+            _createdAt: string
+            _updatedAt: string
+            _rev: string
+            originalFilename?: string
+            label?: string
+            title?: string
+            description?: string
+            altText?: string
+            sha1hash?: string
+            extension?: string
+            mimeType?: string
+            size?: number
+            assetId?: string
+            uploadId?: string
+            path?: string
+            url?: string
+            metadata?: SanityImageMetadata
+            source?: SanityAssetSourceData
         } | null
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        _type: 'image'
     } | null
+    gallery: Array<{
+        _key: string
+        imageUrl: string | null
+        caption: string | null
+        alt: null
+    }> | null
+    categories: null
+    subcategory: null
     description: Array<{
         children?: Array<{
             marks?: Array<string>
@@ -601,16 +690,7 @@ export type AllProjectsQueryResult = Array<{
 }>
 // Variable: allCategoriesQuery
 // Query: *[_type == "category" && !(_id in path("drafts.**"))]{    _id,    title,    "referenceCount": count(*[_type in ["project"] && references(^._id)]),    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{      _id,      title,      "referenceCount": count(*[_type in ["project"] && references(^._id)])    }  }
-export type AllCategoriesQueryResult = Array<{
-    _id: string
-    title: string | null
-    referenceCount: number
-    subcategories: Array<{
-        _id: string
-        title: string | null
-        referenceCount: number
-    }>
-}>
+export type AllCategoriesQueryResult = Array<never>
 // Variable: allStyleUpsQuery
 // Query: *[_type == "styleUp" && !(_id in path("drafts.**"))]{  _id,  title,    coverImage{      alt,      ...,      asset->,    },}
 export type AllStyleUpsQueryResult = Array<{
@@ -651,12 +731,13 @@ export type AllStyleUpsQueryResult = Array<{
 import '@sanity/client'
 declare module '@sanity/client' {
     interface SanityQueries {
-        '\n  *[_type == "home"][0]{\n    _id,\n    _type,\n    overview,\n    showcaseProjects[]{\n      _key,\n      ...@->{\n        _id,\n        _type,\n        coverImage,\n        overview,\n        "slug": slug.current,\n        tags,\n        title,\n      }\n    },\n    title,\n  }\n': HomePageQueryResult
+        '\n  *[_type == "home"][0]{\n    _id,\n    _type,\n    overview,\n    title,\n  }\n': HomePageQueryResult
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body,\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult
         '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    client,\n    coverImage,\n    description,\n    duration,\n    overview,\n    site,\n    "slug": slug.current,\n    tags,\n    title,\n  }\n': ProjectBySlugQueryResult
         '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    footer,\n    menuItems[]{\n      _key,\n      ...@->{\n        _type,\n        "slug": slug.current,\n        title\n      }\n    },\n    ogImage,\n  }\n': SettingsQueryResult
         '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult
-        '\n  *[_type == "project" && !(_id in path("drafts.**"))]{\n    _id,\n    _type,\n    featured,\n    title,\n    date,\n    "slug": slug.current,\n    credits[]{\n      role,\n      name,\n      link\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      _key,\n      title,\n      url\n    },\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },\n    gallery[]{\n      _key,\n      "imageUrl": asset->url,\n      caption,\n      alt\n    },\n    "categories": categories[]->{_id, title},\n    "subcategory": subcategory->{\n      _id, \n      title, \n      "parent": parent->{\n        _id,\n        title\n      }\n    },\n    description[]\n  } | order(date desc)': AllProjectsQueryResult
+        '\n  *[_type == "project" && !(_id in path("drafts.**"))]{\n    _id,\n    _type,\n    featured,\n    title,\n    client,\n    date,\n    "slug": slug.current,\n    credits[]{\n      role,\n      name,\n      link\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      _key,\n      title,\n      url\n    },\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },\n    gallery[]{\n      _key,\n      "imageUrl": asset->url,\n      caption,\n      alt\n    },\n    "categories": categories[]->{_id, title},\n    "subcategory": subcategory->{\n      _id, \n      title, \n      "parent": parent->{\n        _id,\n        title\n      }\n    },\n    description[]\n  } | order(date desc)': AllProjectsQueryResult
+        '\n  *[_type == "project" && featured == true && !(_id in path("drafts.**"))]\n  | order(orderRank asc, date desc){\n    _id,\n    _type,\n    featured,\n    title,\n    client,\n    date,\n    "slug": slug.current,\n    credits[]{\n      role,\n      name,\n      link\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      _key,\n      title,\n      url\n    },\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },\n    gallery[]{\n      _key,\n      "imageUrl": asset->url,\n      caption,\n      alt\n    },\n    "categories": categories[]->{_id, title},\n    "subcategory": subcategory->{\n      _id, \n      title, \n      "parent": parent->{\n        _id,\n        title\n      }\n    },\n    description[]\n  }': FeaturedProjectsQueryResult
         '\n  *[_type == "category" && !(_id in path("drafts.**"))]{\n    _id,\n    title,\n    "referenceCount": count(*[_type in ["project"] && references(^._id)]),\n    "subcategories": *[_type == "subcategory" && parent._ref == ^._id]{\n      _id,\n      title,\n      "referenceCount": count(*[_type in ["project"] && references(^._id)])\n    }\n  }\n': AllCategoriesQueryResult
         '\n*[_type == "styleUp" && !(_id in path("drafts.**"))\n]{\n  _id,\n  title,\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },}\n': AllStyleUpsQueryResult
     }

@@ -10,17 +10,19 @@ import project from '@/sanity/schemas/documents/project'
 import about from '@/sanity/schemas/singletons/about'
 import home from '@/sanity/schemas/singletons/home'
 import contact from './sanity/schemas/singletons/contact'
-import category from './sanity/schemas/taxonomy/category'
+import projectType from './sanity/schemas/taxonomy/projectType'
 import {visionTool} from '@sanity/vision'
 import {defineConfig} from 'sanity'
 // import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 // import {presentationTool} from 'sanity/presentation'
 import {structureTool} from 'sanity/structure'
 import galleryImage from './sanity/schemas/objects/galleryImage'
-import subcategory from './sanity/schemas/taxonomy/subcategory'
 import styleup from './sanity/schemas/documents/styleup'
 import post from './sanity/schemas/documents/post'
 import { customPageStructure } from './sanity/deskStructure'
+import personality from './sanity/schemas/documents/personality'
+import brand from './sanity/schemas/documents/brand'
+import publication from './sanity/schemas/documents/publication'
 
 const title =
   process.env.NEXT_PUBLIC_SANITY_PROJECT_TITLE
@@ -41,16 +43,18 @@ export default defineConfig({
       project,
       styleup,
       post,
+      personality,
+      brand,
+      publication,
       // Objects
       galleryImage,
       // Taxonomy
-      category,
-      subcategory
+      projectType
     ],
   },
   plugins: [
     structureTool({
-      structure: customPageStructure,
+      structure: customPageStructure
     }),
     // presentationTool({
     //   resolve,

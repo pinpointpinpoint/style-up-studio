@@ -15,12 +15,13 @@ export default defineType({
 
     defineField({
       name: 'parent',
-      title: 'Parent Category',
+      title: 'Project Type',
       type: 'reference',
       to: [{ type: 'category' }],
       validation: (rule) => rule.required(),
     }),
   ],
+  
   preview: {
     select: {
       title: 'title',
@@ -29,7 +30,7 @@ export default defineType({
     prepare({ title, parent }) {
       return {
         title,
-        subtitle: parent ? `Subcategory of ${parent}` : '',
+        subtitle: parent ? `${parent}` : '',
       }
     },
   },

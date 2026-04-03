@@ -1,83 +1,11 @@
 'use client';
 
-import {OptimisticSortOrder} from '@/components/OptimisticSortOrder'
-import type {SettingsQueryResult} from '@/sanity.types'
-import {studioUrl} from '@/sanity/lib/api'
-import {resolveHref} from '@/sanity/lib/utils'
-import {createDataAttribute, stegaClean} from 'next-sanity'
-import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import {AnimatePresence, motion} from 'framer-motion';
+import { useState } from 'react'
+import { SlideOutMenu } from './SlideOutMenu';
 
 // interface NavbarProps {
 //   data: SettingsQueryResult
 // }
-
-interface SlideOutMenuProps {
-  isOpen: boolean
-  onClose: () => void
-  children: React.ReactNode
-  direction?: 'left' | 'right'  // default to right
-}
-
-// function SlideOutMenu({ isOpen, children}: SlideOutMenuProps) {
-//   return (
-//     <div className={`top-0 ${isOpen ? 'left-0' : 'left-[100vw]'} absolute z-100 bg-white h-full w-screen p-4 flex items-center justify-between`}>
-//       {children}    
-//     </div>
-//   )
-// }
-
-export function SlideOutMenu({ isOpen, onClose, children, direction}: SlideOutMenuProps) {
-  const initialX = direction === 'right' ? '100%' : '-100%';
-  const menuRef = useRef<HTMLDivElement>(null);
-
-
-
-  
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-  if (!isOpen) return;
-  const handleClickOutside = (e: MouseEvent) => {
-    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  };
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => document.removeEventListener('mousedown', handleClickOutside);
-}, [isOpen, onClose]);
-
-
-
-
-  return (
-    <AnimatePresence>
-      { isOpen && 
-        <motion.div
-          ref={menuRef}
-          initial={{ x: initialX }}
-          animate={{ x: 0 }}
-          exit={{ x: initialX }}
-          transition={{ type: 'tween', duration: 0.3 }}
-          className={`nav__item-content ${
-            direction === 'left' ? 'left-0' : 'right-0'
-          }`}
-        >
-            {children}
-        </motion.div>
-    }
-    </AnimatePresence>
-  )
-}
-
 
 export function Navbar(/*props: NavbarProps*/) {
     const [isCollapsed, setIsCollapsed] = useState<Boolean>(false);
@@ -85,16 +13,6 @@ export function Navbar(/*props: NavbarProps*/) {
   const collapseNav = () => {
     setIsCollapsed(true);
   }
-
-  // const {data} = props
-  // const dataAttribute =
-  //   data?._id && data?._type
-  //     ? createDataAttribute({
-  //         baseUrl: studioUrl,
-  //         id: data._id,
-  //         type: data._type,
-  //       })
-  //     : null
 
   const [openMenu, setOpenMenu] = useState<'about' | 'contact' | null>(null);
 
@@ -108,13 +26,13 @@ export function Navbar(/*props: NavbarProps*/) {
         <button onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}><h1>ABOUT</h1></button>
         <SlideOutMenu isOpen={openMenu === 'about'} direction="left" onClose={closeMenu}>
           <div className='flex justify-between w-full'>
-              <div className='text-[12px] w-1/2 text-left'>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore, at. Voluptas reiciendis fugiat voluptatum iusto omnis.</div>
+              <p className='text-[12px] flex items-center w-1/2 text-left'>
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore, at. Voluptas reiciendis fugiat voluptatum iusto omnis.</p>
               <button onClick={closeMenu}><h1>ABOUT</h1></button>
           </div>
         </SlideOutMenu>
       </div>
-      <a href="/"><img className='nav__logo' alt="Style Up Studio" width="400px" src="logo2.svg"/></a>
+      <a href="/"><img className='nav__logo' alt="Style Up Studio" width="150px" src="minimal_logo.svg"/></a>
       <div className='nav__item'>
         <button onClick={() => setOpenMenu(openMenu === 'contact' ? null : 'contact')}><h1>CONTACT</h1></button>
         <SlideOutMenu isOpen={openMenu === 'contact'} direction="right" onClose={closeMenu}>

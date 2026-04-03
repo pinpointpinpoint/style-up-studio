@@ -1,50 +1,67 @@
-import {StructureBuilder} from 'sanity/structure'
-import { ConfettiIcon, EnvelopeIcon, FolderIcon, HomeIcon, ProjectsIcon, StarFilledIcon, UserIcon } from '@sanity/icons'
+import { StructureBuilder } from 'sanity/structure'
+import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
+import { 
+  CogIcon,
+  ConfettiIcon, EnvelopeIcon, FolderIcon, HomeIcon, ProjectsIcon, StarFilledIcon, UserIcon 
+} from '@sanity/icons'
 
-export const customPageStructure = (S: StructureBuilder) => {
+export const customPageStructure = (S: StructureBuilder, context: any) => {
   return S.list()
     .title('Content')
     .items([
-      // Section 1: Home, About, Contact
       S.listItem()
-        .title('Home')
-        .icon(HomeIcon) // <--- add this line
+        .title('Settings')
+        .icon(CogIcon)
         .child(S.document().schemaType('home').documentId('home')),
+      S.divider(),
       S.listItem()
         .title('About')
-        .icon(UserIcon) // <--- add this line
+        .icon(UserIcon)
         .child(S.document().schemaType('about').documentId('about')),
       S.listItem()
         .title('Contact')
-        .icon(EnvelopeIcon) // <--- add this line
+        .icon(EnvelopeIcon)
         .child(S.document().schemaType('contact').documentId('contact')),
-
-      S.divider(), // First divider
-
-      // Section 2: Project, Style Up, Remix Wall
+      S.divider(),
+      orderableDocumentListDeskItem({
+        type: 'project',
+        title: 'Featured Projects',
+        icon: StarFilledIcon,
+        filter: '_type == "project" && featured == true',
+        S,
+        context,
+      }),
       S.listItem()
-        .title('Project')
-        .icon(ProjectsIcon) // <--- add this line
+        .title('All Projects')
+        .icon(ProjectsIcon)
         .child(S.documentTypeList('project').title('Projects')),
       S.listItem()
-        .title('Style Up')
-        .icon(StarFilledIcon) // <--- add this line
-        .child(S.documentTypeList('styleUp').title('Style Up')),
+        .title('Style Ups')
+        .icon(StarFilledIcon)
+        .child(S.documentTypeList('styleUp').title('Style Ups')),
+
       S.listItem()
         .title('Remix Wall')
-        .icon(ConfettiIcon) // <--- add this line
+        .icon(ConfettiIcon)
         .child(S.documentTypeList('post').title('Remix Wall')),
 
-      S.divider(), // Second divider
+      S.divider(),
 
-      // Section 3: Category / Subcategory
       S.listItem()
-        .title('Category')
-        .icon(FolderIcon) // <--- add this line
-        .child(S.documentTypeList('category').title('Categories')),
+        .title('Project Type')
+        .icon(FolderIcon)
+        .child(S.documentTypeList('projectType').title('Project Type')),
       S.listItem()
-        .title('Subcategory')
-        .icon(FolderIcon) // <--- add this line
-        .child(S.documentTypeList('subcategory').title('Subcategories')),
+        .title('Personalities')
+        .icon(FolderIcon)
+        .child(S.documentTypeList('personality').title('Personalities')),
+      S.listItem()
+        .title('Brands')
+        .icon(FolderIcon)
+        .child(S.documentTypeList('brand').title('Brands')),
+      S.listItem()
+        .title('Publications')
+        .icon(FolderIcon)
+        .child(S.documentTypeList('publication').title('Publications')),
     ])
 }

@@ -58,18 +58,18 @@ export default defineType({
       ],
       validation: (rule) => rule.max(155).required(),
     }),
-    defineField({
-      name: 'featuredProjects',
-      title: 'Featured Projects',
-      description: 'These are the projects that will appear first on your home page.',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'reference',
-          to: [{type: 'project'}],
-        }),
-      ],
-    }),
+    // defineField({
+    //   name: 'featuredProjects',
+    //   title: 'Featured Projects',
+    //   description: 'These are the projects that will appear first on your home page.',
+    //   type: 'array',
+    //   of: [
+    //     defineArrayMember({
+    //       type: 'reference',
+    //       to: [{type: 'project'}],
+    //     }),
+    //   ],
+    // }),
   ],
   preview: {
     select: {
@@ -77,8 +77,8 @@ export default defineType({
     },
     prepare({title}) {
       return {
-        subtitle: 'Home',
-        title,
+        subtitle: 'Settings',
+        title: 'Settings',
       }
     },
   },

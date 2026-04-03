@@ -1,13 +1,83 @@
 import {ProjectsIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
+import {orderRankField} from '@sanity/orderable-document-list'
+
+// FINALIZED WRITE DOCS FOR IT
 
 export default defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
   icon: ProjectsIcon,
-  // liveEdit: true,
+
+  fieldsets: [
+    {
+      name: 'basic', 
+      title: 'Basic Info'
+    },
+    {
+      name: 'collaborators',
+      title: 'Collaborators',
+      description: 'Add any personalities, publications, or brands that collaborated on this project.',
+      options: {
+        collapsible: true, 
+        collapsed: true
+      },
+    },
+    {
+      name: 'media', 
+      title: 'Media',
+      description: 'Add images and videos for this project. At least one media item is required.',
+    },
+    {
+      name: 'content', 
+      title: 'Content'
+    }
+  ],
+
   fields: [
+    defineField({
+      name: 'title',
+      title: 'Title*',
+      type: 'string',
+      validation: (rule) => rule.required(),
+      fieldset: 'basic',
+    }),
+    defineField({
+      name: 'client',
+      title: 'Client*',
+      type: 'string',
+      validation: (rule) => rule.required(),
+      fieldset: 'basic',
+    }),
+    defineField({
+      name: 'date',
+      title: 'Project Date*',
+      description: 'Only the year will be displayed on the site, but you can provide a full date for better organization and future flexibility.',
+      type: 'date',
+      validation: (rule) => rule.required(),
+      options: {
+        dateFormat: 'YYYY-MM-DD',
+      },
+      fieldset: 'basic',
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug*',
+      description: 'The slug is the URL path for this project page. It will be auto-generated from the title but can be customized if needed.',
+      type: 'slug',
+      options: {source: 'title', maxLength: 96},
+      validation: (rule) => rule.required(),
+      fieldset: 'basic',
+    }),
+    defineField({
+      name: 'projectType',
+      title: 'Project Type*',
+      type: 'reference',
+      to: [{type: 'projectType'}],
+      validation: (rule) => rule.required(),
+      fieldset: 'basic',
+    }),
     defineField({
       name: 'featured',
       title: 'Featured Project',
@@ -15,110 +85,120 @@ export default defineType({
       options: {
         layout: 'checkbox',
       },
-      initialValue: false
+      initialValue: false,
+      fieldset: 'basic',
     }),
     defineField({
-      name: 'title',
-      title: 'Title',
-      description: 'This field is the title of your project.',
-      type: 'string',
-      validation: (rule) => rule.required(),
+      name: 'personalities',
+      title: 'Personalities',
+      type: 'array',
+      validation: (rule) => rule.unique(),
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'personality'}],
+        },
+      ],
+      fieldset: 'collaborators',
     }),
     defineField({
-      name: 'date',
-      title: 'Project Date',
-      type: 'date',
-      validation: (rule) => rule.required(),
-      options: {
-        dateFormat: 'YYYY-MM-DD',
-      },
+      name: 'publications',
+      title: 'Publications',
+      type: 'array',
+      validation: (rule) => rule.unique(),
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'publication'}],
+        },
+      ],
+      fieldset: 'collaborators',
     }),
     defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: {source: 'title', maxLength: 96},
-      validation: (rule) => rule.required(),
+      name: 'brands',
+      title: 'Brands',
+      type: 'array',
+      validation: (rule) => rule.unique(),
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'brand'}],
+        },
+      ],
+      fieldset: 'collaborators',
     }),
     defineField({
-      name: 'credits',
-      title: 'Credits',
+      name: 'gallery',
+      title: 'Gallery',
       type: 'array',
       of: [
         defineArrayMember({
-          type: 'object',
-          name: 'credit',
-          title: 'Credit',
+          type: 'image',
+          options: {hotspot: true},
           fields: [
-            defineField({
-              name: 'role',
-              title: 'Role / Title',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'name',
-              title: 'Name',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'link',
-              title: 'External Link (optional)',
-              type: 'url',
-            }),
+            {
+              name: 'caption',
+              title: 'Caption',
+              type: 'string'
+            }
           ],
-          preview: {
-            select: {
-              title: 'role',
-              subtitle: 'name',
-            },
-          },
         }),
       ],
-    }),
+      options: {layout: 'grid'},
+      validation: (rule) =>
+        rule.custom((_, context) => {
+          const {gallery, videos, videoUrls} = context.document as {
+            gallery?: unknown[]
+            videos?: unknown[]
+            videoUrls?: unknown[]
+          }
 
-    // ------------------------------------------------------------
-    // ⭐ MULTIPLE VIDEO FILES (clean + structured)
-    // ------------------------------------------------------------
+          return [gallery, videos, videoUrls].some(
+            (field) => Array.isArray(field) && field.length > 0,
+          )
+            ? true
+            : 'Add at least one gallery image, uploaded video, or video URL'
+        }),
+      fieldset: 'media',
+    }),
     defineField({
       name: 'videos',
       title: 'Project Videos',
       type: 'array',
       of: [
         defineArrayMember({
-          type: 'object',
-          name: 'video',
-          title: 'Video Upload',
+          type: 'file',
+          title: 'Video File',
+          options: {
+            accept: 'video/mp4',
+            storeOriginalFilename: true,
+          },
           fields: [
-            defineField({
+            {
               name: 'title',
               title: 'Video Title (optional)',
               type: 'string',
-            }),
-            defineField({
-              name: 'file',
-              title: 'Video File',
-              type: 'file',
-              options: {
-                accept: 'video/mp4' 
-              },
-              validation: (Rule) => Rule.required(),
-            }),
+            },
           ],
           preview: {
             select: {
               title: 'title',
-              subtitle: 'file.asset.originalFilename',
+              fileName: 'asset.originalFilename',
+            },
+            prepare({title, fileName}) {
+              return {
+                title: title || fileName || 'Untitled',
+              }
             },
           },
+          validation: (Rule) => Rule.required(),
         }),
       ],
+      options: {
+        sortable: true,
+      },
+      fieldset: 'media',
     }),
-
-    // ------------------------------------------------------------
-    // ⭐ MULTIPLE VIDEO URLS (YouTube, Vimeo, TikTok, etc.)
-    // ------------------------------------------------------------
     defineField({
       name: 'videoUrls',
       title: 'Video URLs',
@@ -142,97 +222,20 @@ export default defineType({
               validation: (Rule) => Rule.required(),
             }),
           ],
-          preview: {
-            select: {
-              title: 'title',
-              subtitle: 'url',
-            },
-          },
         }),
       ],
+      fieldset: 'media',
     }),
-    defineField({
-      name: 'gallery',
-      title: 'Gallery',
-      description: 'Upload multiple images for this project. Bulk upload supported.',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'image',
-          options: {hotspot: true},
-          fields: [
-            {
-              name: 'caption',
-              title: 'Caption',
-              type: 'string',
-            },
-            {
-              name: 'alt',
-              title: 'Alt text',
-              type: 'string',
-              description: 'Alternative text for screenreaders. Falls back on caption if not set',
-            },
-          ],
-        }),
-      ],
-      options: {layout: 'grid'},
-    }),
-
     defineField({
       name: 'coverImage',
-      title: 'Cover Image',
+      title: 'Cover Image*',
       type: 'image',
-      description: 'Choose a cover image from the gallery.',
-      options: { 
-        hotspot: {
-          previews: [
-            {title: 'Landscape', aspectRatio: 16 / 9},
-            {title: 'Portrait', aspectRatio: 3 / 4},
-          ],
-        }
+      options: {
+        hotspot: true,
       },
-      fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
+      fieldset: 'media',
     }),
-  defineField({
-    name: 'categories',
-    title: 'Categories',
-    type: 'array',
-    of: [
-      {
-        type: 'reference',
-        to: [{ type: 'category' }],
-      },
-    ],
-    validation: (rule) => rule.required(),
-  }),
-  defineField({
-  name: 'subcategory',
-  title: 'Subcategory',
-  type: 'reference',
-  to: [{ type: 'subcategory' }],
-  options: {
-    filter: ({ document }) => {
-      // Get all selected category IDs from the categories array
-      const doc = document as { categories?: { _ref: string }[] }
-
-      const categoryIds = doc?.categories?.map((c: any) => c._ref) || []
-
-      if (categoryIds.length > 0) {
-        return {
-          filter: 'parent._ref in $categoryIds',
-          params: { categoryIds },
-        }
-      }
-
-      // Return empty if no category is selected
-      return {
-        filter: '_id == $none',
-        params: { none: 'none' },
-      }
-    },
-  },
-}),
     defineField({
       name: 'description',
       title: 'Project Description',
@@ -253,16 +256,92 @@ export default defineType({
           styles: [],
         }),
       ],
+      fieldset: 'content',
     }),
+    defineField({
+      name: 'credits',
+      title: 'Credits',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'credit',
+          title: 'Credit',
+          fields: [
+            defineField({
+              name: 'role',
+              title: 'Role',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'name',
+              title: 'Name',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'link',
+              title: 'External Link (optional)',
+              type: 'url',
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'role',
+              subtitle: 'name',
+            },
+          },
+        }),
+      ],
+      fieldset: 'content',
+    }),
+    orderRankField({type: 'project'}),
   ],
 
   preview: {
     select: {
       title: 'title',
       media: 'coverImage',
+      date: 'date',
+      client: 'client',
     },
-    prepare({title, media}) {
-      return {title, media, subtitle: 'Project'}
+
+    prepare({title, media, date, client}) {
+      const dateObj = date ? new Date(date) : null
+
+      let subtitle = ''
+
+      if (dateObj) {
+        subtitle = dateObj.toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        })
+
+        if (client) {
+          subtitle += ` • ${client}`
+        }
+      } else {
+        subtitle = client
+      }
+      return {
+        title,
+        media,
+        subtitle,
+      }
     },
   },
+
+  orderings: [
+    {
+      title: 'Project Date, newest first',
+      name: 'dateDesc',
+      by: [{field: 'date', direction: 'desc'}],
+    },
+    {
+      title: 'Project Date, oldest first',
+      name: 'dateAsc',
+      by: [{field: 'date', direction: 'asc'}],
+    },
+  ],
 })

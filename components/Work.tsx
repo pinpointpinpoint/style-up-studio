@@ -1,19 +1,13 @@
 'use client'
 
-import { Category, Project, Video, VideoUrls } from '@/types'
 import { FC, useEffect, useState, useMemo, useRef, useCallback } from 'react'
-import Thumbnail from './Thumbnail'
-import { Image as ImageType } from 'sanity'
-import FilterMenu from './FilterMenu'
-import ProjectDetails from './ProjectDetails'
-import Modal from './Modal'
 import Image from 'next/image'
-import ReactPlayer from 'react-player'
-import VideoPlayer from './VideoPlayer'
-import { getYouTubeId } from '@/sanity/lib/utils'
-
-//  TO DO SOMETHING WEIRD IS HAPPENING WITH CLICK AND HOVERING ON THUMBNAILS
-// SHOWING PROJ DETAILS, DOUBLE CHECK THESE 
+import Thumbnail from './Thumbnail'
+import Modal from './Modal'
+import { Sidebar } from './Sidebar/Sidebar'
+import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
+import { Category, Project } from '@/types'
+import '@vidstack/react/player/styles/base.css'
 
 interface WorkProps {
   projects: Project[] | null
@@ -21,107 +15,140 @@ interface WorkProps {
 }
 
 export const Work: FC<WorkProps> = ({ projects, categories }) => {
-  type ImageAsset = {
-    kind: string
-    value: ImageType // replace with your actual image type
-  }
-
-  type VideoUrlAsset = {
-    kind: string
-    value: VideoUrls
-  }
-
-  type VideoAsset = {
-    kind: string
-    value: Video // replace with your actual video type
-  }
-
-  type ProjectAsset = ImageAsset | VideoUrlAsset | VideoAsset
-
+  // -------------------------
+  // Refs
+  // -------------------------
   const targetRef = useRef<null | HTMLVideoElement>(null)
   const sliderRef = useRef<HTMLDivElement>(null)
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
+
+  // -------------------------
+  // State
+  // -------------------------
+  const [localProjects, setLocalProjects] = useState<Project[]>(projects || [])
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [rotations, setRotations] = useState<Record<string, number>>({})
   const [isLocked, setIsLocked] = useState(false)
   const [hoveredCategoryId, setHoveredCategory] = useState<string>()
-  const [filter, setFilter] = useState<{
-    category: string
-    subcategories: string[]
-  }>({
-    category: 'featured',
-    subcategories: [],
-  })
+  const [filter, setFilter] = useState({ category: 'featured', subcategories: [] as string[] })
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalData, setModalData] = useState<any>(null)
 
-  const staticCategories: Category[] = [
+  // -------------------------
+  // Derived Data
+  // -------------------------
+  const displayedProject = activeProject ?? hoveredProject
+
+  const staticCategories: Category[] = useMemo(() => [
     {
       _id: 'featured',
       title: 'Featured',
       subcategories: [],
-      referenceCount: projects?.filter((proj) => proj.featured).length || 0,
+      referenceCount: projects?.filter((p) => p.featured).length || 0,
     },
-    { _id: 'all', title: 'All', subcategories: [], referenceCount: projects?.length || 0 },
-  ]
+    {
+      _id: 'all',
+      title: 'All',
+      subcategories: [],
+      referenceCount: projects?.length || 0,
+    },
+  ], [projects])
 
-  const allCategories = useMemo(() => {
-    return [...staticCategories, ...categories]
-  }, [categories, projects])
-
-  const displayedProject = activeProject ?? hoveredProject;
+  const allCategories = useMemo(() => [...staticCategories, ...(categories || [])], [categories, staticCategories])
 
   const filteredProjects = useMemo(() => {
-    if (!projects) return []
+    if (!localProjects.length) return []
 
-    // Featured
-    if (filter.category === 'featured') {
-      return projects.filter((p) => p.featured)
-    }
+    if (filter.category === 'featured') return localProjects.filter((p) => p.featured)
+    if (filter.category === 'all') return localProjects
 
-    // All
-    if (filter.category === 'all') {
-      return projects
-    }
-
-    return projects.filter((project) => {
+    return localProjects.filter((project) => {
       const matchesCategory = project.categories?.some((cat) => cat._id === filter.category)
-
       const matchesSubcategories =
-        filter.subcategories?.length === 0 ||
-        (project.subcategory && filter.subcategories?.includes(project.subcategory._id))
-
+        filter.subcategories.length === 0 ||
+        (project.subcategory && filter.subcategories.includes(project.subcategory._id))
       return matchesCategory && matchesSubcategories
     })
-  }, [projects, filter])
+  }, [localProjects, filter])
 
-  // for testing
+  // -------------------------
+  // Handlers
+  // -------------------------
+  const handleHover = useCallback((project: Project) => {
+    if (!isLocked) setHoveredProject(project)
+  }, [isLocked])
+
+  const handleLeave = useCallback(() => {
+    if (!isLocked) setHoveredProject(null)
+  }, [isLocked])
+
+  const handleClick = (project: Project) => {
+    setActiveProject(project)
+    setHoveredProject(null)
+    setIsLocked(true)
+  }
+
+  const handlePreviewClick = (playingId: string) => {
+    setPlayingVideoId(playingId)
+    targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }
+
+  const openModal = (data: any) => {
+    setModalData(data)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalData(null)
+    setModalOpen(false)
+  }
+
+  const renderAsset = (asset: any) => {
+    switch (asset.kind) {
+      case 'image':
+        return <Image key={asset.value._key} src={asset.value.image} alt={asset.value.alt} width={600} height={400} className="rounded-lg" />
+      case 'videoUrl':
+      case 'video':
+        return <VideoPlayer key={asset.value._key} asset={asset} title={asset.value.title} />
+      default:
+        return null
+    }
+  }
+
+  // -------------------------
+  // Effects
+  // -------------------------
+
+  // Sync localProjects with prop
   useEffect(() => {
-    console.log(`displayed: ${displayedProject}`)
-    console.log(`active: ${activeProject}`)
-    console.log(`hover:${hoveredProject}`)
-  }, [activeProject, hoveredProject, displayedProject])
+    setLocalProjects(projects || [])
+  }, [projects])
 
+  // Click outside to unlock active project
   useEffect(() => {
     if (!isLocked || !activeProject) return
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       const activeCard = document.querySelector('.work__project-card--active')
-      const projectDetails = document.querySelector('.work__project-details')
-      const modal = document.querySelector('.modal__container');
+      const projectDetails = document.querySelector('.ProjectDetails-module__ESnuvG__container')
+      const modal = document.querySelector('.modal__container')
 
-      if (activeCard && !activeCard.contains(target) && !projectDetails?.contains(target) && !modal?.contains(target)) {
+      if (activeCard && !activeCard.contains(target) &&
+          !projectDetails?.contains(target) &&
+          !modal?.contains(target)) {
         setActiveProject(null)
-        setIsLocked(false)
         setHoveredProject(null)
+        setIsLocked(false)
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isLocked, activeProject])
 
-
-  // CHECK THIS FUNCTION
+  // Slider drag scrolling
   useEffect(() => {
     const slider = sliderRef.current
     if (!slider) return
@@ -159,78 +186,6 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
     }
   }, [])
 
-  const handleHover = useCallback(
-    (project: Project) => {
-      if (isLocked) return
-      setHoveredProject(project)
-    },
-    [isLocked],
-  )
-
-  const handleLeave = useCallback(() => {
-    if (isLocked) return
-    setHoveredProject(null)
-  }, [isLocked])
-
-
-  const handleClick = (project: Project) => {
-    setActiveProject(project)
-    setHoveredProject(null)
-    setIsLocked(true)
-  }
-
-  const handlePreviewClick = (playingId: string) => {
-    setPlayingVideoId(playingId)
-
-    if (targetRef.current) {
-      // 3. Use scrollIntoView() to scroll to the element
-      targetRef.current.scrollIntoView({
-        behavior: 'smooth', // Optional: adds a smooth scrolling animation
-        block: 'end', // Optional: aligns the top of the element to the top of the viewport
-      })
-    }
-  }
-
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalData, setModalData] = useState<any>(null)
-
-  const openModal = (data: any) => {
-    setModalData(data)
-    setModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setModalOpen(false)
-    setModalData(null)
-  }
-
-
-  const renderAsset = (asset: any) => {
-    switch (asset.kind) {
-      case 'image':
-        return <Image key={asset.value._key} src={asset.value.image} alt={asset.value.alt} />
-      case 'videoUrl':
-        return (
-          <ReactPlayer
-            key={asset.value._key}
-            light
-            controls
-            playing={playingVideoId === asset.value._key}
-            playIcon={
-              <div style={{ background: 'white', padding: '3px 15px', border: '1px solid black' }}>
-                Play
-              </div>
-            }
-            onClickPreview={() => setPlayingVideoId(asset.value._key)}
-            src={`https://www.youtube.com/watch?v=${getYouTubeId(asset.value.url)}`}
-          />
-        )
-      case 'video':
-        return <VideoPlayer key={asset.value._key} videoSrc={asset.value.fileUrl} />
-    }
-  }
-
-
   return (
     <div className="work">
       <div className="work__projects">
@@ -247,31 +202,19 @@ export const Work: FC<WorkProps> = ({ projects, categories }) => {
           />
         ))}
       </div>
-      <aside className="work__sidebar">
-        <div>
-          <div className="work__sidebar-title">FILTER</div>
-          <FilterMenu
-            categories={allCategories}
-            filter={filter}
-            hoveredCategoryId={hoveredCategoryId}
-            setHoveredCategory={setHoveredCategory}
-            setFilter={setFilter}
-          />
-        </div>
-        {displayedProject && (
-          <div>
-            <div className="work__sidebar-title">PROJECT INFO</div>
-            <ProjectDetails
-              displayedProject={displayedProject}
-              onOpenModal={openModal}
-              renderAsset={renderAsset}
-            />
-          </div>
-        )}
-      </aside>
-      {modalOpen && (
-        <Modal onClose={closeModal} data={modalData} renderAsset={renderAsset}></Modal>
-      )}
+
+      <Sidebar
+        displayedProject={displayedProject}
+        allCategories={allCategories}
+        filter={filter}
+        hoveredCategoryId={hoveredCategoryId}
+        setHoveredCategory={setHoveredCategory}
+        setFilter={setFilter}
+        openModal={openModal}
+        renderAsset={renderAsset}
+      />
+
+      {modalOpen && <Modal onClose={closeModal} data={modalData} renderAsset={renderAsset} />}
     </div>
   )
 }

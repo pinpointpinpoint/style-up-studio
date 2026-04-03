@@ -1,8 +1,8 @@
 import {defineType, defineField} from 'sanity'
 
 export default defineType({
-  name: 'category',
-  title: 'Category',
+  name: 'projectType',
+  title: 'Project Type',
   type: 'document',
   // liveEdit: true,
   fields: [

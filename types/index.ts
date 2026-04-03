@@ -90,3 +90,16 @@ export interface Subcategory {
   parent: SingleCategory,
   referenceCount: number
 }
+
+export type Filter = {
+  category: string
+  subcategories: string[]
+}
+
+export type SanityAsset = {
+  value: {
+    url?: string;      
+    fileUrl?: string;  
+    poster?: string; 
+  };
+}

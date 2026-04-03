@@ -5,18 +5,6 @@ export const homePageQuery = defineQuery(`
     _id,
     _type,
     overview,
-    showcaseProjects[]{
-      _key,
-      ...@->{
-        _id,
-        _type,
-        coverImage,
-        overview,
-        "slug": slug.current,
-        tags,
-        title,
-      }
-    },
     title,
   }
 `)
@@ -75,6 +63,7 @@ export const allProjectsQuery = defineQuery(`
     _type,
     featured,
     title,
+    client,
     date,
     "slug": slug.current,
     credits[]{
@@ -114,6 +103,55 @@ export const allProjectsQuery = defineQuery(`
     },
     description[]
   } | order(date desc)`
+)
+
+export const featuredProjectsQuery = defineQuery(`
+  *[_type == "project" && featured == true && !(_id in path("drafts.**"))]
+  | order(orderRank asc, date desc){
+    _id,
+    _type,
+    featured,
+    title,
+    client,
+    date,
+    "slug": slug.current,
+    credits[]{
+      role,
+      name,
+      link
+    },
+    videos[]{
+      _key,
+      title,
+      "fileUrl": file.asset->url
+    },
+    videoUrls[]{
+      _key,
+      title,
+      url
+    },
+    coverImage{
+      alt,
+      ...,
+      asset->,
+    },
+    gallery[]{
+      _key,
+      "imageUrl": asset->url,
+      caption,
+      alt
+    },
+    "categories": categories[]->{_id, title},
+    "subcategory": subcategory->{
+      _id, 
+      title, 
+      "parent": parent->{
+        _id,
+        title
+      }
+    },
+    description[]
+  }`
 )
 
 // export const allCategoriesQuery = defineQuery(`

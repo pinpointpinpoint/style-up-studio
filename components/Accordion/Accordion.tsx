@@ -5,6 +5,7 @@ import AccordionItem from './AccordionItem';
 import { Work } from '../Work';
 import { StyleUps } from '../StyleUps';
 import styles from './Accordion.module.css';
+import { useAccordionQuery } from '@/hooks/useAccordionQuery';
 
 type Section = {
   id: string;
@@ -18,8 +19,10 @@ interface AccordionProps {
 }
 
 export default function Accordion({ projects, categories, styleUps }: AccordionProps) {
-  const [open, setOpen] = useState<"work" | "style" | null>("work");
+  // const [open, setOpen] = useState<"work" | "style" | null>("work");
+  const [open, setOpen] = useAccordionQuery("work");
   const canCloseWork = true;
+
 
   const sections: Section[] = [
     { id: '1', title: 'WORK' },
@@ -93,7 +96,11 @@ export default function Accordion({ projects, categories, styleUps }: AccordionP
     }
   };
 
+
+
   const handleClick = (id: "work" | "style") => {
+    setOpen(open === id ? null : id);
+
     if (id === "style") {
       setOpen("style");
       return;
@@ -107,6 +114,18 @@ export default function Accordion({ projects, categories, styleUps }: AccordionP
       setOpen("work");
     }
   };
+
+  const getTitle = (id: "work" | "style", base: string) => {
+    // if both closed → both up arrows
+    if (open === null) return `${base} ↑`;
+
+    // if this one is open → down arrow
+    if (open === id) return `${base} ↓`;
+
+    // otherwise closed → up arrow
+    return `${base} ↑`;
+  };
+
 
   return (
 
@@ -122,7 +141,7 @@ export default function Accordion({ projects, categories, styleUps }: AccordionP
         }}
       >
         <AccordionItem
-          title="WORK"
+          title={`WORK ${open === null ? "↑" : open === "work" ? "" : "↓"}`}
           isOpen={open === "work"}
           onClick={() => handleClick("work")}
           isBottom={false}
@@ -132,7 +151,7 @@ export default function Accordion({ projects, categories, styleUps }: AccordionP
         </AccordionItem>
 
         <AccordionItem
-          title="STYLE UPS"
+          title={open === "style" ? "STYLE UPS" : "STYLE UPS ↑"}
           isOpen={open === "style"}
           onClick={() => handleClick("style")}
           isBottom={true}

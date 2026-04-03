@@ -1,19 +1,15 @@
 import '@/styles/index.css'
-import { CustomPortableText } from '@/components/CustomPortableText'
 import { Navbar } from '@/components/Navbar'
-import IntroTemplate from '@/intro-template'
 import { sanityFetch, SanityLive } from '@/sanity/lib/live'
 import { homePageQuery, settingsQuery } from '@/sanity/lib/queries'
 import { urlForOpenGraphImage } from '@/sanity/lib/utils'
 import type { Metadata, Viewport } from 'next'
-import { toPlainText, type PortableTextBlock } from 'next-sanity'
+import { toPlainText } from 'next-sanity'
 import { VisualEditing } from 'next-sanity/visual-editing'
 import { draftMode } from 'next/headers'
 import { handleError } from './client-functions'
 import { DraftModeToast } from './DraftModeToast'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-
-
 
 export async function generateMetadata(): Promise<Metadata> {
   const [{ data: settings }, { data: homePage }] = await Promise.all([
@@ -25,11 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
     // @ts-expect-error - @TODO update @sanity/image-url types so it's compatible
     settings?.ogImage,
   )
+
   return {
     title: homePage?.title
       ? {
         template: `%s | ${homePage.title}`,
-        default: homePage.title || 'Personal website',
+        default: homePage.title,
       }
       : undefined,
     description: homePage?.overview ? toPlainText(homePage.overview) : undefined,

@@ -1,0 +1,188 @@
+.container {
+    /* flex: 0 0 auto; */
+    border-top: 1px solid black;
+    min-height: 0;
+    position: relative;
+    height: 100%;
+
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    overflow: auto;
+  }
+
+.title {
+    padding: 3px 30px;
+    border-bottom: solid 1px black;
+}
+
+.body {
+    height: fit-content;
+}
+
+.details {
+  position: absolute;
+  background-color: white;
+  top: 56px;
+  max-height: fit-content;
+  height: calc(100% - 56px);
+  overflow: auto;
+  padding: 6px 30px 6px 30px;
+  outline: 1px solid black;
+  width: 100%;
+  z-index: 999;
+  /* margin-right: 15px; */
+}
+
+
+/* Webkit browsers (Chrome, Edge, Safari) */
+.details::-webkit-scrollbar,
+.container::-webkit-scrollbar {
+  width: 10px; /* thickness */
+  background: transparent; /* hide track background */
+}
+
+.details::-webkit-scrollbar-thumb,
+.container::-webkit-scrollbar-thumb  {
+  background-color: black; /* thumb color */
+  padding: 2px;
+  border: solid 2px white;
+  border-radius: 0; /* not rounded */
+}
+
+.details::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 2px; /* top/bottom space */
+}
+
+
+.details p {
+    text-align: justify;
+}
+
+.credits details,
+.description details {
+    border-bottom: solid 1px black;
+}
+
+/* Credits and Description */
+.credits details>summary,
+.description details>summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 3px 30px;
+
+}
+
+/* .credits summary::-webkit-details-marker,
+.description summary::-webkit-details-marker {
+    display: none;
+} */
+
+.credits summary::after,
+.description summary::after {
+    content: '↓';
+}
+
+.credits details[open] summary:after,
+.description details[open] summary:after  {
+    content: ' ↑';
+}
+
+.credits li {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Assets */
+.assets {
+    /* for mobile */
+    /* scroll-snap-type: x mandatory; */
+    /* cursor: grab; */
+    /* scrollbar-width: none; */
+    /* touch-action: pan-y; */
+    padding: 0 30px 30px 30px;
+    gap: 15px;
+    display: flex;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 30px 5px 30px;
+}
+
+/* .work__project-assets-multiple {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+}
+
+.work__project-assets-multiple-count {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 30px 15px 30px;
+} */
+
+/* .assets::-webkit-scrollbar {
+    display: none;
+} */
+
+/* .work__project-assets:active {
+  cursor: grabbing;
+} */
+
+/* .work__project-image {
+  width: 250px;
+  height: auto;
+  display: block;
+  flex: 0 0 auto;
+  for mobile
+  scroll-snap-align: start;
+} */
+
+/* .work__project-image img {
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+} */
+
+/* .work__project-images::after {
+  content: "";
+  pointer-events: none;
+  position: sticky;
+  right: 0;
+  width: 40px;
+  background: linear-gradient(to left, rgba(255,255,255,1), transparent);
+} */
+
+/* .player-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; 
+}
+
+.react-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+} */
+
+
+
+.credits details>summary,
+.description details>summary {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none;     /* IE 10+ */
+  user-select: none;         /* Standard syntax */
+}

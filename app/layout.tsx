@@ -1,4 +1,5 @@
 import './globals.css'
+import "@vidstack/react/player/styles/base.css";
 import {Chivo, Geist, Instrument_Serif, Pinyon_Script} from 'next/font/google'
 
 const body = Chivo({
