@@ -1,72 +1,33 @@
 import {StarFilledIcon} from '@sanity/icons'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'styleUp',
   title: 'Style Up',
   type: 'document',
-  // liveEdit: true,
   icon: StarFilledIcon,
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
-      description: 'This field is the title of your project.',
+      name: 'name',
+      title: 'Name*',
       type: 'string',
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule.required().error('Name is required.'),
     }),
     defineField({
-      name: 'date',
-      title: 'Project Date',
-      type: 'date',
-      validation: (rule) => rule.required(),
-      options: {
-        dateFormat: 'YYYY-MM-DD',
-      },
-    }),
-    defineField({
-      name: 'gallery',
-      title: 'Gallery',
-      description: 'Upload multiple images for this project. Bulk upload supported.',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'image',
-          options: {hotspot: true},
-          fields: [
-            {
-              name: 'caption',
-              title: 'Caption',
-              type: 'string',
-            },
-            {
-              name: 'alt',
-              title: 'Alt text',
-              type: 'string',
-              description: 'Alternative text for screenreaders. Falls back on caption if not set',
-            },
-          ],
-        }),
-      ],
-      options: {layout: 'grid'},
-    }),
-    defineField({
-      name: 'coverImage',
-      title: 'Cover Image',
+      name: 'image',
+      title: 'Image*',
       type: 'image',
-      description: 'Choose a cover image from the gallery.',
       options: {hotspot: true},
-      fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule.required().error('Image is required.'),
     }),
   ],
   preview: {
     select: {
-      title: 'title',
-      media: 'coverImage',
+      name: 'name',
+      media: 'image',
     },
-    prepare({title, media}) {
-      return {title, media, subtitle: 'Style Up'}
+    prepare({name, media}) {
+      return {title: name, media}
     },
   },
 })

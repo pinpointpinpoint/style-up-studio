@@ -1,5 +1,3 @@
-"use client";
-
 import { motion, AnimatePresence } from "framer-motion";
 import styles from './Accordion.module.css';
 import { useState } from "react";

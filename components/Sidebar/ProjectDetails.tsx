@@ -3,7 +3,7 @@ import { PortableText } from 'next-sanity'
 import { Project } from '@/types'
 import styles from "./ProjectDetails.module.css";
 
-const ProjectDetails = ({ displayedProject, onOpenModal, renderAsset }: { displayedProject: Project | null, onOpenModal: any, renderAsset: any }) => {
+const ProjectDetails = ({ displayedProject, renderAsset }: { displayedProject: Project | null, renderAsset: any }) => {
     const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
     const detailsWrapperRef = useRef<HTMLDivElement>(null);
     const [assetsMarginTop, setAssetsMarginTop] = useState(0);
@@ -17,10 +17,6 @@ const ProjectDetails = ({ displayedProject, onOpenModal, renderAsset }: { displa
     ]
 
     const projectAssetCount = allProjectAssets.length
-
-    const handleButtonClick = () => {
-        onOpenModal(allProjectAssets)
-    }
 
     // useEffect(() => {
     //     const updateMargin = () => {
@@ -41,6 +37,7 @@ const ProjectDetails = ({ displayedProject, onOpenModal, renderAsset }: { displa
         <div className={styles.container}>
             <div className={styles.body}>
                 <div className={styles.title}>{displayedProject?.title ? displayedProject.title : 'Title'}</div>
+                <div className={styles.title}>{displayedProject?.client ? displayedProject.client : 'Client'}</div>
                     {displayedProject?.description && (
                         <div className={styles.description}>
                             <details>
@@ -90,6 +87,10 @@ const ProjectDetails = ({ displayedProject, onOpenModal, renderAsset }: { displa
                     <button onClick={handleButtonClick}>[Expand]</button>
                 </div> */}
                 {/* <div className={styles.assets}>{allProjectAssets.map(renderAsset)}</div> */}
+                <div className={styles.asset}></div>
+                <div className={styles.asset}></div>
+                <div className={styles.asset}></div>
+                <div className={styles.asset}></div>
             </div>
         </div>
     )

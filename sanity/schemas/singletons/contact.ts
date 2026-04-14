@@ -1,14 +1,12 @@
-import {EnvelopeIcon} from '@sanity/icons'
-import {defineField, defineType} from 'sanity'
+import { EnvelopeIcon } from '@sanity/icons'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'contact',
   title: 'Contact',
   type: 'document',
   icon: EnvelopeIcon,
-  // liveEdit: true,
   fields: [
-    // Hidden singleton title field
     defineField({
       name: 'title',
       type: 'string',
@@ -16,30 +14,31 @@ export default defineType({
       initialValue: 'Contact',
     }),
     defineField({
-    name: 'email',
-    title: 'Email',
-    type: 'string',
-    validation: (rule) =>
-        rule
-        .required()
-        .email()
-        .error('Please enter a valid email address.'),
+      name: 'email',
+      title: 'Email Address',
+      type: 'string',
+      description: 'Your email will be a clickable link in the Contact section.',
+      validation: (Rule) =>
+        Rule.required()
+          .email()
+          .error('Enter a valid email address.'),
     }),
     defineField({
       name: 'instagram',
       title: 'Instagram',
       type: 'url',
-      validation: (rule) => rule.uri({allowRelative: false}).required(),
-    }),
+      description: 'Full Instagram profile URL. Displays as @username in the Contact section.',
+      validation: (Rule) =>
+        Rule.required()
+          .uri({ allowRelative: false, scheme: ['http', 'https'] })
+          .error('Enter a valid URL starting with https:// or http://.'),
+    })
   ],
+
   preview: {
-    select: {
-      title: 'title',
-    },
-    prepare({title}) {
+    prepare() {
       return {
-        title: title || 'Contact',
-        subtitle: 'Contact Page',
+        title: 'Contact'
       }
     },
   },

@@ -1,5 +1,3 @@
-'use client';
-
 import { urlFor } from "@/sanity/lib/utils";
 import Image from "next/image";
 import { FC, useState, useRef } from "react";
@@ -42,7 +40,6 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
 
   return (
     <div className="main_style">
-
       {/* Left thumbnails */}
       <div className="styleUps">
         {styleUps.map((su) => (
@@ -50,66 +47,53 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
             key={su._id}
             style={{ maxWidth: '100%', cursor: 'crosshair', position: 'relative' }}
             onMouseEnter={() => setHovered({
-              coverImage: su.coverImage, 
+              coverImage: su.coverImage,
               title: su.title
             })}
             onMouseLeave={() => setHovered(null)}
             onMouseMove={handleMouseMove}
           >
-            <Image
+            {/* <Image
               src={urlFor(su.coverImage)?.auto('format').url()}
               height={300}
               width={300}
               style={{ width: '100%', display: 'block' }}
-                          alt={typeof su.coverImage.alt === 'string' 
-                        ? su.coverImage.alt 
-                        : `Cover image for ${su.title}`}
-            />
-
-
-
-      <div
-        className="style_sidebar--preview"
-        ref={sidebarRef}
-      >
-{hovered && hovered.coverImage && (
-          <>
-            <Image
-              ref={zoomRef}
-              src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
-              height={LARGE_HEIGHT}
-              width={LARGE_WIDTH}
-              style={{
-                position: 'absolute',
-                width: `${LARGE_WIDTH}px`,
-                height: `${LARGE_HEIGHT}px`,
-                top: '0',
-                left: '0',
-                transition: 'top 0.05s, left 0.05s', // optional smoothness
-                maxWidth: 'none',
-                maxHeight: 'none',
-              }}
-                          alt={typeof hovered.coverImage.alt === 'string' 
-                        ? hovered.coverImage.alt 
-                        : `Cover image for ${hovered.title}`}
-                                  
-
-
-/>
-            <div className="style_title">
-              <p>{hovered.title.toUpperCase()}</p>
+              alt={typeof su.coverImage.alt === 'string'
+                ? su.coverImage.alt
+                : `Cover image for ${su.title}`}
+            /> */}
+            <div
+              className="style_sidebar--preview"
+              ref={sidebarRef}
+            >
+              {hovered && hovered.coverImage && (
+                <>
+                  <Image
+                    ref={zoomRef}
+                    src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
+                    height={LARGE_HEIGHT}
+                    width={LARGE_WIDTH}
+                    style={{
+                      position: 'absolute',
+                      width: `${LARGE_WIDTH}px`,
+                      height: `${LARGE_HEIGHT}px`,
+                      top: '0',
+                      left: '0',
+                      transition: 'top 0.05s, left 0.05s', // optional smoothness
+                      maxWidth: 'none',
+                      maxHeight: 'none',
+                    }}
+                    alt={typeof hovered.coverImage.alt === 'string'
+                      ? hovered.coverImage.alt
+                      : `Cover image for ${hovered.title}`}
+                  />
+                  <div className="style_title">
+                    <p>{hovered.title.toUpperCase()}</p>
+                  </div>
+                </>
+              )}
             </div>
-          </>
-        )}
-        </div>
-
-
-
-
           </div>
-
-
-
         ))}
       </div>
 

@@ -1,0 +1,26 @@
+
+.projectCard {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid black;
+  position: relative;
+}
+
+.projectCard:hover {
+  cursor: none;
+}
+
+.projectCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.projectCardImageLoaded {
+  opacity: 1;
+}

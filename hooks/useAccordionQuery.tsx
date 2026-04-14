@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useAccordionQuery(defaultSection: string | null = null) {
 const [openSection, setOpenSection] = useState<string | null>(() => {

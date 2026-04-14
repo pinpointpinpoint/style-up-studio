@@ -30,6 +30,9 @@ export const singletonPlugin = (types: string[]) => {
   }
 }
 
+
+// THIS IS THE ALTERNATIVE TO DESKSTRUCTURE.TS -- TODO: consolidate the two approaches and remove the one we're not using
+
 // The StructureResolver is how we're changing the DeskTool structure to linking to document (named Singleton)
 // like how "Home" is handled.
 export const pageStructure = (typeDefArray: DocumentDefinition[]): StructureResolver => {

@@ -1,0 +1,10 @@
+.workSection {
+    display: flex;
+    height: 100%;
+    flex: 2 1 0%;
+    min-width: 0;
+    position: relative;
+    border-top: solid 1px black;
+}
+
+

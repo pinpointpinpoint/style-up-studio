@@ -1,0 +1,27 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  background-color: white;
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+  will-change: opacity, transform;
+}
+
+.loader img {
+  height: 60%;
+  width: auto;
+}
+
+.loaderVisible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.loaderHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.02);
+}

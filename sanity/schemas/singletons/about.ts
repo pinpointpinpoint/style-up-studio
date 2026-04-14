@@ -1,76 +1,43 @@
-import {UserIcon} from '@sanity/icons'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import { UserIcon } from '@sanity/icons'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'about',
   title: 'About',
   type: 'document',
   icon: UserIcon,
-  // liveEdit: true,
   fields: [
     defineField({
-        name: 'title',
-        type: 'string',
-        hidden: true,
-        initialValue: 'About'
+      name: 'title',
+      type: 'string',
+      hidden: true,
+      initialValue: 'About',
     }),
     defineField({
       name: 'image',
-      title: 'About Image',
+      title: 'Photo',
       type: 'image',
-      description: 'Upload an image representing you or your brand.',
+      description: 'Your photo or brand image displayed in the About section.',
       options: {
         hotspot: true,
       },
     }),
-
     defineField({
-      name: 'blurb',
-      title: 'About Text',
-      description: 'A short paragraph or two about you.',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          lists: [],
-          marks: {
-            annotations: [
-              {
-                name: 'link',
-                type: 'object',
-                title: 'Link',
-                fields: [
-                  {
-                    name: 'href',
-                    type: 'url',
-                    title: 'URL',
-                  },
-                ],
-              },
-            ],
-            decorators: [
-              {title: 'Italic', value: 'em'},
-              {title: 'Strong', value: 'strong'},
-            ],
-          },
-          styles: [],
-        }),
-      ],
-      validation: (rule) =>
-        rule.required().max(500).warning('Keep your about section concise.'),
+      name: 'bio',
+      title: 'Bio*',
+      type: 'text',
+      description: 'A short bio displayed in the About section. Maximum 150 characters.',
+      validation: (Rule) =>
+        Rule.required()
+          .max(150)
+          .warning('Should be 150 characters or less.'),
     }),
   ],
 
   preview: {
-    select: {
-      title: 'title',
-      media: 'image',
-    },
-    prepare({title, media}) {
+    prepare() {
       return {
-        title: title || 'About',
-        media,
-        subtitle: 'About Page',
+        title: 'About'
       }
     },
   },

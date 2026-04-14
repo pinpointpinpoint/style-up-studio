@@ -1,23 +1,26 @@
 import { defineField, defineType } from "sanity";
-import {ConfettiIcon} from '@sanity/icons'
+import { ComposeSparklesIcon } from '@sanity/icons'
 
 export default defineType({
   name: "post",
   title: "Remix Wall",
   type: "document",
-  // liveEdit: true,
-  icon: ConfettiIcon,
+  icon: ComposeSparklesIcon,
   fields: [
     defineField({
       name: "name",
-      title: "Name",
+      title: "Name*",
       type: "string",
+      validation: (Rule) => Rule.required().error('Name is required.'),
     }),
     defineField({
       name: "imageUrl",
-      title: "Image URL",
+      title: "Image URL*",
       type: "url",
-      validation: (Rule) => Rule.required()
+      validation: (Rule) =>
+        Rule.required()
+          .uri({allowRelative: false, scheme: ['http', 'https']})
+          .error('Enter a valid URL starting with https://')
     }),
     defineField({
       name: "postedAt",

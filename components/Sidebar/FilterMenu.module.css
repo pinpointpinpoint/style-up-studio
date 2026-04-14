@@ -11,12 +11,15 @@
     background-color: white;
     width: 100.3%;
     background-color: white;
+
+    padding-top: 30px;
 }
 
 .categoryContainer {
     border-top: 1px solid black;
     border-right: 1px solid black;
     width: 100%;
+    transition: background-color 160ms ease;
 }
 
 .all {
@@ -75,7 +78,7 @@
     height: 100%;
 } */
 
-.title {
+.categoryName {
     display: flex;
     gap: 5px;
     align-items: center;
@@ -83,10 +86,10 @@
     padding-right: 5px;
 }
 
-.title .dot,
-.title .dots .dot {
-    width: 12px;
-    height: 12px;
+.categoryName .dot,
+.categoryName .dots .dot {
+    width: 8px;
+    height: 8px;
     background: black;
     border-radius: 50%;
 }
@@ -101,3 +104,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+.title {
+    padding: 3px 30px;
+}
+
+.details>summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 30px;
+}
+
+.details > summary::after {
+    content: '↓';
+}
+
+.details[open] > summary:after  {
+    content: ' ↑';
+}
+
+.collaboratorsSection {
+    padding-top: 30px;
+}
+

@@ -1,12 +1,11 @@
 import './globals.css'
 import "@vidstack/react/player/styles/base.css";
-import {Chivo, Geist, Instrument_Serif, Pinyon_Script} from 'next/font/google'
+import {Chivo, Geist, Pinyon_Script} from 'next/font/google'
 
 const body = Chivo({
   subsets: ['latin'],
   variable: '--font-body',
 })
-
 
 const headingHover = Pinyon_Script({
   weight: "400",

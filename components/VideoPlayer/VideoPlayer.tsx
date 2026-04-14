@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState } from "react";
 import {
   MediaPlayer,
@@ -10,7 +8,6 @@ import {
 } from "@vidstack/react";
 
 import "./VideoPlayer.css";
-import VideoOverlay from "./VideoOverlay";
 import VideoControls from "./VideoControls";
 import { SanityAsset } from "@/types";
 import useAutoPoster from "@/hooks/useAutoPoster";

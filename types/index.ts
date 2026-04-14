@@ -1,28 +1,6 @@
 import type {PortableTextBlock} from 'next-sanity'
 import type {Image} from 'sanity'
 
-export interface MilestoneItem {
-  _key: string
-  description?: string
-  duration?: {
-    start?: string
-    end?: string
-  }
-  image?: Image
-  tags?: string[]
-  title?: string
-}
-
-export interface ShowcaseProject {
-  _id: string
-  _type: string
-  coverImage?: Image
-  overview?: PortableTextBlock[]
-  slug?: string
-  tags?: string[]
-  title?: string
-}
-
 export interface AboutPage {
   _id: string
   _type: 'about'
@@ -58,36 +36,48 @@ export interface Credit {
 export interface Project {
   _id: string;
   _type: string;
-  featured?: boolean;
   title: string;
-  slug: string;
+  client: string;
   date: string;
-  categories: SingleCategory[];
-  subcategory?: Subcategory;
-  coverImage: Image;
+  slug: string;
+  projectType: ProjectType[];
+  featured?: boolean;
+  personalities: Personality[];
+  brands: Brand[];
+  publications: Publication[];
   gallery?: Image[];
-  description?: PortableTextBlock[];
-  videoUrls?: VideoUrls[];
   videos?: Video[];
+  videoUrls?: VideoUrls[];
+  coverImage: Image;
+  description?: PortableTextBlock[];
   credits?: Credit[];
 };
 
-export interface SingleCategory {
-  _id: string,
-  title: string,
+export interface Personality {
+  _id: string;
+  name: string;
 }
 
-export interface Category {
+export interface Brand {
+  _id: string;
+  name: string;
+}
+
+export interface Publication {
+  _id: string;
+  name: string;
+}
+
+export interface ProjectType {
   _id: string,
   title: string,
-  subcategories?: Subcategory[],
   referenceCount: number
 }
 
 export interface Subcategory {
   _id: string,
   title: string,
-  parent: SingleCategory,
+  parent: ProjectType,
   referenceCount: number
 }
 

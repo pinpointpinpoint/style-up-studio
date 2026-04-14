@@ -4,13 +4,13 @@ export default defineType({
   name: 'projectType',
   title: 'Project Type',
   type: 'document',
-  // liveEdit: true,
   fields: [
     defineField({
       name: 'title',
-      title: 'Title',
+      title: 'Title*',
+      description: 'The name of the project type. This will be used as a filter option in the sidebar.',
       type: 'string',
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required().error('Title is required.'),
     }),
   ],
   preview: {

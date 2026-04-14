@@ -1,18 +1,29 @@
-# Project Name
+# Style Up Studio - Web Portfolio
 
-This is the official portfolio site for Style Up Studio, created by Pinpoint Studio. The site highlights Angie's work with a clean, interactive, and responsive design. It’s built to be easy to update, scalable, and provide a smooth browsing experience across all devices.
+Portfolio site for Style Up Studio, created by Pinpoint Studio. 
 
----
+## Features
+
+- Headless CMS powered by Sanity
+- Type-safe frontend with Next.js and TypeScript
+- Video support with Vidstack
+- Fast global deployment via Cloudflare Pages
+- Scalable and maintainable architecture
+
+- **Headless CMS powered by Sanity** – flexible content management for dynamic pages.
+- **Type-safe frontend with Next.js and TypeScript** – catch errors early and improve developer productivity.
+- **Video support with Vidstack** – custom UI and seamless video playback.
+- **Fast global deployment via Cloudflare Pages** – optimized performance and reliability.
+- **Scalable and maintainable architecture** – clean folder structure and reusable components.
 
 ## Tech Stack
 
-- Framework: Next.js  
-- CMS: Sanity  
-- Database: Supabase
+- Language: TypeScript
+- Frontend: Next.js  
+- Animation: Framer Motion
+- Content Management System (CMS): Sanity  
 - Media: Vidstack 
-- Hosting: Vercel  
-
----
+- Hosting: Cloudflare Pages  
 
 ## Getting Started
 
@@ -27,6 +38,7 @@ This is the official portfolio site for Style Up Studio, created by Pinpoint Stu
 
 Create a `.env.local` file:
 
+```
 NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER=
 NEXT_PUBLIC_VERCEL_GIT_PROVIDER=
 NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG=
@@ -38,6 +50,7 @@ SANITY_API_READ_TOKEN=
 SANITY_API_WRITE_TOKEN=
 
 NEXT_PUBLIC_SANITY_PROJECT_TITLE="Style Up Studio"
+```
 
 ### 4. Run development server
 
@@ -146,3 +159,48 @@ This codebase is the property of Style Up Studio and is provided by Pinpoint Stu
 All rights and ownership are transferred to Style Up Studio upon delivery of the project.  
 
 Use, modification, and deployment rights belong exclusively to Style Up Studio after transfer. Redistribution or sharing without written permission is prohibited.
+
+
+
+
+
+
+Project overview
+Tech stack (Next.js, Sanity, Shopify, etc.)
+Setup instructions
+Environment variables
+Deployment instructions
+CMS info
+Links to other docs
+
+
+# Project Name
+
+## Overview
+Short description of the project
+
+## Tech Stack
+- Next.js
+- Sanity
+- Cloudflare
+- Tailwind
+
+## Getting Started
+Link to Setup.md
+
+## Documentation
+- Architecture
+- Deployment
+- Standards
+- Contributing
+
+## Environments
+- Production
+- Staging
+
+
+
+Studios must be on version 5.1.0 or, preferably to @latest to generate manifest and schema files. Learn how to update your studio.
+Sanity-hosted studios: Update your studio and re-deploy
+Schema and manifest extraction happens automatically as part of the deploy step:
+npx sanity schema deploy

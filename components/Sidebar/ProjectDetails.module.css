@@ -21,19 +21,6 @@
     height: fit-content;
 }
 
-.details {
-  position: absolute;
-  background-color: white;
-  top: 56px;
-  max-height: fit-content;
-  height: calc(100% - 56px);
-  overflow: auto;
-  padding: 6px 30px 6px 30px;
-  outline: 1px solid black;
-  width: 100%;
-  z-index: 999;
-  /* margin-right: 15px; */
-}
 
 
 /* Webkit browsers (Chrome, Edge, Safari) */
@@ -67,34 +54,6 @@
 }
 
 /* Credits and Description */
-.credits details>summary,
-.description details>summary {
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-
-    position: sticky;
-    top: 0;
-    background-color: white;
-    padding: 3px 30px;
-
-}
-
-/* .credits summary::-webkit-details-marker,
-.description summary::-webkit-details-marker {
-    display: none;
-} */
-
-.credits summary::after,
-.description summary::after {
-    content: '↓';
-}
-
-.credits details[open] summary:after,
-.description details[open] summary:after  {
-    content: ' ↑';
-}
 
 .credits li {
     display: flex;
@@ -185,4 +144,19 @@
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none;     /* IE 10+ */
   user-select: none;         /* Standard syntax */
+}
+
+.assetsWrapper {
+  height: 100px;
+  width: 100%;
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding: 10px 30px 10px 30px;
+}
+
+.asset {
+  border: 1px solid black;
+  width: 60px;
+  height: 100%;
 }

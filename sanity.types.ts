@@ -13,24 +13,6 @@
  */
 
 // Source: schema.json
-export type GalleryItem = {
-    _type: 'galleryItem'
-    image?: {
-        asset?: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-    }
-}
-
 export type Publication = {
     _id: string
     _type: 'publication'
@@ -56,7 +38,6 @@ export type Personality = {
     _updatedAt: string
     _rev: string
     name?: string
-    active?: boolean
 }
 
 export type Post = {
@@ -76,9 +57,8 @@ export type StyleUp = {
     _createdAt: string
     _updatedAt: string
     _rev: string
-    title?: string
-    date?: string
-    gallery?: Array<{
+    name?: string
+    image?: {
         asset?: {
             _ref: string
             _type: 'reference'
@@ -88,22 +68,6 @@ export type StyleUp = {
         media?: unknown
         hotspot?: SanityImageHotspot
         crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-    }>
-    coverImage?: {
-        asset?: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
         _type: 'image'
     }
 }
@@ -156,7 +120,6 @@ export type Project = {
         media?: unknown
         hotspot?: SanityImageHotspot
         crop?: SanityImageCrop
-        caption?: string
         _type: 'image'
         _key: string
     }>
@@ -168,12 +131,10 @@ export type Project = {
             [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
         }
         media?: unknown
-        title?: string
         _type: 'file'
         _key: string
     }>
     videoUrls?: Array<{
-        title?: string
         url?: string
         _type: 'videoUrlItem'
         _key: string
@@ -257,51 +218,24 @@ export type About = {
         crop?: SanityImageCrop
         _type: 'image'
     }
-    blurb?: Array<{
-        children?: Array<{
-            marks?: Array<string>
-            text?: string
-            _type: 'span'
-            _key: string
-        }>
-        style?: 'normal'
-        listItem?: never
-        markDefs?: Array<{
-            href?: string
-            _type: 'link'
-            _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-    }>
+    bio?: string
 }
 
-export type Home = {
+export type Settings = {
     _id: string
-    _type: 'home'
+    _type: 'settings'
     _createdAt: string
     _updatedAt: string
     _rev: string
-    title?: string
-    overview?: Array<{
-        children?: Array<{
-            marks?: Array<string>
-            text?: string
-            _type: 'span'
-            _key: string
-        }>
-        style?: 'normal'
-        listItem?: never
-        markDefs?: Array<{
-            href?: string
-            _type: 'link'
-            _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-    }>
+    seo?: {
+        title?: string
+        description?: string
+    }
+    sidebarFilters?: {
+        showPersonalities?: boolean
+        showBrands?: boolean
+        showPublications?: boolean
+    }
 }
 
 export type SanityImagePaletteSwatch = {
@@ -423,7 +357,6 @@ export type SanityAssetSourceData = {
 }
 
 export type AllSanitySchemaTypes =
-    | GalleryItem
     | Publication
     | Brand
     | Personality
@@ -433,7 +366,7 @@ export type AllSanitySchemaTypes =
     | ProjectType
     | Contact
     | About
-    | Home
+    | Settings
     | SanityImagePaletteSwatch
     | SanityImagePalette
     | SanityImageDimensions
@@ -449,32 +382,7 @@ export declare const internalGroqTypeReferenceTo: unique symbol
 // Source: ./sanity/lib/queries.ts
 // Variable: homePageQuery
 // Query: *[_type == "home"][0]{    _id,    _type,    overview,    title,  }
-export type HomePageQueryResult = {
-    _id: string
-    _type: 'home'
-    overview: Array<{
-        children?: Array<{
-            marks?: Array<string>
-            text?: string
-            _type: 'span'
-            _key: string
-        }>
-        style?: 'normal'
-        listItem?: never
-        markDefs?: Array<{
-            href?: string
-            _type: 'link'
-            _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-    }> | null
-    title: string | null
-} | null
-// Variable: pagesBySlugQuery
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    body,    overview,    title,    "slug": slug.current,  }
-export type PagesBySlugQueryResult = null
+export type HomePageQueryResult = null
 // Variable: projectBySlugQuery
 // Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    client,    coverImage,    description,    duration,    overview,    site,    "slug": slug.current,    tags,    title,  }
 export type ProjectBySlugQueryResult = {
@@ -520,7 +428,13 @@ export type ProjectBySlugQueryResult = {
 } | null
 // Variable: settingsQuery
 // Query: *[_type == "settings"][0]{    _id,    _type,    footer,    menuItems[]{      _key,      ...@->{        _type,        "slug": slug.current,        title      }    },    ogImage,  }
-export type SettingsQueryResult = null
+export type SettingsQueryResult = {
+    _id: string
+    _type: 'settings'
+    footer: null
+    menuItems: null
+    ogImage: null
+} | null
 // Variable: slugsByTypeQuery
 // Query: *[_type == $type && defined(slug.current)]{"slug": slug.current}
 export type SlugsByTypeQueryResult = Array<{
@@ -543,12 +457,12 @@ export type AllProjectsQueryResult = Array<{
     }> | null
     videos: Array<{
         _key: string
-        title: string | null
+        title: null
         fileUrl: null
     }> | null
     videoUrls: Array<{
         _key: string
-        title: string | null
+        title: null
         url: string | null
     }> | null
     coverImage: {
@@ -583,7 +497,7 @@ export type AllProjectsQueryResult = Array<{
     gallery: Array<{
         _key: string
         imageUrl: string | null
-        caption: string | null
+        caption: null
         alt: null
     }> | null
     categories: null
@@ -624,12 +538,12 @@ export type FeaturedProjectsQueryResult = Array<{
     }> | null
     videos: Array<{
         _key: string
-        title: string | null
+        title: null
         fileUrl: null
     }> | null
     videoUrls: Array<{
         _key: string
-        title: string | null
+        title: null
         url: string | null
     }> | null
     coverImage: {
@@ -664,7 +578,7 @@ export type FeaturedProjectsQueryResult = Array<{
     gallery: Array<{
         _key: string
         imageUrl: string | null
-        caption: string | null
+        caption: null
         alt: null
     }> | null
     categories: null
@@ -695,36 +609,8 @@ export type AllCategoriesQueryResult = Array<never>
 // Query: *[_type == "styleUp" && !(_id in path("drafts.**"))]{  _id,  title,    coverImage{      alt,      ...,      asset->,    },}
 export type AllStyleUpsQueryResult = Array<{
     _id: string
-    title: string | null
-    coverImage: {
-        alt?: string
-        asset: {
-            _id: string
-            _type: 'sanity.imageAsset'
-            _createdAt: string
-            _updatedAt: string
-            _rev: string
-            originalFilename?: string
-            label?: string
-            title?: string
-            description?: string
-            altText?: string
-            sha1hash?: string
-            extension?: string
-            mimeType?: string
-            size?: number
-            assetId?: string
-            uploadId?: string
-            path?: string
-            url?: string
-            metadata?: SanityImageMetadata
-            source?: SanityAssetSourceData
-        } | null
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        _type: 'image'
-    } | null
+    title: null
+    coverImage: null
 }>
 
 // Query TypeMap
@@ -732,7 +618,6 @@ import '@sanity/client'
 declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == "home"][0]{\n    _id,\n    _type,\n    overview,\n    title,\n  }\n': HomePageQueryResult
-        '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body,\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult
         '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    client,\n    coverImage,\n    description,\n    duration,\n    overview,\n    site,\n    "slug": slug.current,\n    tags,\n    title,\n  }\n': ProjectBySlugQueryResult
         '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    footer,\n    menuItems[]{\n      _key,\n      ...@->{\n        _type,\n        "slug": slug.current,\n        title\n      }\n    },\n    ogImage,\n  }\n': SettingsQueryResult
         '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult

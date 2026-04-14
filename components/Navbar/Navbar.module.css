@@ -1,0 +1,72 @@
+.navbar {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0px 10px;
+  min-height: 30px;
+  max-height: 30px;
+}
+
+.navbar a {
+    display: flex;
+    align-items: center;
+}
+
+.navbar img {
+  width: 375px auto;
+  transition: width 2s;
+  padding: 0 30px;
+ }
+
+.navbarItem button {
+  width: 100% auto;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.navbarItemContent {
+  display: flex;
+  align-items: center;
+  padding: 5px 5px;
+  justify-content: space-between;
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  min-height: 40px;
+  max-height: 40px;
+  background-color: white;
+}
+
+.menuLeft {
+  left: 0;
+}
+
+.menuRight {
+  right: 0;
+}
+
+.menuContentRow {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.aboutText {
+  display: flex;
+  align-items: center;
+  width: 50%;
+  text-align: left;
+}
+
+.contactInfoRow {
+  display: flex;
+  gap: 5rem;
+  text-align: right;
+}
+
+.contactColumn {
+  display: flex;
+  flex-direction: column;
+}
