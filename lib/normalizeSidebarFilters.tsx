@@ -46,11 +46,14 @@ export function normalizeSidebarFilters(sidebarFilters: any) {
   ]
 
   const visibleCollaborators = collaborators.filter(
-    (c) => c.items.length > 0
+    (c) => c.items.some((item: FilterOption) => item.slug && item.referenceCount > 0)
   )
 
   return {
     projectTypes,
-    collaborators: visibleCollaborators
+    collaborators: visibleCollaborators.map((c) => ({
+      ...c,
+      items: c.items.filter((item: FilterOption) => item.slug && item.referenceCount > 0)
+    }))
   }
 }

@@ -17,6 +17,7 @@ type ProjectGalleryProps = {
   onProjectLeave?: () => void
   hasMouseMoved?: boolean
   isFeaturedProjects: boolean
+  isArchiveLayout: boolean
 }
 
 function getStableDelay(id: string) {
@@ -37,7 +38,8 @@ export default function ProjectGallery({
   onProjectHover,
   onProjectLeave,
   hasMouseMoved = false,
-  isFeaturedProjects
+  isFeaturedProjects,
+  isArchiveLayout
 }: ProjectGalleryProps) {
   const introDone = useIntro()
   const [cursor, setCursor] = useState({show: false, x: 0, y: 0 })
@@ -75,12 +77,17 @@ export default function ProjectGallery({
 
   if (projects.length < 1) {
     return (
-      <div className={styles.projectGallery}>No projects</div>
+      <div className={`${styles.projectGallery} ${isArchiveLayout ? styles.archiveGallery : styles.curatedGallery}`}>
+        No projects
+      </div>
     )
   }
 
   return (
-    <div ref={galleryRef} className={`${styles.projectGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}>
+    <div
+      ref={galleryRef}
+      className={`${styles.projectGallery} ${isArchiveLayout ? styles.archiveGallery : styles.curatedGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}
+    >
         {projects?.map((project, idx) => (
         <motion.div
           key={project._id}

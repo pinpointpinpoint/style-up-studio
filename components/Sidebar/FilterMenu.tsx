@@ -1,7 +1,7 @@
 'use client';
 
 import { Filter } from '@/types'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import styles from './FilterMenu.module.css';
 import { normalizeSidebarFilters } from '@/lib/normalizeSidebarFilters';
 
@@ -23,6 +23,7 @@ export default function FilterMenu({
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [hoverColor, setHoverColor] = useState<string>('transparent')
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
   let lastColor = ''
 
@@ -73,6 +74,15 @@ export default function FilterMenu({
     ))
   }
 
+  useEffect(() => {
+    if (!['brand', 'publication', 'personality'].includes(filter.type)) return
+
+    setOpenGroups((current) => ({
+      ...current,
+      [filter.type]: current[filter.type] ?? true,
+    }))
+  }, [filter.type])
+
   return (
     <div className={styles.container}>
       <div className={styles.title}>INDEX</div>
@@ -119,14 +129,38 @@ export default function FilterMenu({
         {/* <div className={styles.title}>COLLABORATORS</div> */}
 
         {collaborators
-          .map((c) => (
-            <details key={c.label} className={styles.details}>
+          .map((c) => {
+            const isActiveGroup = filter.type === c.filterType
+            const isOpen = openGroups[c.filterType] ?? isActiveGroup
+            const activeItem = 'id' in filter && isActiveGroup
+              ? c.items.find((item) => item._id === filter.id)
+              : undefined
+
+            return (
+            <details
+              key={c.label}
+              className={styles.details}
+              open={isOpen}
+              onToggle={(event) => {
+                const isGroupOpen = event.currentTarget.open
+
+                setOpenGroups((current) => ({
+                  ...current,
+                  [c.filterType]: isGroupOpen,
+                }))
+              }}
+            >
               <summary onMouseEnter={() => {
                 setHoveredId(c._id)
                 setHoverColor(randomColor())
               }}
                 onMouseLeave={() => setHoveredId(null)}
-                style={{ backgroundColor: hoveredId === c._id ? hoverColor : 'transparent' }} className={styles.categoryName}>{c.label}</summary>
+                style={{ backgroundColor: hoveredId === c._id ? hoverColor : 'transparent' }} className={styles.categoryName}>
+                <span>{c.label}{isActiveGroup && !isOpen && activeItem?.title && (
+                  <span className={styles.selectedSummary}>[{activeItem.title}]</span>
+                )}</span>
+                
+              </summary>
               <div className={styles.infoContent}>
                 {c.items.filter((i) => i.slug).map((i) => (
                   <button
@@ -151,7 +185,8 @@ export default function FilterMenu({
                 ))}
               </div>
             </details>
-          ))}
+            )
+          })}
       </div>
     </div>
 

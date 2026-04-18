@@ -146,6 +146,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
         onProjectLeave={() => setHoveredProject(null)}
         hasMouseMoved={hasMouseMoved}
         isFeaturedProjects={displayedFilter.type === "featured"}
+        isArchiveLayout={displayedFilter.type === "all"}
       />
       <Sidebar
         displayedProject={displayedProject}

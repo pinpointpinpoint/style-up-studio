@@ -98,8 +98,7 @@
     gap: 5px;
     align-items: center;
     padding-right: 5px;
-
-    font-size: 13px;
+    font-size: var(--font-sm);
     font-family: Geist;
 }
 
@@ -139,6 +138,11 @@
     display: flex;
     justify-content: space-between;
     padding: 3px 30px;
+    user-select: none; 
+}
+
+.selectedSummary {
+    margin-left: 5px;
 }
 
 .details > summary::after {

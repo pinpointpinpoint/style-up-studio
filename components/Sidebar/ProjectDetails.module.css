@@ -15,6 +15,12 @@
 .title {
     padding: 3px 30px;
     border-bottom: solid 1px black;
+    font-size: var(--font-sm);
+}
+
+.titleEmpty {
+  font-style: italic;
+  color: var(--disabled);
 }
 
 .body {
@@ -147,16 +153,16 @@
 }
 
 .assetsWrapper {
-  height: 100px;
+  height: fit-content;
   width: 100%;
   display: flex;
   gap: 15px;
-  overflow-x: auto;
+  overflow-x: hidden;
   padding: 10px 30px 10px 30px;
 }
 
 .asset {
   border: 1px solid black;
-  width: 60px;
-  height: 100%;
+  aspect-ratio: 1/1;
+  height: 30px;
 }

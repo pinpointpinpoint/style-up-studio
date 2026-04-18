@@ -144,8 +144,8 @@ const projectProjection = `
   },
   videos[]{
     _key,
-    title,
-    "fileUrl": file.asset->url
+    "title": asset->originalFilename,
+    "fileUrl": asset->url
   },
   videoUrls[]{
     _key,

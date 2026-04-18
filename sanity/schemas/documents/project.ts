@@ -199,7 +199,7 @@ export default defineType({
               name: 'url',
               title: 'URL',
               type: 'url',
-              description: 'Full URL to your video. (e.g., YouTube, Vimeo, or TikTok). The video will appear in the project view.',
+              description: 'Full URL to your video. (e.g., YouTube, Vimeo). The video will appear in the project view.',
               validation: (Rule) =>
                 Rule.required()
                   .uri({allowRelative: false, scheme: ['http', 'https']})

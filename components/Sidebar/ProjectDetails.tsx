@@ -38,8 +38,13 @@ const ProjectDetails = ({ displayedProject, renderAsset }: { displayedProject: P
     return (
         <div className={styles.container}>
             <div className={styles.body}>
-                <div className={styles.title}>{displayedProject?.title ? displayedProject.title : 'Title'}</div>
-                <div className={styles.title}>{displayedProject?.client ? displayedProject.client : 'Client'}</div>
+            <div className={`${styles.title} ${!displayedProject?.client ? styles.titleEmpty : ''}`}>
+                {displayedProject?.client || 'Client'}
+            </div>
+            <div className={`${styles.title} ${!displayedProject?.title ? styles.titleEmpty : ''}`}>
+                {displayedProject?.title || 'Title'}
+            </div>
+
                     {/* {displayedProject?.description && (
                         <div className={styles.description}>
                             <details>
