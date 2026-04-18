@@ -60,7 +60,7 @@ export default function SplashGate({
             visible ? styles.loaderVisible : styles.loaderHidden
           }`}
         >
-          <img src="/loader.gif" alt="Loading..." />
+          <video src="/loader.mp4" autoPlay muted playsInline className={styles.video} />
         </div>
       )}
     </IntroContext.Provider>

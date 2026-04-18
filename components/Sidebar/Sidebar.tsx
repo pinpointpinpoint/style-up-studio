@@ -1,26 +1,24 @@
-import { ProjectType, Project } from '@/types';
+'use client';
+
+import { Dispatch, SetStateAction } from 'react';
+import { Project } from '@/types';
 import FilterMenu from './FilterMenu';
 import ProjectDetails from './ProjectDetails';
 import { Filter } from '@/types';
 import styles from "./Sidebar.module.css";
-import { useEffect, useRef, useState } from 'react';
 
 type SidebarProps = {
     displayedProject: Project | null
-    allProjectTypes: ProjectType[]
+    sidebarFilters: any | null
     filter: Filter
-    hoveredCategoryId?: string
-    setHoveredCategory: (id: string) => void
-    setFilter: (filter: Filter) => void
+    setFilter: Dispatch<SetStateAction<Filter>>
     renderAsset: (asset: any) => React.ReactNode
 }
 
 export function Sidebar({
     displayedProject,
-    allProjectTypes,
+    sidebarFilters,
     filter,
-    hoveredCategoryId,
-    setHoveredCategory,
     setFilter,
     renderAsset,
 }: SidebarProps) {
@@ -29,10 +27,8 @@ export function Sidebar({
         <aside className={styles.container}>
             <div className={styles.section}>
                 <FilterMenu
-                    projectTypes={allProjectTypes}
+                    sidebarFilters={sidebarFilters}
                     filter={filter}
-                    hoveredCategoryId={hoveredCategoryId}
-                    setHoveredCategory={setHoveredCategory}
                     setFilter={setFilter}
                 />
             </div>

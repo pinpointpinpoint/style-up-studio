@@ -1,24 +1,25 @@
-import { ProjectType } from '@/types'
-import { Dispatch, SetStateAction, useState } from 'react'
+'use client';
+
 import { Filter } from '@/types'
+import { Dispatch, SetStateAction, useState } from 'react'
 import styles from './FilterMenu.module.css';
-import  { useMouseMoved } from '@/hooks/useMouseInitiatedHover';
+import { normalizeSidebarFilters } from '@/lib/normalizeSidebarFilters';
+
+type CollaboratorFilterType = 'brand' | 'publication' | 'personality'
+const FEATURED_ACTIVE_IMAGE_SRC = 'og/og_img.png'
 
 type FilterMenuProps = {
-  projectTypes: ProjectType[]
+  sidebarFilters: any | null
   filter: Filter
-  hoveredCategoryId?: string
-  setHoveredCategory: (categoryId: string) => void
   setFilter: Dispatch<SetStateAction<Filter>>
 }
 
 export default function FilterMenu({
-  projectTypes,
+  sidebarFilters,
   filter,
-  hoveredCategoryId,
-  setHoveredCategory,
   setFilter,
-}: FilterMenuProps) {  
+}: FilterMenuProps) {
+  const { projectTypes, collaborators } = normalizeSidebarFilters(sidebarFilters)
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [hoverColor, setHoverColor] = useState<string>('transparent')
@@ -46,128 +47,113 @@ export default function FilterMenu({
     return color
   }
 
-  const hasMouseMoved = useMouseMoved();
+  const handleProjectTypeClick = (projectTypeId: string) => {
+    if (projectTypeId === 'featured') {
+      setFilter({ type: 'featured' })
+      return
+    }
 
-  const handleCategoryHover = (categoryId: string, hasSubcategories: boolean) => {
-    if (!hasSubcategories || !hasMouseMoved) return;
-    setHoveredCategory(categoryId);
-  };
+    if (projectTypeId === 'all') {
+      setFilter({ type: 'all' })
+      return
+    }
 
-  const isSubmenuOpen = (categoryId: string, hasSubcategories: boolean) =>
-    hasMouseMoved && hoveredCategoryId === categoryId && !!hasSubcategories;
-
-  const handleCategoryLeave = () => {
-    setHoveredCategory('')
+    setFilter((prev) => (
+      prev.type === 'projectType' && prev.id === projectTypeId
+        ? { type: 'featured' }
+        : { type: 'projectType', id: projectTypeId }
+    ))
   }
 
-  const handleCategoryClick = (categoryId: string) => {
-    setFilter((prev) =>
-      prev.category === categoryId
-        ? {
-          category: 'featured',
-          subcategories: [],
-        }
-        : {
-          category: categoryId,
-          subcategories: [],
-        },
-    )
-  }
-
-  const handleSubcategoryClick = (subId: string, parentId: string) => {
-    setFilter((prev) => {
-      const isSameParent = prev.category === parentId
-      const isActive = prev.subcategories.includes(subId)
-
-      if (!isSameParent) {
-        return {
-          category: parentId,
-          subcategories: [subId],
-        }
-      }
-
-      return {
-        category: parentId,
-        subcategories: isActive
-          ? prev.subcategories.filter((id) => id !== subId)
-          : [...prev.subcategories, subId],
-      }
-    })
+  const handleCollaboratorClick = (filterType: CollaboratorFilterType, collaboratorId: string) => {
+    setFilter((prev) => (
+      prev.type === filterType && prev.id === collaboratorId
+        ? { type: 'featured' }
+        : { type: filterType, id: collaboratorId }
+    ))
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>PROJECT TYPE</div>
-      {projectTypes.map((cat) => (
-        cat.referenceCount > 0 && (
+      <div className={styles.title}>INDEX</div>
+      {projectTypes.map((type) => (
+        type.referenceCount > 0 && type.slug && (
           <div
-            key={cat._id}
-            className={`${styles.categoryContainer} ${styles[cat._id]}`}
-            onMouseLeave={handleCategoryLeave}
+            key={type._id}
+            className={`${styles.categoryContainer} ${styles[type._id]}`}
           >
             <div className={styles.category}
               onMouseEnter={() => {
-                setHoveredId(cat._id)
+                setHoveredId(type._id)
                 setHoverColor(randomColor())
               }}
               onMouseLeave={() => setHoveredId(null)}
-              style={{ backgroundColor: hoveredId === cat._id ? hoverColor : 'transparent' }}
+              style={{ backgroundColor: hoveredId === type._id ? hoverColor : 'transparent' }}
             >
               <button
-                onClick={() => handleCategoryClick(cat._id)}
+                onClick={() => handleProjectTypeClick(type._id)}
               >
                 <span className={styles.categoryName}>
-                  {filter.category === cat._id && <span className={styles.dot}></span>}
-                  {cat.title}
+                  {filter.type === 'featured' && type._id === 'featured' && FEATURED_ACTIVE_IMAGE_SRC ? (
+                    <img
+                      src={FEATURED_ACTIVE_IMAGE_SRC}
+                      alt=""
+                      className={styles.activeImage}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    (
+                      (filter.type === 'all' && type._id === 'all') ||
+                      (filter.type === 'projectType' && filter.id === type._id)
+                    ) && <span className={styles.dot}></span>
+                  )}
+                  {type.title}
                 </span>
-                <span>({cat.referenceCount})</span>
+                <span>({type.referenceCount})</span>
               </button>
             </div>
           </div>
-        ) 
+        )
       ))}
- 
+      <div className={styles.collaboratorsSection}>
+        {/* <div className={styles.title}>COLLABORATORS</div> */}
 
-  <div className={styles.collaboratorsSection}>
-    <div className={styles.title}>COLLABORATORS</div>
-    <details className={styles.details}>
-      <summary>Personalities</summary>
-      <div className={styles.infoContent}>
-        <div className={styles.category}
-          onMouseEnter={() => {
-          // setHoveredId(cat._id)
-          setHoverColor(randomColor())
-          }}
-          onMouseLeave={() => setHoveredId(null)}
-          // style={{ backgroundColor: hoveredId === cat._id ? hoverColor : 'transparent' }}
-        >
-          <button
-            // onClick={() => handleCategoryClick(cat._id)}
-            // onFocus={() => handleCategoryHover(cat._id, !!cat.subcategories?.length)}
-          >
-            <span className={styles.categoryName}>
-              {/* {filter.category === cat._id && <span className={styles.dot}></span>} */}
-              {/* {cat.title} */}
-              Bambii
-            </span>
-            {/* <span>({cat.referenceCount})</span> */}
-            <span>(2)</span>
-          </button>
-        </div>
+        {collaborators
+          .map((c) => (
+            <details key={c.label} className={styles.details}>
+              <summary onMouseEnter={() => {
+                setHoveredId(c._id)
+                setHoverColor(randomColor())
+              }}
+                onMouseLeave={() => setHoveredId(null)}
+                style={{ backgroundColor: hoveredId === c._id ? hoverColor : 'transparent' }} className={styles.categoryName}>{c.label}</summary>
+              <div className={styles.infoContent}>
+                {c.items.filter((i) => i.slug).map((i) => (
+                  <button
+                    onMouseEnter={() => {
+                      setHoveredId(i._id)
+                      setHoverColor(randomColor())
+                    }}
+                    onMouseLeave={() => setHoveredId(null)}
+                    style={{ backgroundColor: hoveredId === i._id ? hoverColor : 'transparent' }}
+                    key={i._id}
+                    type="button"
+                    onClick={() => handleCollaboratorClick(c.filterType as CollaboratorFilterType, i._id)}
+                  >
+                    <span className={styles.categoryName}>
+                      {'id' in filter && filter.type === c.filterType && filter.id === i._id && (
+                        <span className={styles.dot}></span>
+                      )}
+                      {i.title}
+                    </span>
+                    <span>({i.referenceCount})</span>
+                  </button>
+                ))}
+              </div>
+            </details>
+          ))}
       </div>
-    </details>
-      <details className={styles.details}>
-      <summary>Brands</summary>
-      <div className={styles.infoContent}>
-      </div>
-    </details>
-      <details className={styles.details}>
-      <summary>Publications</summary>
-      <div className={styles.infoContent}>
-      </div>
-    </details>
-  </div>
-</div>
+    </div>
 
   )
 }

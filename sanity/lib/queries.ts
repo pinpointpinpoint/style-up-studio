@@ -25,126 +25,22 @@ export const projectBySlugQuery = defineQuery(`
   }
 `)
 
-export const settingsQuery = defineQuery(`
+export const seoSettingsQuery = `
   *[_type == "settings"][0]{
-    _id,
-    _type,
-    footer,
-    menuItems[]{
-      _key,
-      ...@->{
-        _type,
-        "slug": slug.current,
-        title
-      }
-    },
-    ogImage,
+    "title": seo.title,
+    "description": seo.description
   }
-`)
+`
 
 export const slugsByTypeQuery = defineQuery(`
   *[_type == $type && defined(slug.current)]{"slug": slug.current}
 `)
 
-// Projects query with cursor pagination and project type/collaborators filtering
-export const projectsQuery = defineQuery(`
-  *[
-    _type == "project" &&
-    !(_id in path("drafts.**")) &&
-
-    // Category filter
-    (
-      $category == "all" ||
-      featured == true ||
-      ($category != "all" && $category != "featured" && references($category))
-    ) &&
-
-    // Subcategory filter
-    (
-      count($subcategoryIds) == 0 ||
-      subcategory._ref in $subcategoryIds
-    ) &&
-
-    // Cursor pagination
-    (
-      !defined($cursorDate) ||
-      date < $cursorDate ||
-      (date == $cursorDate && _id < $cursorId)
-    )
-  ]
-  | order(date desc, _id desc)
-  [0...$limit]{
-    _id,
-    _type,
-    featured,
-    title,
-    date,
-    "slug": slug.current,
-    coverImage{
-      alt,
-      ...,
-      asset->
-    },
-    "projectType": projectType[]->{_id, title},
-    "subcategory": subcategory->{_id, title},
-    description[],
-    credits[]{role, name, link},
-    videos[]{_key, title, "fileUrl": file.asset->url},
-    videoUrls[]{_key, title, url}
-  }
-`)
-
-
-// COMPLETED
-export const featuredProjectsQuery = defineQuery(`
-  *[_type == "project" && featured == true && !(_id in path("drafts.**"))]
-  | order(orderRank asc, date desc){
-    _id,
-    _type,
-    title,
-    client,
-    date,
-    "slug": slug.current,
-    "projectType": projectType[]->{_id, title},
-    featured,
-    "personalities": personalities[]->{_id, name},
-    "brands": brands[]->{_id, name},
-    "publications": publications[]->{_id, name},
-    gallery[]{
-      _key,
-      "imageUrl": asset->url,
-      caption,
-      alt
-    },
-    videos[]{
-      _key,
-      title,
-      "fileUrl": file.asset->url
-    },
-    videoUrls[]{
-      _key,
-      title,
-      url
-    },
-    coverImage{
-      alt,
-      ...,
-      asset->,
-    },
-    description[],
-    credits[]{
-      role,
-      name,
-      link
-    },
-  }`
-)
-
-// COMPLETED
 export const allProjectTypesQuery = defineQuery(`
   *[_type == "projectType" && !(_id in path("drafts.**"))]{
     _id,
     title,
+    "slug": slug.current,
     "referenceCount": count(*[_type in ["project"] && references(^._id)]),
   }
 `)
@@ -167,6 +63,7 @@ export const sidebarFiltersQuery = defineQuery(`
   ] | order(title asc) {
     _id,
     title,
+    "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
       !(_id in path("drafts.**")) &&
@@ -179,6 +76,7 @@ export const sidebarFiltersQuery = defineQuery(`
   ] | order(name asc) {
     _id,
     "title": name,
+    "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
       !(_id in path("drafts.**")) &&
@@ -188,9 +86,10 @@ export const sidebarFiltersQuery = defineQuery(`
   "publications": *[
     _type == "publication" &&
     !(_id in path("drafts.**"))
-  ] | order(title asc) {
+  ] | order(name asc) {
     _id,
-    title,
+    "title": name,
+    "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
       !(_id in path("drafts.**")) &&
@@ -200,9 +99,10 @@ export const sidebarFiltersQuery = defineQuery(`
   "brands": *[
     _type == "brand" &&
     !(_id in path("drafts.**"))
-  ] | order(title asc) {
+  ] | order(name asc) {
     _id,
-    title,
+    "title": name,
+    "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
       !(_id in path("drafts.**")) &&
@@ -211,8 +111,6 @@ export const sidebarFiltersQuery = defineQuery(`
   }
 }
 `)
-
-
 
 export const allStyleUpsQuery = defineQuery(`
 *[_type == "styleUp" && !(_id in path("drafts.**"))
@@ -224,4 +122,91 @@ export const allStyleUpsQuery = defineQuery(`
       ...,
       asset->,
     },}
+`)
+
+const projectProjection = `
+  _id,
+  _type,
+  title,
+  client,
+  date,
+  "slug": slug.current,
+  "projectType": projectType[]->{_id, title, "slug": slug.current},
+  featured,
+  "personalities": personalities[]->{_id, name, "slug": slug.current},
+  "brands": brands[]->{_id, name, "slug": slug.current},
+  "publications": publications[]->{_id, name, "slug": slug.current},
+  gallery[]{
+    _key,
+    asset,
+    crop,
+    hotspot
+  },
+  videos[]{
+    _key,
+    title,
+    "fileUrl": file.asset->url
+  },
+  videoUrls[]{
+    _key,
+    title,
+    url
+  },
+  coverImage{
+    asset,
+    crop,
+    hotspot
+  },
+  description[],
+  credits[]{
+    role,
+    name,
+    link
+  },
+  orderRank
+`
+
+export const projectsQuery = defineQuery(`
+  *[
+    _type == "project" &&
+    !(_id in path("drafts.**")) &&
+    (
+      $filterType == "all" ||
+      ($filterType == "featured" && featured == true) ||
+      ($filterType == "projectType" && $filterId in projectType[]._ref) ||
+      ($filterType == "brand" && $filterId in brands[]._ref) ||
+      ($filterType == "publication" && $filterId in publications[]._ref) ||
+      ($filterType == "personality" && $filterId in personalities[]._ref)
+    ) &&
+    (
+      !defined($cursorDate) ||
+      $cursorId == "" ||
+      date < $cursorDate ||
+      (date == $cursorDate && _id < $cursorId)
+    )
+  ]
+  | order(date desc, _id desc)
+  [0...$limit]{
+   ${projectProjection}
+  }
+`)
+
+export const featuredProjectsQuery = defineQuery(`
+*[
+    _type == "project" &&
+    !(_id in path("drafts.**")) &&
+      featured == true &&
+    (
+      !defined($cursorId) ||
+      $cursorId == "" ||
+      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||
+      (
+        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&
+        _id > $cursorId
+      )
+    )
+  ]
+  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {
+   ${projectProjection}
+  }
 `)

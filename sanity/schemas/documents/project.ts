@@ -183,9 +183,6 @@ export default defineType({
           validation: (Rule) => Rule.required(),
         }),
       ],
-      options: {
-        sortable: true,
-      },
       fieldset: 'media',
     }),
     defineField({

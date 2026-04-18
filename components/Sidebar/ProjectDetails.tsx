@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react'
 import { PortableText } from 'next-sanity'
 import { Project } from '@/types'
@@ -38,7 +40,7 @@ const ProjectDetails = ({ displayedProject, renderAsset }: { displayedProject: P
             <div className={styles.body}>
                 <div className={styles.title}>{displayedProject?.title ? displayedProject.title : 'Title'}</div>
                 <div className={styles.title}>{displayedProject?.client ? displayedProject.client : 'Client'}</div>
-                    {displayedProject?.description && (
+                    {/* {displayedProject?.description && (
                         <div className={styles.description}>
                             <details>
                                 <summary>Description & Credits</summary>
@@ -52,7 +54,7 @@ const ProjectDetails = ({ displayedProject, renderAsset }: { displayedProject: P
                                 </div>
                             </details>
                         </div>
-                    )}
+                    )} */}
                     {/* {displayedProject.credits && (
                         <div className={styles.credits}>
                             <details>

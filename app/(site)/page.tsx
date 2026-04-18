@@ -1,14 +1,32 @@
-import {allProjectTypesQuery, allStyleUpsQuery, featuredProjectsQuery, projectsQuery} from '@/sanity/lib/queries'
 import { sanityFetch } from '@/sanity/lib/live'
-import Accordion from '@/components/Accordion/Accordion'
+import {sidebarFiltersQuery} from '@/sanity/lib/queries'
+import { WorkSection } from '@/components/WorkSection/WorkSection';
+import { getProjects } from './actions';
+import { parseProjectFilter } from '@/lib/projectFilters';
 
-export default async function IndexRoute() {
-  const [{ data: featuredProjects }, { data: projectTypes },{ data: styleups }] = await Promise.all([
-    sanityFetch({ query: featuredProjectsQuery, stega: false }),
-    sanityFetch({query: allProjectTypesQuery, stega: false}),
-    // should fetch when the styleups accordion is active...
-    sanityFetch({query: allStyleUpsQuery, stega: false}),
-  ]);
+type IndexRouteProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
-  return <Accordion featuredProjects={featuredProjects} projectTypes={projectTypes} styleUps={styleups}/>
+export default async function IndexRoute({ searchParams }: IndexRouteProps) {
+  const [{ data: sidebarFilters }, resolvedSearchParams] = await Promise.all([
+    sanityFetch({
+      query: sidebarFiltersQuery,
+      stega: false,
+    }),
+    searchParams,
+  ])
+  const initialFilter = parseProjectFilter(resolvedSearchParams, sidebarFilters)
+  const initialProjects = await getProjects({
+    filter: initialFilter,
+    limit: 15,
+  })
+
+  return (
+    <WorkSection
+      initialProjects={initialProjects}
+      initialFilter={initialFilter}
+      sidebarFilters={sidebarFilters}
+    />
+  )
 }

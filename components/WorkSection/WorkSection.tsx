@@ -1,61 +1,52 @@
-import { FC, useEffect, useState, useMemo, useRef, useCallback } from 'react'
+'use client';
+
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Sidebar } from '../Sidebar/Sidebar'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
-import { ProjectType, Project } from '@/types'
+import { Filter, Project } from '@/types'
 import '@vidstack/react/player/styles/base.css'
 import styles from'./WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
 import { useMouseMoved } from '@/hooks/useMouseInitiatedHover'
+import { getProjects } from '@/app/(site)/actions'
+import {
+  getProjectCursor,
+  parseProjectFilter,
+  writeProjectFilterToParams,
+} from '@/lib/projectFilters'
+
+const PROJECTS_PAGE_SIZE = 15
 
 interface WorkSectionProps {
-  projects: Project[] | null
-  projectTypes: ProjectType[]
+  initialProjects: Project[] | null
+  initialFilter: Filter
+  // todo: create type for sidebarfilters
+  sidebarFilters: any | null
+  isProjectsLoading?: boolean
 }
 
-export const WorkSection: FC<WorkSectionProps> = ({ projects, projectTypes }) => {
-  const targetRef = useRef<null | HTMLVideoElement>(null)
+function getFilterKey(filter: Filter) {
+  return JSON.stringify(filter)
+}
 
-  const [visibleProjects, setVisibleProjects] = useState<Project[]>(projects || [])
+export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, isProjectsLoading = false }) => {
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const hasMouseMoved = useMouseMoved()
 
-
-  const [activeProject, setActiveProject] = useState<Project | null>(null)
+  const [visibleProjects, setVisibleProjects] = useState<Project[]>(initialProjects ?? [])
+  const [hasMore, setHasMore] = useState((initialProjects?.length ?? 0) >= PROJECTS_PAGE_SIZE)
+  const [isLoading, setIsLoading] = useState(isProjectsLoading)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
-  const [isLocked, setIsLocked] = useState(false)
-  const [hoveredCategoryId, setHoveredCategory] = useState<string>()
-  const [filter, setFilter] = useState({ category: 'featured', subcategories: [] as string[] })
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
+  const [filter, setFilter] = useState<Filter>(initialFilter)
+  const [displayedFilter, setDisplayedFilter] = useState<Filter>(initialFilter)
+  const activeSidebarFilters = sidebarFilters
+  const hasSkippedInitialFetchRef = useRef(false)
 
-  // TODO: hook in loading state from parent component when fetching projects, for shimmer state
-  const [isProjectsLoading, setIsProjectsLoading] = useState(false)
-
-  const displayedProject = activeProject ?? hoveredProject
-
-
-  const STATIC = [
-    {
-       _id:'featured',
-       title: 'Featured',
-       referenceCount: projects?.filter((p) => p.featured).length || 0,
-    }, 
-    {
-      _id:'all',
-      title: 'All',
-      referenceCount: projects?.length || 0,
-    }
-  ]
-
-  const merged = new Map<string, ProjectType>()
-
-  STATIC.forEach((t) => merged.set(t._id, t))
-  
-  projectTypes.forEach((t) => merged.set(t._id, t)) 
-  
-  const allProjectTypes = Array.from(merged.values())
-
-  const handleHover = useCallback((project: Project) => {
-    if (!isLocked) setHoveredProject(project)
-  }, [isLocked])
+  const displayedProject = hoveredProject
 
   const renderAsset = (asset: any) => {
     switch (asset.kind) {
@@ -69,31 +60,98 @@ export const WorkSection: FC<WorkSectionProps> = ({ projects, projectTypes }) =>
     }
   }
 
-  // Sync visibleProjects with prop
   useEffect(() => {
-    setVisibleProjects(projects || [])
-  }, [projects])
+    const nextFilter = parseProjectFilter(searchParams, activeSidebarFilters)
+    const nextFilterKey = getFilterKey(nextFilter)
+
+    setFilter((currentFilter) => (
+      getFilterKey(currentFilter) === nextFilterKey ? currentFilter : nextFilter
+    ))
+  }, [searchParams, activeSidebarFilters])
+
+  useEffect(() => {
+    if (!hasSkippedInitialFetchRef.current) {
+      hasSkippedInitialFetchRef.current = true
+      return
+    }
+
+    let isCurrent = true
+
+    async function refreshProjects() {
+      setIsLoading(true)
+
+      try {
+        const nextProjects = await getProjects({
+          filter,
+          cursor: null,
+          limit: PROJECTS_PAGE_SIZE,
+        })
+
+        if (!isCurrent) return
+
+        setVisibleProjects(nextProjects)
+        setDisplayedFilter(filter)
+        setHasMore(nextProjects.length >= PROJECTS_PAGE_SIZE)
+        setHoveredProject(null)
+      } finally {
+        if (isCurrent) setIsLoading(false)
+      }
+    }
+
+    refreshProjects()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [filter])
+
+  const handleFilterChange: Dispatch<SetStateAction<Filter>> = useCallback((value) => {
+    const nextFilter = typeof value === 'function' ? value(filter) : value
+    const nextParams = writeProjectFilterToParams(nextFilter, activeSidebarFilters, searchParams)
+    const queryString = nextParams.toString()
+
+    setFilter(nextFilter)
+    router.push(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
+  }, [activeSidebarFilters, filter, pathname, router, searchParams])
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return
+
+    const cursor = getProjectCursor(visibleProjects[visibleProjects.length - 1], filter)
+
+    setIsLoading(true)
+
+    try {
+      const nextProjects = await getProjects({
+        filter,
+        cursor,
+        limit: PROJECTS_PAGE_SIZE,
+      })
+
+      setVisibleProjects((currentProjects) => [...currentProjects, ...nextProjects])
+      setHasMore(nextProjects.length >= PROJECTS_PAGE_SIZE)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter, hasMore, isLoading, visibleProjects])
 
   return (
     <div className={styles.workSection}>
       <ProjectGallery 
         projects={visibleProjects}
-        hasMouseMoved={useMouseMoved()}
-        isLoading={isProjectsLoading}
-        // activeProject={activeProject}
-        // rotations={rotations}
-        // hoveredProject={hoveredProject}
-        // handleClick={handleClick}
-        // handleHover={handleHover}
-        // handleLeave={handleLeave}
+        hasMore={hasMore}
+        isLoading={isLoading}
+        onLoadMore={handleLoadMore}
+        onProjectHover={setHoveredProject}
+        onProjectLeave={() => setHoveredProject(null)}
+        hasMouseMoved={hasMouseMoved}
+        isFeaturedProjects={displayedFilter.type === "featured"}
       />
       <Sidebar
         displayedProject={displayedProject}
-        allProjectTypes={allProjectTypes}
+        sidebarFilters={activeSidebarFilters}
         filter={filter}
-        hoveredCategoryId={hoveredCategoryId}
-        setHoveredCategory={setHoveredCategory}
-        setFilter={setFilter}
+        setFilter={handleFilterChange}
         renderAsset={renderAsset}
       />
     </div>

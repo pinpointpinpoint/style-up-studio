@@ -1,4 +1,6 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+'use client';
+
+import { useEffect, useRef, useState } from 'react'
 import styles from'./ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import { Project } from '@/types'
@@ -7,18 +9,35 @@ import { motion } from "framer-motion";
 import { useIntro } from '@/contexts/IntroContext'
 
 type ProjectGalleryProps = {
-  projects: Project[] | null
+  projects: Project[]
+  hasMore: boolean
   isLoading?: boolean
-  emptyState?: ReactNode
+  onLoadMore: () => void
+  onProjectHover?: (project: Project) => void
+  onProjectLeave?: () => void
   hasMouseMoved?: boolean
-  skeletonCount?: number
+  isFeaturedProjects: boolean
+}
+
+function getStableDelay(id: string) {
+  let hash = 0
+
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 1000
+  }
+
+  return (hash / 1000) * 0.4
 }
 
 export default function ProjectGallery({
   projects,
-  isLoading,
+  hasMore,
+  isLoading = false,
+  onLoadMore,
+  onProjectHover,
+  onProjectLeave,
   hasMouseMoved = false,
-  skeletonCount = 12
+  isFeaturedProjects
 }: ProjectGalleryProps) {
   const introDone = useIntro()
   const [cursor, setCursor] = useState({show: false, x: 0, y: 0 })
@@ -26,7 +45,7 @@ export default function ProjectGallery({
   const galleryRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-  const el = galleryRef.current
+    const el = galleryRef.current
   if (!el) return
 
   const saved = sessionStorage.getItem('projectGalleryScrollY')
@@ -40,7 +59,8 @@ export default function ProjectGallery({
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
-  const onEnter = (e: React.MouseEvent) => {
+  const onEnter = (project: Project) => (e: React.MouseEvent) => {
+    onProjectHover?.(project)
     setCursor({ show: true, x: e.clientX, y: e.clientY })
   }
   
@@ -49,54 +69,47 @@ export default function ProjectGallery({
   }
 
   const onLeave = () => {
+    onProjectLeave?.()
     setCursor((prev) => ({ ...prev, show: false }))
   }
 
-  const delays = useMemo(
-    () => (projects ?? []).map(() => Math.random() * 0.9),
-    [projects]
-  )
-
-  if (isLoading) {
+  if (projects.length < 1) {
     return (
-      <div className={`${styles.projectGallery} ${styles.skeletonGrid}`} aria-busy="true" aria-live="polite">
-        {Array.from({ length: skeletonCount }).map((_, idx) => (
-          <div key={`skeleton-${idx}`} className={styles.skeletonCard}>
-            <div className={styles.skeletonShimmer} />
-          </div>
-        ))}
-      </div>
+      <div className={styles.projectGallery}>No projects</div>
     )
   }
 
   return (
-    <div ref={galleryRef} className={styles.projectGallery}>
+    <div ref={galleryRef} className={`${styles.projectGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}>
         {projects?.map((project, idx) => (
         <motion.div
           key={project._id}
           initial={{ opacity: 0 }}
-          animate={introDone ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.3, ease: 'easeOut', delay: delays[idx] }}
+          animate={introDone ? { opacity: 1} : {}}
+          transition={{ duration: 0.25, ease: 'easeOut', delay: getStableDelay(project._id) }}
         >
           <ProjectCard
             project={project}
-            onHoverStart={onEnter}
+            index={idx}
+            onHoverStart={onEnter(project)}
             onHoverMove={onMove}
             onHoverEnd={onLeave}
             hasMouseMoved={hasMouseMoved}
-            // activeProject={activeProject}
-            // rotations={rotations}
-            // hoveredProject={hoveredProject}
-            // handleClick={handleClick}
-            // handleHover={handleHover}
-            // handleLeave={handleLeave}
           />
         </motion.div>
         ))}
         {cursor.show && (
           <ProjectHoverCursor x={cursor.x} y={cursor.y} text="[VIEW]" />
         )}
-        <button className={styles.viewMoreButton}>[LOAD MORE]</button>
+
+        {hasMore && (
+        <button 
+          onClick={onLoadMore} 
+          disabled={isLoading}
+          className={styles.viewMoreButton}        >
+          {isLoading ? '[LOADING...]' : '[LOAD MORE]'}
+        </button>
+)}
     </div>
   )
 }

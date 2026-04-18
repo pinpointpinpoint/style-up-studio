@@ -1,46 +1,49 @@
 .accordion {
+  --accordion-header-height: 30px;
+  --accordion-top-offset: 30px;
   position: fixed;
+  top: var(--accordion-top-offset);
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+  z-index: 20;
+  pointer-events: none;
 }
 
-.accordion .item {
+.section {
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  pointer-events: none;
 }
 
-.accordion .item.open {
-  flex-grow: 1;
-}
-
-.accordion .item .header {
+.header {
   width: 100%;
   background: white;
   color: black;
   padding: 0px 10px;
   text-align: left;
-  border-top: 1px solid black;  
+  border-top: 1px solid black;
   font-size: 16px;
-  height: 30px;  
+  height: var(--accordion-header-height);
+  min-height: var(--accordion-header-height);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.accordion .item .header.active {
+.open .header {
   background: rgb(0, 0, 0);
   color: white;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
-}
-
-.accordion .item .content {
-  flex-grow: 1;
-  display: flex;
-  min-height: 0;
-  flex-direction: row;
-  
+  pointer-events: none;
 }
 
 .accordion .item.hint .header {
@@ -60,4 +63,3 @@
   animation-timing-function: cubic-bezier(.34,1.56,.64,1);
   animation: easter-bounce 1.1s cubic-bezier(.4,0,.2,1);
 }
-

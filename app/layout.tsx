@@ -1,6 +1,11 @@
 import './globals.css'
 import "@vidstack/react/player/styles/base.css";
 import {Chivo, Geist, Pinyon_Script} from 'next/font/google'
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Style Up Studio',
+};
 
 const body = Chivo({
   subsets: ['latin'],

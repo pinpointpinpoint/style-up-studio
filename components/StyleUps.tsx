@@ -1,3 +1,5 @@
+'use client';
+
 import { urlFor } from "@/sanity/lib/utils";
 import Image from "next/image";
 import { FC, useState, useRef } from "react";

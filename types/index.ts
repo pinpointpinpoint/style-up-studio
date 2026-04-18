@@ -51,39 +51,68 @@ export interface Project {
   coverImage: Image;
   description?: PortableTextBlock[];
   credits?: Credit[];
+  orderRank?: string | null
 };
 
 export interface Personality {
   _id: string;
   name: string;
+  slug?: string;
 }
 
 export interface Brand {
   _id: string;
   name: string;
+  slug?: string;
 }
 
 export interface Publication {
   _id: string;
   name: string;
+  slug?: string;
 }
 
 export interface ProjectType {
   _id: string,
   title: string,
-  referenceCount: number
+  slug: string
 }
 
-export interface Subcategory {
+export interface FilterOption {
   _id: string,
   title: string,
-  parent: ProjectType,
+  slug: string,
   referenceCount: number
 }
 
-export type Filter = {
-  category: string
-  subcategories: string[]
+export interface CollaboratorFilterOption extends FilterOption {
+  filterType: 'brand' | 'publication' | 'personality'
+}
+
+export type Filter =
+  | {type: 'featured'}
+  | {type: 'all'}
+  | {type: 'projectType'; id: string}
+  | {type: 'brand'; id: string}
+  | {type: 'publication'; id: string}
+  | {type: 'personality'; id: string}
+
+export type ProjectCursor =
+  | {
+      type: 'featured'
+      orderRank?: string | null
+      id?: string
+    }
+  | {
+      type: 'date'
+      date?: string | null
+      id?: string
+    }
+
+export type ProjectsQueryInput = {
+  filter: Filter
+  cursor?: ProjectCursor | null
+  limit?: number
 }
 
 export type SanityAsset = {

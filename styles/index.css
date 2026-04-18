@@ -5,6 +5,10 @@ body, html {
   font-family: var(--font-body), sans-serif;
 }
 
+.loading {
+  background-color: red;
+}
+
 *,
 *::before,
 *::after {
@@ -21,19 +25,22 @@ button:hover {
 }
 
 .site {
+  --site-nav-height: 30px;
+  --site-collapsed-accordion-height: 30px;
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
 .site__main {
-  /* this is where the hidden message board will be */
   flex: 1;
   overflow: hidden;
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   min-height: 0;
-
+  position: relative;
+  padding-top: var(--site-main-padding-top, var(--site-collapsed-accordion-height));
+  padding-bottom: var(--site-main-padding-bottom, var(--site-collapsed-accordion-height));
 }
 
 /* Work */
