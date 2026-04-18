@@ -19,18 +19,6 @@ export default defineType({
       group: 'seo',
       fields: [
         defineField({
-          name: 'title',
-          title: 'Title*',
-          type: 'string',
-          description:
-            'The main title of your website. Appears in the browser tab and search results. Maximum 60 characters.',
-          validation: (Rule) =>
-            Rule.required()
-              .error('Title is required.')
-              .max(60)
-              .warning('Should be 60 characters or less.'),
-        }),
-        defineField({
           name: 'description',
           title: 'Meta Description*',
           type: 'text',

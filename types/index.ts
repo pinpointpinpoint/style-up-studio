@@ -1,5 +1,6 @@
 import type {PortableTextBlock} from 'next-sanity'
 import type {Image} from 'sanity'
+import type {ProjectsQueryResult} from '@/sanity.types'
 
 export interface AboutPage {
   _id: string
@@ -33,26 +34,7 @@ export interface Credit {
   role: string;
 }
 
-export interface Project {
-  _id: string;
-  _type: string;
-  title: string;
-  client: string;
-  date: string;
-  slug: string;
-  projectType: ProjectType[];
-  featured?: boolean;
-  personalities: Personality[];
-  brands: Brand[];
-  publications: Publication[];
-  gallery?: Image[];
-  videos?: Video[];
-  videoUrls?: VideoUrls[];
-  coverImage: Image;
-  description?: PortableTextBlock[];
-  credits?: Credit[];
-  orderRank?: string | null
-};
+export type Project = ProjectsQueryResult[number]
 
 export interface Personality {
   _id: string;
@@ -74,8 +56,8 @@ export interface Publication {
 
 export interface ProjectType {
   _id: string,
-  title: string,
-  slug: string
+  title: string | null,
+  slug: string | null
 }
 
 export interface FilterOption {

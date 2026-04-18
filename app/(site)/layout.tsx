@@ -10,31 +10,33 @@ import SplashGate from '@/components/SplashGate/SplashGate'
 import AccordionNav from '@/components/Accordion/AccordionNav'
 import Navbar from '@/components/Navbar/Navbar'
 
-// export async function generateMetadata(): Promise<Metadata> {
-//   const [{ data: settings }] = await Promise.all([
-//     sanityFetch({ query: seoSettingsQuery, stega: false })
-//   ])
+export async function generateMetadata(): Promise<Metadata> {
+  const [{ data: settings }] = await Promise.all([
+    sanityFetch({ query: seoSettingsQuery, stega: false })
+  ])
+
+  const siteTitle = 'Style Up Studio'
   
-//   return {
-//     title: settings?.title
-//       ? {
-//         template: `%s | ${settings.title}`,
-//         default: settings.title,
-//       }
-//       : undefined,
-//     description: settings?.description ? toPlainText(settings.description) : undefined,
-//     openGraph: {
-//       images: [
-//         {
-//           url: '/og/minimal_logo.png',
-//           width: 1200,
-//           height: 630,
-//           alt: 'Logo',
-//         },
-//       ],
-//     },
-//   }
-// }
+  return {
+    title: {
+      template: `%s | ${siteTitle}`,
+      default: siteTitle,
+    },
+    description: settings?.description ? toPlainText(settings.description) : undefined,
+    openGraph: {
+      title: siteTitle,
+      description: settings?.description ? toPlainText(settings.description) : undefined,
+      images: [
+        {
+          url: '/og/minimal_logo.png',
+          width: 1200,
+          height: 630,
+          alt: 'Logo',
+        },
+      ],
+    },
+  }
+}
 
 // what does this do?
 export const viewport: Viewport = {

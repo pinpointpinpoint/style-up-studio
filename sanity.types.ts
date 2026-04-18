@@ -233,7 +233,6 @@ export type Settings = {
     _updatedAt: string
     _rev: string
     seo?: {
-        title?: string
         description?: string
     }
     sidebarFilters?: {
@@ -482,7 +481,7 @@ export type AllStyleUpsQueryResult = Array<{
     coverImage: null
 }>
 // Variable: projectsQuery
-// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    (      $category == "all" ||      ($category == "featured" && featured == true) ||      (        $category != "all" &&        $category != "featured" &&        $category in projectType[]._ref      )    ) &&    (      count($brandIds) == 0 ||      count(brands[_ref in $brandIds]) > 0    ) &&    (      count($publicationIds) == 0 ||      count(publications[_ref in $publicationIds]) > 0    ) &&    (      count($personalityIds) == 0 ||      count(personalities[_ref in $personalityIds]) > 0    ) &&    (      !defined($cursorDate) ||      $cursorId == "" ||      date < $cursorDate ||      (date == $cursorDate && _id < $cursorId)    )  ]  | order(date desc, _id desc)  [0...$limit]{    _id,    _type,    title,    client,    date,    "slug": slug.current,    "projectType": projectType[]->{_id, title, "slug": slug.current},    featured,    "personalities": personalities[]->{_id, name, "slug": slug.current},    "brands": brands[]->{_id, name, "slug": slug.current},    "publications": publications[]->{_id, name, "slug": slug.current},    gallery[]{      _key,      asset,      crop,      hotspot    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      _key,      title,      url    },    coverImage{      asset,      crop,      hotspot    },    description[],    credits[]{      role,      name,      link    },    orderRank  }
+// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    (      $filterType == "all" ||      ($filterType == "featured" && featured == true) ||      ($filterType == "projectType" && $filterId in projectType[]._ref) ||      ($filterType == "brand" && $filterId in brands[]._ref) ||      ($filterType == "publication" && $filterId in publications[]._ref) ||      ($filterType == "personality" && $filterId in personalities[]._ref)    ) &&    (      !defined($cursorDate) ||      $cursorId == "" ||      date < $cursorDate ||      (date == $cursorDate && _id < $cursorId)    )  ]  | order(date desc, _id desc)  [0...$limit]{     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  "publications": publications[]->{_id, name, "slug": slug.current},  gallery[]{    _key,    asset,    crop,    hotspot  },  videos[]{    _key,    "title": asset->originalFilename,    "fileUrl": asset->url  },  videoUrls[]{    _key,    title,    url  },  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
 export type ProjectsQueryResult = Array<{
     _id: string
     _type: 'project'
@@ -524,8 +523,8 @@ export type ProjectsQueryResult = Array<{
     }> | null
     videos: Array<{
         _key: string
-        title: null
-        fileUrl: null
+        title: string | null
+        fileUrl: string | null
     }> | null
     videoUrls: Array<{
         _key: string
@@ -568,7 +567,7 @@ export type ProjectsQueryResult = Array<{
     orderRank: string | null
 }>
 // Variable: featuredProjectsQuery
-// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&      featured == true &&    (      count($brandIds) == 0 ||      count(brands[_ref in $brandIds]) > 0    ) &&    (      count($publicationIds) == 0 ||      count(publications[_ref in $publicationIds]) > 0    ) &&    (      count($personalityIds) == 0 ||      count(personalities[_ref in $personalityIds]) > 0    ) &&    (      !defined($cursorId) ||      $cursorId == "" ||      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||      (        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&        _id > $cursorId      )    )      ]  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {    _id,    _type,    title,    client,    date,    "slug": slug.current,    "projectType": projectType[]->{_id, title, "slug": slug.current},    featured,    "personalities": personalities[]->{_id, name, "slug": slug.current},    "brands": brands[]->{_id, name, "slug": slug.current},    "publications": publications[]->{_id, name, "slug": slug.current},    coverImage{      asset,      crop,      hotspot    },    gallery[]{      _key,      asset,      crop,      hotspot    },    videos[]{      _key,      title,      "fileUrl": file.asset->url    },    videoUrls[]{      _key,      title,      url    },    description[],    credits[]{      role,      name,      link    },    orderRank  }
+// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&      featured == true &&    (      !defined($cursorId) ||      $cursorId == "" ||      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||      (        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&        _id > $cursorId      )    )  ]  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  "publications": publications[]->{_id, name, "slug": slug.current},  gallery[]{    _key,    asset,    crop,    hotspot  },  videos[]{    _key,    "title": asset->originalFilename,    "fileUrl": asset->url  },  videoUrls[]{    _key,    title,    url  },  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
 export type FeaturedProjectsQueryResult = Array<{
     _id: string
     _type: 'project'
@@ -597,16 +596,6 @@ export type FeaturedProjectsQueryResult = Array<{
         name: string | null
         slug: string | null
     }> | null
-    coverImage: {
-        asset: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        } | null
-        crop: SanityImageCrop | null
-        hotspot: SanityImageHotspot | null
-    } | null
     gallery: Array<{
         _key: string
         asset: {
@@ -620,14 +609,24 @@ export type FeaturedProjectsQueryResult = Array<{
     }> | null
     videos: Array<{
         _key: string
-        title: null
-        fileUrl: null
+        title: string | null
+        fileUrl: string | null
     }> | null
     videoUrls: Array<{
         _key: string
         title: null
         url: string | null
     }> | null
+    coverImage: {
+        asset: {
+            _ref: string
+            _type: 'reference'
+            _weak?: boolean
+            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+        } | null
+        crop: SanityImageCrop | null
+        hotspot: SanityImageHotspot | null
+    } | null
     description: Array<{
         children?: Array<{
             marks?: Array<string>
@@ -664,7 +663,7 @@ declare module '@sanity/client' {
         '\n  *[_type == "projectType" && !(_id in path("drafts.**"))]{\n    _id,\n    title,\n    "slug": slug.current,\n    "referenceCount": count(*[_type in ["project"] && references(^._id)]),\n  }\n': AllProjectTypesQueryResult
         '\n{\n  "featuredCount": count(*[\n    _type == "project" &&\n    featured == true &&\n    !(_id in path("drafts.**"))\n  ]),\n  "allCount": count(*[\n    _type == "project" &&\n    !(_id in path("drafts.**"))\n  ]),\n\n  "projectTypes": *[\n    _type == "projectType" &&\n    !(_id in path("drafts.**"))\n  ] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "personalities": *[\n    _type == "personality" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "publications": *[\n    _type == "publication" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "brands": *[\n    _type == "brand" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  }\n}\n': SidebarFiltersQueryResult
         '\n*[_type == "styleUp" && !(_id in path("drafts.**"))\n]{\n  _id,\n  title,\n    coverImage{\n      alt,\n      ...,\n      asset->,\n    },}\n': AllStyleUpsQueryResult
-        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n\n    (\n      $category == "all" ||\n      ($category == "featured" && featured == true) ||\n      (\n        $category != "all" &&\n        $category != "featured" &&\n        $category in projectType[]._ref\n      )\n    ) &&\n\n    (\n      count($brandIds) == 0 ||\n      count(brands[_ref in $brandIds]) > 0\n    ) &&\n\n    (\n      count($publicationIds) == 0 ||\n      count(publications[_ref in $publicationIds]) > 0\n    ) &&\n\n    (\n      count($personalityIds) == 0 ||\n      count(personalities[_ref in $personalityIds]) > 0\n    ) &&\n\n    (\n      !defined($cursorDate) ||\n      $cursorId == "" ||\n      date < $cursorDate ||\n      (date == $cursorDate && _id < $cursorId)\n    )\n  ]\n  | order(date desc, _id desc)\n  [0...$limit]{\n    _id,\n    _type,\n    title,\n    client,\n    date,\n    "slug": slug.current,\n    "projectType": projectType[]->{_id, title, "slug": slug.current},\n    featured,\n    "personalities": personalities[]->{_id, name, "slug": slug.current},\n    "brands": brands[]->{_id, name, "slug": slug.current},\n    "publications": publications[]->{_id, name, "slug": slug.current},\n    gallery[]{\n      _key,\n      asset,\n      crop,\n      hotspot\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      _key,\n      title,\n      url\n    },\n    coverImage{\n      asset,\n      crop,\n      hotspot\n    },\n    description[],\n    credits[]{\n      role,\n      name,\n      link\n    },\n    orderRank\n  }\n': ProjectsQueryResult
-        '\n*[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n\n      featured == true &&\n\n    (\n      count($brandIds) == 0 ||\n      count(brands[_ref in $brandIds]) > 0\n    ) &&\n\n    (\n      count($publicationIds) == 0 ||\n      count(publications[_ref in $publicationIds]) > 0\n    ) &&\n\n    (\n      count($personalityIds) == 0 ||\n      count(personalities[_ref in $personalityIds]) > 0\n    ) &&\n\n    (\n      !defined($cursorId) ||\n      $cursorId == "" ||\n      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||\n      (\n        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&\n        _id > $cursorId\n      )\n    )\n    \n  ]\n  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {\n    _id,\n    _type,\n    title,\n    client,\n    date,\n    "slug": slug.current,\n    "projectType": projectType[]->{_id, title, "slug": slug.current},\n    featured,\n    "personalities": personalities[]->{_id, name, "slug": slug.current},\n    "brands": brands[]->{_id, name, "slug": slug.current},\n    "publications": publications[]->{_id, name, "slug": slug.current},\n    coverImage{\n      asset,\n      crop,\n      hotspot\n    },\n    gallery[]{\n      _key,\n      asset,\n      crop,\n      hotspot\n    },\n    videos[]{\n      _key,\n      title,\n      "fileUrl": file.asset->url\n    },\n    videoUrls[]{\n      _key,\n      title,\n      url\n    },\n    description[],\n    credits[]{\n      role,\n      name,\n      link\n    },\n    orderRank\n  }\n': FeaturedProjectsQueryResult
+        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n    (\n      $filterType == "all" ||\n      ($filterType == "featured" && featured == true) ||\n      ($filterType == "projectType" && $filterId in projectType[]._ref) ||\n      ($filterType == "brand" && $filterId in brands[]._ref) ||\n      ($filterType == "publication" && $filterId in publications[]._ref) ||\n      ($filterType == "personality" && $filterId in personalities[]._ref)\n    ) &&\n    (\n      !defined($cursorDate) ||\n      $cursorId == "" ||\n      date < $cursorDate ||\n      (date == $cursorDate && _id < $cursorId)\n    )\n  ]\n  | order(date desc, _id desc)\n  [0...$limit]{\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  "publications": publications[]->{_id, name, "slug": slug.current},\n  gallery[]{\n    _key,\n    asset,\n    crop,\n    hotspot\n  },\n  videos[]{\n    _key,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url\n  },\n  videoUrls[]{\n    _key,\n    title,\n    url\n  },\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': ProjectsQueryResult
+        '\n*[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n      featured == true &&\n    (\n      !defined($cursorId) ||\n      $cursorId == "" ||\n      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||\n      (\n        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&\n        _id > $cursorId\n      )\n    )\n  ]\n  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  "publications": publications[]->{_id, name, "slug": slug.current},\n  gallery[]{\n    _key,\n    asset,\n    crop,\n    hotspot\n  },\n  videos[]{\n    _key,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url\n  },\n  videoUrls[]{\n    _key,\n    title,\n    url\n  },\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': FeaturedProjectsQueryResult
     }
 }

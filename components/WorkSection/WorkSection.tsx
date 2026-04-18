@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Sidebar } from '../Sidebar/Sidebar'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
 import { Filter, Project } from '@/types'
+import type { SidebarFiltersQueryResult } from '@/sanity.types'
 import '@vidstack/react/player/styles/base.css'
 import styles from'./WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
@@ -18,12 +19,12 @@ import {
 } from '@/lib/projectFilters'
 
 const PROJECTS_PAGE_SIZE = 15
+type SidebarFilters = SidebarFiltersQueryResult
 
 interface WorkSectionProps {
   initialProjects: Project[] | null
   initialFilter: Filter
-  // todo: create type for sidebarfilters
-  sidebarFilters: any | null
+  sidebarFilters: SidebarFilters | null
   isProjectsLoading?: boolean
 }
 

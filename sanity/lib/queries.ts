@@ -27,7 +27,6 @@ export const projectBySlugQuery = defineQuery(`
 
 export const seoSettingsQuery = `
   *[_type == "settings"][0]{
-    "title": seo.title,
     "description": seo.description
   }
 `
