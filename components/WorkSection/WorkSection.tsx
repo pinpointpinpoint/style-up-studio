@@ -20,6 +20,7 @@ import {
 } from '@/lib/projectFilters'
 
 const PROJECTS_PAGE_SIZE = 15
+const PROJECT_GALLERY_RETURN_URL_KEY = 'projectGalleryReturnUrl'
 type SidebarFilters = SidebarFiltersQueryResult
 
 interface WorkSectionProps {
@@ -140,7 +141,21 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
     return project.slug ? `/work/${project.slug}` : '/'
   }, [])
 
+  const handleProjectOpen = useCallback(() => {
+    const queryString = searchParams.toString()
+    const returnUrl = queryString ? `${pathname}?${queryString}` : pathname
+
+    sessionStorage.setItem(PROJECT_GALLERY_RETURN_URL_KEY, returnUrl)
+  }, [pathname, searchParams])
+
   const handleProjectDetailClose = useCallback(() => {
+    const savedReturnUrl = sessionStorage.getItem(PROJECT_GALLERY_RETURN_URL_KEY)
+
+    if (savedReturnUrl) {
+      router.push(savedReturnUrl)
+      return
+    }
+
     let shouldGoBack = false
 
     try {
@@ -173,6 +188,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
           isLoading={isLoading}
           onLoadMore={handleLoadMore}
           getProjectHref={getProjectHref}
+          onProjectOpen={handleProjectOpen}
           onProjectHover={setHoveredProject}
           onProjectLeave={() => setHoveredProject(null)}
           hasMouseMoved={hasMouseMoved}

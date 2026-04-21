@@ -14,6 +14,7 @@ type ProjectGalleryProps = {
   isLoading?: boolean
   onLoadMore: () => void
   getProjectHref: (project: Project) => string
+  onProjectOpen?: () => void
   onProjectHover?: (project: Project) => void
   onProjectLeave?: () => void
   hasMouseMoved?: boolean
@@ -35,6 +36,7 @@ export default function ProjectGallery({
   isLoading = false,
   onLoadMore,
   getProjectHref,
+  onProjectOpen,
   onProjectHover,
   onProjectLeave,
   hasMouseMoved = false
@@ -103,6 +105,7 @@ export default function ProjectGallery({
             project={project}
             index={idx}
             href={getProjectHref(project)}
+            onOpen={onProjectOpen}
             onHoverStart={onEnter(project)}
             onHoverMove={() => {}}
             onHoverEnd={onCardLeave}

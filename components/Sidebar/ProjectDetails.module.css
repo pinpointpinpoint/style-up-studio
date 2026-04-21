@@ -88,10 +88,10 @@
 }
 
 .credits li {
-  display: grid;
   font-size: var(--font-sm);
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  display: flex;
+  justify-content: space-between;
 }
 
 .credits a {

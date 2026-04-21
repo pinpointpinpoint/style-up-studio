@@ -10,6 +10,7 @@ interface ProjectCardProps {
     project: Project
     index: number
     href: string
+    onOpen?: () => void
     onHoverStart: (e: React.MouseEvent<HTMLAnchorElement>) => void
     onHoverMove: (e: React.MouseEvent<HTMLAnchorElement>) => void
     onHoverEnd: () => void
@@ -31,6 +32,7 @@ const ProjectCard = ({
     project,
     index,
     href,
+    onOpen,
     onHoverEnd,
     onHoverMove,
     onHoverStart
@@ -159,6 +161,7 @@ const ProjectCard = ({
             onMouseEnter={handleMouseEnter}
             onMouseMove={onHoverMove}
             onMouseLeave={handleMouseLeave}
+            onClick={onOpen}
         >
             <img
                 src={imageUrl}

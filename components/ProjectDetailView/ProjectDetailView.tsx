@@ -23,39 +23,51 @@ export default function ProjectDetailView({ project }: ProjectDetailViewProps) {
           if (!src) return null
 
           return (
-            <img
+            <div
               key={image._key ?? image.asset?._ref ?? idx}
-              src={src}
-              alt={`Project image ${idx + 1} for ${project.title ?? 'project'}`}
-              className={styles.image}
-              loading={idx === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-            />
+              className={styles.mediaFrame}
+            >
+              <img
+                src={src}
+                alt={`Project image ${idx + 1} for ${project.title ?? 'project'}`}
+                className={styles.image}
+                loading={idx === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </div>
           )
         })}
         {videos.map((video, idx) => (
-          <VideoPlayer
+          <div
             key={video._key ?? `video-${idx}`}
-            asset={{
-              value: {
-                fileUrl: video.fileUrl ?? undefined,
-                poster: urlForImage(video.thumbnail)?.width(1600).quality(80).url(),
-              },
-            }}
-            title={video.title ?? undefined}
-          />
+            className={styles.mediaFrame}
+          >
+            <VideoPlayer
+              asset={{
+                value: {
+                  fileUrl: video.fileUrl ?? undefined,
+                  poster: urlForImage(video.thumbnail)?.width(1600).quality(80).url(),
+                },
+              }}
+              title={video.title ?? undefined}
+            />
+          </div>
         ))}
         {videoUrls.map((videoUrl, idx) => (
-          <VideoPlayer
+          <div
             key={videoUrl._key ?? `video-url-${idx}`}
-            asset={{
-              value: {
-                url: videoUrl.url ?? undefined,
-                poster: urlForImage(videoUrl.thumbnail)?.width(1600).quality(80).url(),
-              },
-            }}
-            title={videoUrl.title ?? undefined}
-          />
+            className={styles.mediaFrame}
+          >
+            <VideoPlayer
+              asset={{
+                value: {
+                  url: videoUrl.url ?? undefined,
+                  poster: urlForImage(videoUrl.thumbnail)?.width(1600).quality(80).url(),
+                },
+              }}
+              title={videoUrl.title ?? undefined}
+            />
+          </div>
         ))}
       </div>
     </section>
