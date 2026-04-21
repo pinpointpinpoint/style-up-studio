@@ -45,7 +45,6 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   const [isLoading, setIsLoading] = useState(isProjectsLoading)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [filter, setFilter] = useState<Filter>(initialFilter)
-  const [displayedFilter, setDisplayedFilter] = useState<Filter>(initialFilter)
   const activeSidebarFilters = sidebarFilters
   const hasSkippedInitialFetchRef = useRef(false)
 
@@ -93,7 +92,6 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
         if (!isCurrent) return
 
         setVisibleProjects(nextProjects)
-        setDisplayedFilter(filter)
         setHasMore(nextProjects.length >= PROJECTS_PAGE_SIZE)
         setHoveredProject(null)
       } finally {
@@ -178,7 +176,6 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
           onProjectHover={setHoveredProject}
           onProjectLeave={() => setHoveredProject(null)}
           hasMouseMoved={hasMouseMoved}
-          isFeaturedProjects={displayedFilter.type === "featured"}
         />
       )}
       <Sidebar

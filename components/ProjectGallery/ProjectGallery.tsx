@@ -17,7 +17,6 @@ type ProjectGalleryProps = {
   onProjectHover?: (project: Project) => void
   onProjectLeave?: () => void
   hasMouseMoved?: boolean
-  isFeaturedProjects: boolean
 }
 
 function getStableDelay(id: string) {
@@ -38,8 +37,7 @@ export default function ProjectGallery({
   getProjectHref,
   onProjectHover,
   onProjectLeave,
-  hasMouseMoved = false,
-  isFeaturedProjects
+  hasMouseMoved = false
 }: ProjectGalleryProps) {
   const introDone = useIntro()
   const [cursor, setCursor] = useState({show: false, x: 0, y: 0 })
@@ -90,7 +88,7 @@ export default function ProjectGallery({
   return (
     <div
       ref={galleryRef}
-      className={`${styles.projectGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}
+      className={styles.projectGallery}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
