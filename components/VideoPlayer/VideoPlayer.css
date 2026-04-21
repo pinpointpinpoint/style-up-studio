@@ -216,7 +216,15 @@
 
 
 
+.media-poster {
+  cursor: pointer;
+}
+
+.media-poster:not([data-visible]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .media-poster[data-visible] {
   opacity: 1;
 }
-

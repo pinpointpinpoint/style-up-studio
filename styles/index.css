@@ -123,20 +123,43 @@ button:hover {
 }
 
 .styleUps {
+  align-content: start;
   display: grid;
-  align-items: start;
   flex: 2;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  isolation: isolate;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 30px;
-  overflow: auto;
-  scrollbar-width: none; 
-  height: fit-content;
-  max-height: 100%;
+  position: relative;
+  scrollbar-width: none;
 }
 
-.styleUps img {
-    border: 1px solid black;
+.styleUpCard {
+  align-self: center;
+  justify-self: center;
+  cursor: crosshair;
+  position: relative;
+  transform: translate(var(--style-up-offset-x), var(--style-up-offset-y)) rotate(var(--style-up-rotation));
+  transition:
+    transform 0.24s ease,
+    width 0.24s ease,
+    z-index 0s;
+  width: var(--style-up-width);
+}
+
+.styleUpCard:hover,
+.styleUpCard--hovered {
+  transform: translate(var(--style-up-offset-x), var(--style-up-offset-y)) rotate(0deg) scale(1.08);
+}
+
+.styleUpCard img {
+  border: 1px solid black;
+  box-shadow: 0 0 0 0 white;
+  height: auto;
+  width: 100%;
 }
 
 .style_sidebar {

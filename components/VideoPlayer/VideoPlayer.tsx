@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   MediaPlayer,
   MediaProvider,
@@ -31,48 +31,53 @@ export default function VideoPlayer({ asset }: VideoPlayerProps) {
 
   const canPlay = useMediaState("canPlay", playerRef);
 
-  if (!src) return null;
+  const handlePlayRequest = useCallback(() => {
+    if (!playerRef.current) return;
 
-function handlePlay() {
-  if (!playerRef.current) return;
+    setHasStarted(true);
+    setHasEnded(false);
 
-  setHasStarted(true);
-  setHasEnded(false);
-
-  if (canPlay) {
-    playerRef.current.play().catch(err => {
-      console.error("Play request failed:", err);
-      setError("This video cannot be played.");
-    });
-  } else {
-    // Wait for can-play event
-    const onCanPlay = () => {
-      playerRef.current?.play().catch(err => {
+    if (canPlay) {
+      playerRef.current.play().catch(err => {
         console.error("Play request failed:", err);
         setError("This video cannot be played.");
       });
-      playerRef.current?.removeEventListener("canplay", onCanPlay);
-    };
-    playerRef.current.addEventListener("canplay", onCanPlay);
-  }
-}
+    } else {
+      const onCanPlay = () => {
+        playerRef.current?.play().catch(err => {
+          console.error("Play request failed:", err);
+          setError("This video cannot be played.");
+        });
+        playerRef.current?.removeEventListener("canplay", onCanPlay);
+      };
+      playerRef.current.addEventListener("canplay", onCanPlay);
+    }
+  }, [canPlay]);
+
+  const handlePlay = useCallback(() => {
+    setHasStarted(true);
+    setHasEnded(false);
+  }, []);
+
+  if (!src) return null;
 
   // data-started is only present while the video is actively in play mode
   const showControls = hasStarted && !hasEnded;
 
   return (
-    <div className="vp-root vp-player-wrapper" data-started={showControls }>
+    <div className="vp-root vp-player-wrapper" data-started={showControls ? '' : undefined}>
       <MediaPlayer
         ref={playerRef}
         src={src}
         playsInline
         className="vp-media-player"
         onEnded={() => setHasEnded(true)}
-        onPlay={() => setHasEnded(false)}
-          onError={(e) => {
-    console.error("Media error:", e);
-    setError("Cannot play video due to error.");
-  }}
+        onPlay={handlePlay}
+        onPlaying={handlePlay}
+        onError={(e) => {
+          console.error("Media error:", e);
+          setError("Cannot play video due to error.");
+        }}
       >
         <MediaProvider />
         {/* {error ? (
@@ -81,8 +86,7 @@ function handlePlay() {
           <Poster 
             className="media-poster"
             src={poster} 
-          // title={title} 
-          // onPlay={handlePlay}
+            onClick={handlePlayRequest}
            />
         {/* )}         */}
 

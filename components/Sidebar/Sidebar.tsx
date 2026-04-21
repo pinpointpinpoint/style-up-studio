@@ -46,7 +46,7 @@ export function Sidebar({
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
             >
                 <div className={`${styles.title} ${isProjectDetail ? styles.projectDetailTitle : ''}`}>
-                    <span>PROJECT INFORMATION</span>
+                    <span>INFO</span>
                     {isProjectDetail && onCloseProjectDetail && (
                         <button
                             type="button"

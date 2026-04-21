@@ -83,15 +83,15 @@ export const sidebarFiltersQuery = defineQuery(`
 `)
 
 export const allStyleUpsQuery = defineQuery(`
-*[_type == "styleUp" && !(_id in path("drafts.**"))
-]{
+*[_type == "styleUp" && !(_id in path("drafts.**"))] | order(_createdAt desc) {
   _id,
-  title,
-    coverImage{
-      alt,
-      ...,
-      asset->,
-    },}
+  name,
+  image{
+    asset,
+    crop,
+    hotspot
+  },
+}
 `)
 
 const projectProjection = `

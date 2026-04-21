@@ -1,18 +1,47 @@
 'use client';
 
 import { urlFor } from "@/sanity/lib/utils";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import Image from "next/image";
 import { FC, useState, useRef } from "react";
 
+export type StyleUpItem = {
+  _id: string
+  name?: string | null
+  image?: SanityImageSource | null
+}
+
 interface StyleUpsProps {
-  styleUps: any | null;
+  styleUps: StyleUpItem[] | null;
+}
+
+function getStableNumber(id: string, salt: number) {
+  let hash = salt
+
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 10000
+  }
+
+  return hash / 10000
+}
+
+function getScatterStyle(styleUp: StyleUpItem, index: number, isHovered: boolean) {
+  const offsetX = -18 + getStableNumber(styleUp._id, 11) * 36
+  const offsetY = -16 + getStableNumber(styleUp._id, 23) * 32
+  const rotation = -8 + getStableNumber(styleUp._id, 37) * 16
+  const width = 82 + getStableNumber(styleUp._id, 51) * 16
+
+  return {
+    '--style-up-offset-x': `${offsetX}px`,
+    '--style-up-offset-y': `${offsetY}px`,
+    '--style-up-rotation': `${rotation}deg`,
+    '--style-up-width': `${width}%`,
+    zIndex: isHovered ? 1000 : index + 1,
+  } as React.CSSProperties
 }
 
 export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
-  const [hovered, setHovered] = useState<any | null>({
-    coverImage: null,
-    title: null
-  });
+  const [hovered, setHovered] = useState<StyleUpItem | null>(styleUps?.[0] ?? null);
   const zoomRef = useRef<HTMLImageElement | null>(null);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,57 +73,23 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
     <div className="main_style">
       {/* Left thumbnails */}
       <div className="styleUps">
-        {styleUps.map((su) => (
+        {styleUps.map((su, index) => (
           <div
             key={su._id}
-            style={{ maxWidth: '100%', cursor: 'crosshair', position: 'relative' }}
-            onMouseEnter={() => setHovered({
-              coverImage: su.coverImage,
-              title: su.title
-            })}
-            onMouseLeave={() => setHovered(null)}
+            className={`styleUpCard ${hovered?._id === su._id ? 'styleUpCard--hovered' : ''}`}
+            style={getScatterStyle(su, index, hovered?._id === su._id)}
+            onMouseEnter={() => setHovered(su)}
             onMouseMove={handleMouseMove}
           >
-            {/* <Image
-              src={urlFor(su.coverImage)?.auto('format').url()}
-              height={300}
-              width={300}
-              style={{ width: '100%', display: 'block' }}
-              alt={typeof su.coverImage.alt === 'string'
-                ? su.coverImage.alt
-                : `Cover image for ${su.title}`}
-            /> */}
-            <div
-              className="style_sidebar--preview"
-              ref={sidebarRef}
-            >
-              {hovered && hovered.coverImage && (
-                <>
-                  <Image
-                    ref={zoomRef}
-                    src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
-                    height={LARGE_HEIGHT}
-                    width={LARGE_WIDTH}
-                    style={{
-                      position: 'absolute',
-                      width: `${LARGE_WIDTH}px`,
-                      height: `${LARGE_HEIGHT}px`,
-                      top: '0',
-                      left: '0',
-                      transition: 'top 0.05s, left 0.05s', // optional smoothness
-                      maxWidth: 'none',
-                      maxHeight: 'none',
-                    }}
-                    alt={typeof hovered.coverImage.alt === 'string'
-                      ? hovered.coverImage.alt
-                      : `Cover image for ${hovered.title}`}
-                  />
-                  <div className="style_title">
-                    <p>{hovered.title.toUpperCase()}</p>
-                  </div>
-                </>
-              )}
-            </div>
+            {su.image && (
+              <Image
+                src={urlFor(su.image).width(900).height(900).fit('crop').url()}
+                height={900}
+                width={900}
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+                alt={`Style up image for ${su.name ?? 'style up'}`}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -104,12 +99,12 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
         className="style_sidebar"
         ref={sidebarRef}
       >
-        {hovered && hovered.coverImage && (
+        {hovered?.image && (
           <>
             <img
               ref={zoomRef}
-              src={urlFor(hovered.coverImage)?.width(LARGE_WIDTH).url()}
-              alt={hovered.coverImage.alt}
+              src={urlFor(hovered.image).width(LARGE_WIDTH).url()}
+              alt={`Zoomed style up image for ${hovered.name ?? 'style up'}`}
               style={{
                 position: 'absolute',
                 width: `${LARGE_WIDTH}px`,
@@ -122,7 +117,7 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
               }}
             />
             <div className="style_title">
-              <p>{hovered.title.toUpperCase()}</p>
+              <p>{hovered.name?.toUpperCase()}</p>
             </div>
           </>
         )}

@@ -1,4 +1,4 @@
-import { StyleUps } from "@/components/StyleUps";
+import { StyleUps, type StyleUpItem } from "@/components/StyleUps";
 import { sanityFetch } from "@/sanity/lib/live"
 import { allStyleUpsQuery } from "@/sanity/lib/queries"
 
@@ -7,6 +7,6 @@ export default async function StylePage() {
     sanityFetch({query: allStyleUpsQuery, stega: false}),
   ]);
   return (
-    <StyleUps styleUps={styleUps}/>
+    <StyleUps styleUps={styleUps as StyleUpItem[]}/>
   )
 }
