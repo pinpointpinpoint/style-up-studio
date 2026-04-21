@@ -1,6 +1,11 @@
-import {ProjectsIcon} from '@sanity/icons'
-import {defineArrayMember, defineField, defineType} from 'sanity'
-import {orderRankField} from '@sanity/orderable-document-list'
+import { ProjectsIcon } from '@sanity/icons'
+import { defineArrayMember, defineField, defineType } from 'sanity'
+import { orderRankField } from '@sanity/orderable-document-list'
+
+const MAX_VIDEO_FILE_SIZE_MB = 250
+const MAX_VIDEO_FILE_SIZE_BYTES = MAX_VIDEO_FILE_SIZE_MB * 1024 * 1024
+const MAX_PREVIEW_CLIP_SIZE_MB = 30
+const MAX_PREVIEW_CLIP_SIZE_BYTES = MAX_PREVIEW_CLIP_SIZE_MB * 1024 * 1024
 
 export default defineType({
   name: 'project',
@@ -9,27 +14,28 @@ export default defineType({
   icon: ProjectsIcon,
   fieldsets: [
     {
-      name: 'basic', 
-      title: 'Basic Info'
+      name: 'basic',
+      title: 'Basic Info',
     },
     {
       name: 'collaborators',
       title: 'Collaborators',
-      description: 'Add any personalities, publications, or brands that collaborated on this project.',
+      description: 'Add any personalities or brands that collaborated on this project.',
       options: {
-        collapsible: true, 
-        collapsed: true
+        collapsible: true,
+        collapsed: true,
       },
     },
     {
-      name: 'media', 
+      name: 'media',
       title: 'Media',
-      description: 'Add images and videos for this project. At least one media item is required.',
+      description:
+        'Add images and videos for this project. At least one media item is required.',
     },
     {
-      name: 'content', 
-      title: 'Content'
-    }
+      name: 'content',
+      title: 'Content',
+    },
   ],
 
   fields: [
@@ -50,7 +56,8 @@ export default defineType({
     defineField({
       name: 'date',
       title: 'Project Date*',
-      description: 'Only the year will be displayed on the site, but you can provide a full date for better organization and future flexibility.',
+      description:
+        'Only the year will be displayed on the site, but you can provide a full date for better organization and future flexibility.',
       type: 'date',
       validation: (rule) => rule.required().error('Add a project date in YYYY-MM-DD format.'),
       options: {
@@ -61,11 +68,14 @@ export default defineType({
     defineField({
       name: 'slug',
       title: 'Slug*',
-      description: 'The slug is the URL path for this project page. It will be auto-generated from the title but can be customized if needed.',
+      description:
+        'The slug is the URL path for this project page. It will be auto-generated from the title but can be customized if needed.',
       type: 'slug',
-      options: {source: 'title', maxLength: 96},
+      options: { source: 'title', maxLength: 96 },
       validation: (rule) =>
-        rule.required().error('Slug is required for the project URL. Click "Generate" if empty.'),
+        rule
+          .required()
+          .error('Slug is required for the project URL. Click "Generate" if empty.'),
       fieldset: 'basic',
     }),
     defineField({
@@ -76,11 +86,11 @@ export default defineType({
       of: [
         {
           type: 'reference',
-          to: [{type: 'projectType'}],
-          options: { disableNew: true }
+          to: [{ type: 'projectType' }],
+          options: { disableNew: true },
         },
       ],
-      fieldset: 'basic'
+      fieldset: 'basic',
     }),
     defineField({
       name: 'featured',
@@ -100,20 +110,7 @@ export default defineType({
       of: [
         {
           type: 'reference',
-          to: [{type: 'personality'}],
-        },
-      ],
-      fieldset: 'collaborators',
-    }),
-    defineField({
-      name: 'publications',
-      title: 'Publications',
-      type: 'array',
-      validation: (rule) => rule.unique(),
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'publication'}],
+          to: [{ type: 'personality' }],
         },
       ],
       fieldset: 'collaborators',
@@ -126,7 +123,7 @@ export default defineType({
       of: [
         {
           type: 'reference',
-          to: [{type: 'brand'}],
+          to: [{ type: 'brand' }],
         },
       ],
       fieldset: 'collaborators',
@@ -138,13 +135,13 @@ export default defineType({
       of: [
         defineArrayMember({
           type: 'image',
-          options: {hotspot: true},
+          options: { hotspot: true },
         }),
       ],
-      options: {layout: 'grid'},
+      options: { layout: 'grid' },
       validation: (rule) =>
         rule.custom((_, context) => {
-          const {gallery, videos, videoUrls} = context.document as {
+          const { gallery, videos, videoUrls } = context.document as {
             gallery?: unknown[]
             videos?: unknown[]
             videoUrls?: unknown[]
@@ -161,11 +158,27 @@ export default defineType({
     defineField({
       name: 'videos',
       title: 'Project Videos',
+      description:
+        'Upload a web-optimized MP4 under 250MB for best browser playback. For longer videos, use a YouTube or Vimeo URL.',
       type: 'array',
       of: [
         defineArrayMember({
           type: 'file',
           title: 'Video File',
+          fields: [
+            defineField({
+              name: 'thumbnail',
+              title: 'Thumbnail*',
+              description:
+                'Required image used as the video thumbnail.',
+              type: 'image',
+              options: {
+                hotspot: true,
+              },
+              validation: (Rule) =>
+                Rule.required().error('Add a thumbnail for this uploaded video.'),
+            }),
+          ],
           options: {
             accept: 'video/mp4',
             storeOriginalFilename: true,
@@ -173,14 +186,35 @@ export default defineType({
           preview: {
             select: {
               fileName: 'asset.originalFilename',
+              media: 'thumbnail',
             },
-            prepare({fileName}) {
+            prepare({ fileName, media }) {
               return {
                 title: fileName || 'Untitled',
+                media,
               }
             },
           },
-          validation: (Rule) => Rule.required(),
+          validation: (Rule) =>
+            Rule.required().custom(async (file, context) => {
+              const assetRef = file?.asset?._ref
+
+              if (!assetRef) {
+                return true
+              }
+
+              const client = context.getClient({ apiVersion: '2024-01-01' })
+              const size = await client.fetch<number | null>(
+                '*[_id == $assetRef][0].size',
+                { assetRef },
+              )
+
+              if (size && size > MAX_VIDEO_FILE_SIZE_BYTES) {
+                return `Video files should be under ${MAX_VIDEO_FILE_SIZE_MB}MB. Export a web-optimized MP4.`
+              }
+
+              return true
+            }),
         }),
       ],
       fieldset: 'media',
@@ -198,21 +232,36 @@ export default defineType({
             defineField({
               name: 'url',
               title: 'URL',
+              description:
+                'Full URL to your video (YouTube or Vimeo). The video will appear in the project view.',
               type: 'url',
-              description: 'Full URL to your video. (e.g., YouTube, Vimeo). The video will appear in the project view.',
               validation: (Rule) =>
                 Rule.required()
-                  .uri({allowRelative: false, scheme: ['http', 'https']})
-                  .error('Enter a valid URL starting with https:// or http://'),
+                  .uri({ allowRelative: false, scheme: ['http', 'https'] })
+                  .error(
+                    'Enter a valid Youtube or Vimeo URL starting with https:// or http://',
+                  ),
+            }),
+            defineField({
+              name: 'thumbnail',
+              title: 'Thumbnail',
+              description:
+                'Optional image used as this video link thumbnail. Default YouTube/Vimeo thumbnails are used if empty.',
+              type: 'image',
+              options: {
+                hotspot: true,
+              },
             }),
           ],
           preview: {
             select: {
               url: 'url',
+              media: 'thumbnail',
             },
-            prepare({url}) {
+            prepare({ url, media }) {
               return {
                 title: url || 'Untitled',
+                media,
               }
             },
           },
@@ -227,7 +276,51 @@ export default defineType({
       options: {
         hotspot: true,
       },
-      validation: (Rule) => Rule.required().error('Cover image is required for project cards.'),
+      validation: (Rule) =>
+        Rule.required().error('Cover image is required for project cards.'),
+      fieldset: 'media',
+    }),
+    defineField({
+      name: 'previewClip',
+      title: 'Preview Clip',
+      description:
+        'Required when this project has video. Upload a 3-5 second MP4 used for project-card hover previews.',
+      type: 'file',
+      options: {
+        accept: 'video/mp4',
+        storeOriginalFilename: true,
+      },
+      validation: (Rule) =>
+        Rule.custom(async (file, context) => {
+          const { videos, videoUrls } = context.document as {
+            videos?: unknown[]
+            videoUrls?: unknown[]
+          }
+          const hasVideo = [videos, videoUrls].some(
+            (field) => Array.isArray(field) && field.length > 0,
+          )
+
+          if (hasVideo && !file?.asset?._ref) {
+            return 'Add a 3-5 second preview clip for projects with video.'
+          }
+
+          const assetRef = file?.asset?._ref
+
+          if (!assetRef) {
+            return true
+          }
+
+          const client = context.getClient({ apiVersion: '2024-01-01' })
+          const size = await client.fetch<number | null>('*[_id == $assetRef][0].size', {
+            assetRef,
+          })
+
+          if (size && size > MAX_PREVIEW_CLIP_SIZE_BYTES) {
+            return `Preview clips should be under ${MAX_PREVIEW_CLIP_SIZE_MB}MB. Export a short, web-optimized MP4.`
+          }
+
+          return true
+        }),
       fieldset: 'media',
     }),
     defineField({
@@ -243,7 +336,7 @@ export default defineType({
                 name: 'link',
                 type: 'object',
                 title: 'Link',
-                fields: [{name: 'href', type: 'url', title: 'Url'}],
+                fields: [{ name: 'href', type: 'url', title: 'Url' }],
               },
             ],
           },
@@ -277,7 +370,7 @@ export default defineType({
             defineField({
               name: 'link',
               title: 'External Link',
-              type: 'url'
+              type: 'url',
             }),
           ],
           preview: {
@@ -290,7 +383,7 @@ export default defineType({
       ],
       fieldset: 'content',
     }),
-    orderRankField({type: 'project'}),
+    orderRankField({ type: 'project' }),
   ],
 
   preview: {
@@ -301,7 +394,7 @@ export default defineType({
       client: 'client',
     },
 
-    prepare({title, media, date, client}) {
+    prepare({ title, media, date, client }) {
       const dateObj = date ? new Date(date) : null
 
       let subtitle = ''
@@ -330,12 +423,12 @@ export default defineType({
     {
       title: 'Project Date, newest first',
       name: 'dateDesc',
-      by: [{field: 'date', direction: 'desc'}],
+      by: [{ field: 'date', direction: 'desc' }],
     },
     {
       title: 'Project Date, oldest first',
       name: 'dateAsc',
-      by: [{field: 'date', direction: 'asc'}],
+      by: [{ field: 'date', direction: 'asc' }],
     },
   ],
 })

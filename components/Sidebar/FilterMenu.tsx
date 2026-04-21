@@ -5,8 +5,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import styles from './FilterMenu.module.css';
 import { normalizeSidebarFilters } from '@/lib/normalizeSidebarFilters';
 
-type CollaboratorFilterType = 'brand' | 'publication' | 'personality'
-const FEATURED_ACTIVE_IMAGE_SRC = 'og/og_img.png'
+type CollaboratorFilterType = 'brand' | 'personality'
+const FEATURED_ACTIVE_IMAGE_SRC = '/og/og_img.png'
 
 type FilterMenuProps = {
   sidebarFilters: any | null
@@ -75,7 +75,7 @@ export default function FilterMenu({
   }
 
   useEffect(() => {
-    if (!['brand', 'publication', 'personality'].includes(filter.type)) return
+    if (!['brand', 'personality'].includes(filter.type)) return
 
     setOpenGroups((current) => ({
       ...current,

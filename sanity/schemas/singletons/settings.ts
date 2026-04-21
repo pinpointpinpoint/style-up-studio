@@ -49,13 +49,7 @@ export default defineType({
           title: 'Show Brands Filter',
           type: 'boolean',
           description: 'Show or hide the Brands filter in the sidebar.'
-        }),
-        defineField({
-          name: 'showPublications',
-          title: 'Show Publications Filter',
-          type: 'boolean',
-          description: 'Show or hide the Publications filter in the sidebar.'
-        }),
+        })
       ],
     }),
   ],

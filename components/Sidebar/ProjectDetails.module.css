@@ -27,6 +27,84 @@
     height: fit-content;
 }
 
+.revealedDetails {
+  border-bottom: 1px solid black;
+  overflow: hidden;
+}
+
+.metaRow {
+  border-bottom: 1px solid black;
+  display: grid;
+  font-size: var(--font-sm);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.metaRow span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 3px 30px;
+}
+
+.metaRow span + span {
+  border-left: 1px solid black;
+}
+
+.description,
+.credits {
+  padding: 18px 30px 20px;
+}
+
+.description + .credits {
+  border-top: 1px solid black;
+}
+
+.description h3,
+.credits h3 {
+  font-size: var(--font-sm);
+  font-weight: inherit;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.portableText {
+  font-size: var(--font-sm);
+}
+
+.portableText p {
+  margin: 0 0 1em;
+  text-align: justify;
+}
+
+.portableText p:last-child {
+  margin-bottom: 0;
+}
+
+.credits ul {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.credits li {
+  display: grid;
+  font-size: var(--font-sm);
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.credits a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.credits li > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 
 
 /* Webkit browsers (Chrome, Edge, Safari) */
@@ -49,22 +127,6 @@
   margin: 2px; /* top/bottom space */
 }
 
-
-.details p {
-    text-align: justify;
-}
-
-.credits details,
-.description details {
-    border-bottom: solid 1px black;
-}
-
-/* Credits and Description */
-
-.credits li {
-    display: flex;
-    justify-content: space-between;
-}
 
 /* Assets */
 .assets {
@@ -153,24 +215,70 @@
 }
 
 .assetsWrapper {
-  height: fit-content;
+  height: 50px;
   width: 100%;
   display: flex;
   gap: 5px;
-  overflow-x: auto;
+  overflow: hidden;
   padding: 10px 30px 10px 30px;
   scrollbar-width: none;
-  overflow-x: auto;
-  mask-image: linear-gradient(to right, black 90%, transparent);
+}
+
+.assetsMeasurer {
+  display: flex;
+  gap: 5px;
+  height: 0;
+  left: -9999px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
 }
 
 .asset {
   border: 1px solid black;
-  aspect-ratio: 1/1;
   height: 30px;
-  width: 30px;
+  width: auto;
   object-fit: cover;
-  flex: 0 0 auto;
+}
+
+.assetCount {
+  align-items: center;
+  border: 1px solid black;
+  display: flex;
+  flex: 0 0 30px;
+  font-size: var(--font-sm);
+  height: 30px;
+  justify-content: center;
+  line-height: 1;
+  width: 30px;
+}
+
+.assetEmpty {
+  border: 1px solid var(--disabled);
+  flex: 0 0 22px;
+  height: 30px;
+  position: relative;
+  width: 22px;
+}
+
+.assetEmpty::before,
+.assetEmpty::after {
+  background: var(--disabled);
+  content: "";
+  height: 1px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  width: 35px;
+}
+
+.assetEmpty::before {
+  transform: translate(-50%, -50%) rotate(53deg);
+}
+
+.assetEmpty::after {
+  transform: translate(-50%, -50%) rotate(-53deg);
 }
 
 .assetsWrapper::-webkit-scrollbar {

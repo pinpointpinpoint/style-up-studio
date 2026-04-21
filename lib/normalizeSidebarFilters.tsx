@@ -36,12 +36,6 @@ export function normalizeSidebarFilters(sidebarFilters: any) {
       label: "Brands",
       filterType: "brand",
       items: sidebarFilters.brands ?? []
-    },
-    {
-      _id: "publications",
-      label: "Publications",
-      filterType: "publication",
-      items: sidebarFilters.publications ?? []
     }
   ]
 

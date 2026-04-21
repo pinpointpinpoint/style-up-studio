@@ -1,4 +1,5 @@
 .projectGallery {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   display: grid;
   flex: 2;
   gap: 10px;
@@ -12,17 +13,8 @@
   align-content: start;
 }
 
-.archiveGallery {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.curatedGallery {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .featuredGallery {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-
 }
 
 .viewMoreButton {

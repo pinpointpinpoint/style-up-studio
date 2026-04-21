@@ -9,7 +9,7 @@
   --font-2xl: 1.5rem;   /* 24px */
   --font-3xl: 2rem;     /* 32px */
 
-  --disabled: rgba(0, 0, 0, 0.324);
+  --disabled: rgba(0, 0, 0, 0.204);
 }
 
 body {

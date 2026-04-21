@@ -8,7 +8,6 @@ const PARAM_KEYS = {
   view: 'view',
   projectType: 'projectType',
   brand: 'brand',
-  publication: 'publication',
   personality: 'personality',
 } as const
 
@@ -32,7 +31,6 @@ type SidebarFilterItem = {
 type SidebarFilters = {
   projectTypes?: SidebarFilterItem[]
   brands?: SidebarFilterItem[]
-  publications?: SidebarFilterItem[]
   personalities?: SidebarFilterItem[]
 } | null | undefined
 
@@ -56,7 +54,7 @@ function findSlugById(items: SidebarFilterItem[] | undefined, id: string) {
 }
 
 function filterBySlug(
-  type: 'brand' | 'publication' | 'personality' | 'projectType',
+  type: 'brand' | 'personality' | 'projectType',
   items: SidebarFilterItem[] | undefined,
   slug: string | undefined,
 ): Filter | null {
@@ -72,13 +70,6 @@ export function parseProjectFilter(
 ): Filter {
   const brandFilter = filterBySlug('brand', sidebarFilters?.brands, readParam(searchParams, PARAM_KEYS.brand))
   if (brandFilter) return brandFilter
-
-  const publicationFilter = filterBySlug(
-    'publication',
-    sidebarFilters?.publications,
-    readParam(searchParams, PARAM_KEYS.publication),
-  )
-  if (publicationFilter) return publicationFilter
 
   const personalityFilter = filterBySlug(
     'personality',
@@ -118,7 +109,6 @@ export function writeProjectFilterToParams(
   const itemsByType = {
     projectType: sidebarFilters?.projectTypes,
     brand: sidebarFilters?.brands,
-    publication: sidebarFilters?.publications,
     personality: sidebarFilters?.personalities,
   }
   const slug = findSlugById(itemsByType[filter.type], filter.id)

@@ -13,11 +13,11 @@ type ProjectGalleryProps = {
   hasMore: boolean
   isLoading?: boolean
   onLoadMore: () => void
+  getProjectHref: (project: Project) => string
   onProjectHover?: (project: Project) => void
   onProjectLeave?: () => void
   hasMouseMoved?: boolean
   isFeaturedProjects: boolean
-  isArchiveLayout: boolean
 }
 
 function getStableDelay(id: string) {
@@ -35,11 +35,11 @@ export default function ProjectGallery({
   hasMore,
   isLoading = false,
   onLoadMore,
+  getProjectHref,
   onProjectHover,
   onProjectLeave,
   hasMouseMoved = false,
-  isFeaturedProjects,
-  isArchiveLayout
+  isFeaturedProjects
 }: ProjectGalleryProps) {
   const introDone = useIntro()
   const [cursor, setCursor] = useState({show: false, x: 0, y: 0 })
@@ -75,9 +75,13 @@ export default function ProjectGallery({
     setCursor((prev) => ({ ...prev, show: false }))
   }
 
+  const onCardLeave = () => {
+    setCursor((prev) => ({ ...prev, show: false }))
+  }
+
   if (projects.length < 1) {
     return (
-      <div className={`${styles.projectGallery} ${isArchiveLayout ? styles.archiveGallery : styles.curatedGallery}`}>
+      <div className={styles.projectGallery}>
         No projects
       </div>
     )
@@ -86,7 +90,9 @@ export default function ProjectGallery({
   return (
     <div
       ref={galleryRef}
-      className={`${styles.projectGallery} ${isArchiveLayout ? styles.archiveGallery : styles.curatedGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}
+      className={`${styles.projectGallery} ${isFeaturedProjects ? styles.featuredGallery : ""}`}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
     >
         {projects?.map((project, idx) => (
         <motion.div
@@ -98,9 +104,10 @@ export default function ProjectGallery({
           <ProjectCard
             project={project}
             index={idx}
+            href={getProjectHref(project)}
             onHoverStart={onEnter(project)}
-            onHoverMove={onMove}
-            onHoverEnd={onLeave}
+            onHoverMove={() => {}}
+            onHoverEnd={onCardLeave}
             hasMouseMoved={hasMouseMoved}
           />
         </motion.div>

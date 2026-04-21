@@ -10,6 +10,7 @@ import type { SidebarFiltersQueryResult } from '@/sanity.types'
 import '@vidstack/react/player/styles/base.css'
 import styles from'./WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
+import ProjectDetailView from '../ProjectDetailView/ProjectDetailView'
 import { useMouseMoved } from '@/hooks/useMouseInitiatedHover'
 import { getProjects } from '@/app/(site)/actions'
 import {
@@ -25,6 +26,7 @@ interface WorkSectionProps {
   initialProjects: Project[] | null
   initialFilter: Filter
   sidebarFilters: SidebarFilters | null
+  selectedProject?: Project | null
   isProjectsLoading?: boolean
 }
 
@@ -32,7 +34,7 @@ function getFilterKey(filter: Filter) {
   return JSON.stringify(filter)
 }
 
-export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, isProjectsLoading = false }) => {
+export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, selectedProject = null, isProjectsLoading = false }) => {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -47,7 +49,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   const activeSidebarFilters = sidebarFilters
   const hasSkippedInitialFetchRef = useRef(false)
 
-  const displayedProject = hoveredProject
+  const displayedProject = hoveredProject ?? selectedProject
 
   const renderAsset = (asset: any) => {
     switch (asset.kind) {
@@ -136,25 +138,57 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
     }
   }, [filter, hasMore, isLoading, visibleProjects])
 
+  const getProjectHref = useCallback((project: Project) => {
+    return project.slug ? `/work/${project.slug}` : '/'
+  }, [])
+
+  const handleProjectDetailClose = useCallback(() => {
+    let shouldGoBack = false
+
+    try {
+      const referrer = document.referrer ? new URL(document.referrer) : null
+      shouldGoBack = Boolean(
+        referrer &&
+        referrer.origin === window.location.origin &&
+        window.history.length > 1
+      )
+    } catch {
+      shouldGoBack = false
+    }
+
+    if (shouldGoBack) {
+      router.back()
+      return
+    }
+
+    router.push('/')
+  }, [router])
+
   return (
     <div className={styles.workSection}>
-      <ProjectGallery 
-        projects={visibleProjects}
-        hasMore={hasMore}
-        isLoading={isLoading}
-        onLoadMore={handleLoadMore}
-        onProjectHover={setHoveredProject}
-        onProjectLeave={() => setHoveredProject(null)}
-        hasMouseMoved={hasMouseMoved}
-        isFeaturedProjects={displayedFilter.type === "featured"}
-        isArchiveLayout={displayedFilter.type === "all"}
-      />
+      {selectedProject ? (
+        <ProjectDetailView project={selectedProject} />
+      ) : (
+        <ProjectGallery
+          projects={visibleProjects}
+          hasMore={hasMore}
+          isLoading={isLoading}
+          onLoadMore={handleLoadMore}
+          getProjectHref={getProjectHref}
+          onProjectHover={setHoveredProject}
+          onProjectLeave={() => setHoveredProject(null)}
+          hasMouseMoved={hasMouseMoved}
+          isFeaturedProjects={displayedFilter.type === "featured"}
+        />
+      )}
       <Sidebar
         displayedProject={displayedProject}
         sidebarFilters={activeSidebarFilters}
         filter={filter}
         setFilter={handleFilterChange}
         renderAsset={renderAsset}
+        isProjectDetail={Boolean(selectedProject)}
+        onCloseProjectDetail={handleProjectDetailClose}
       />
     </div>
   )

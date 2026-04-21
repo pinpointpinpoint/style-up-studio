@@ -17,7 +17,6 @@ import post from './sanity/schemas/documents/post'
 import { customPageStructure } from './sanity/deskStructure'
 import personality from './sanity/schemas/documents/personality'
 import brand from './sanity/schemas/documents/brand'
-import publication from './sanity/schemas/documents/publication'
 import settings from './sanity/schemas/singletons/settings'
 
 const title =
@@ -41,7 +40,6 @@ export default defineConfig({
       post,
       personality,
       brand,
-      publication,
       // Taxonomy
       projectType
     ],

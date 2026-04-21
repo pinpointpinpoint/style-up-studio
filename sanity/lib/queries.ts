@@ -9,22 +9,6 @@ export const homePageQuery = defineQuery(`
   }
 `)
 
-export const projectBySlugQuery = defineQuery(`
-  *[_type == "project" && slug.current == $slug][0] {
-    _id,
-    _type,
-    client,
-    coverImage,
-    description,
-    duration,
-    overview,
-    site,
-    "slug": slug.current,
-    tags,
-    title,
-  }
-`)
-
 export const seoSettingsQuery = `
   *[_type == "settings"][0]{
     "description": seo.description
@@ -82,19 +66,6 @@ export const sidebarFiltersQuery = defineQuery(`
       references(^._id)
     ])
   },
-  "publications": *[
-    _type == "publication" &&
-    !(_id in path("drafts.**"))
-  ] | order(name asc) {
-    _id,
-    "title": name,
-    "slug": slug.current,
-    "referenceCount": count(*[
-      _type == "project" &&
-      !(_id in path("drafts.**")) &&
-      references(^._id)
-    ])
-  },
   "brands": *[
     _type == "brand" &&
     !(_id in path("drafts.**"))
@@ -134,22 +105,32 @@ const projectProjection = `
   featured,
   "personalities": personalities[]->{_id, name, "slug": slug.current},
   "brands": brands[]->{_id, name, "slug": slug.current},
-  "publications": publications[]->{_id, name, "slug": slug.current},
   gallery[]{
     _key,
     asset,
     crop,
     hotspot
   },
+  "previewUrl": previewClip.asset->url,
   videos[]{
     _key,
     "title": asset->originalFilename,
-    "fileUrl": asset->url
+    "fileUrl": asset->url,
+    thumbnail{
+      asset,
+      crop,
+      hotspot
+    }
   },
   videoUrls[]{
     _key,
     title,
-    url
+    url,
+    thumbnail{
+      asset,
+      crop,
+      hotspot
+    }
   },
   coverImage{
     asset,
@@ -165,6 +146,16 @@ const projectProjection = `
   orderRank
 `
 
+export const projectBySlugQuery = defineQuery(`
+  *[
+    _type == "project" &&
+    !(_id in path("drafts.**")) &&
+    slug.current == $slug
+  ][0]{
+   ${projectProjection}
+  }
+`)
+
 export const projectsQuery = defineQuery(`
   *[
     _type == "project" &&
@@ -174,7 +165,6 @@ export const projectsQuery = defineQuery(`
       ($filterType == "featured" && featured == true) ||
       ($filterType == "projectType" && $filterId in projectType[]._ref) ||
       ($filterType == "brand" && $filterId in brands[]._ref) ||
-      ($filterType == "publication" && $filterId in publications[]._ref) ||
       ($filterType == "personality" && $filterId in personalities[]._ref)
     ) &&
     (
@@ -196,7 +186,6 @@ export const featuredProjectsQuery = defineQuery(`
     !(_id in path("drafts.**")) &&
       featured == true &&
     (
-      !defined($cursorId) ||
       $cursorId == "" ||
       coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||
       (

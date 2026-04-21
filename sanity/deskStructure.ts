@@ -59,10 +59,6 @@ export const customPageStructure = (S: StructureBuilder, context: any) => {
       S.listItem()
         .title('Brands')
         .icon(TagIcon)
-        .child(S.documentTypeList('brand').title('Brands')),
-      S.listItem()
-        .title('Publications')
-        .icon(BookIcon)
-        .child(S.documentTypeList('publication').title('Publications')),
+        .child(S.documentTypeList('brand').title('Brands'))
     ])
 }

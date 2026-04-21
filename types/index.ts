@@ -48,12 +48,6 @@ export interface Brand {
   slug?: string;
 }
 
-export interface Publication {
-  _id: string;
-  name: string;
-  slug?: string;
-}
-
 export interface ProjectType {
   _id: string,
   title: string | null,
@@ -68,7 +62,7 @@ export interface FilterOption {
 }
 
 export interface CollaboratorFilterOption extends FilterOption {
-  filterType: 'brand' | 'publication' | 'personality'
+  filterType: 'brand' | 'personality'
 }
 
 export type Filter =
@@ -76,7 +70,6 @@ export type Filter =
   | {type: 'all'}
   | {type: 'projectType'; id: string}
   | {type: 'brand'; id: string}
-  | {type: 'publication'; id: string}
   | {type: 'personality'; id: string}
 
 export type ProjectCursor =
