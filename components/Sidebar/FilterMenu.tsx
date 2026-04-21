@@ -6,7 +6,7 @@ import styles from './FilterMenu.module.css';
 import { normalizeSidebarFilters } from '@/lib/normalizeSidebarFilters';
 
 type CollaboratorFilterType = 'brand' | 'personality'
-const FEATURED_ACTIVE_IMAGE_SRC = '/og/og_img.png'
+const FEATURED_ACTIVE_IMAGE_SRC = '/featured.svg'
 
 type FilterMenuProps = {
   sidebarFilters: any | null
