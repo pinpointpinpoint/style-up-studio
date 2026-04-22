@@ -4,9 +4,12 @@ import { useState } from 'react'
 import { SlideOutMenu } from './SlideOutMenu';
 import styles from './Navbar.module.css'
 import Link from 'next/link';
+import { urlForImage } from '@/sanity/lib/utils';
 
-export default function Navbar() {
+export default function Navbar({about, contact}) {
   const [openMenu, setOpenMenu] = useState<'about' | 'contact' | null>(null);
+  const aboutImageUrl = urlForImage(about?.image)?.height(60).url()
+  const aboutPreviewUrl = urlForImage(about?.image)?.height(800).url()
 
   const closeMenu = () => {
     setOpenMenu(null)
@@ -18,9 +21,16 @@ export default function Navbar() {
         <button onClick={() => setOpenMenu(openMenu === 'about' ? null : 'about')}>ABOUT</button>
         <SlideOutMenu isOpen={openMenu === 'about'} direction="left" onClose={closeMenu}>
           <div className={styles.menuContentRow}>
-              <p className={styles.aboutText}>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore, at. Voluptas reiciendis fugiat voluptatum iusto omnis.</p>
-              <button onClick={closeMenu}>CLOSE</button>
+              <span className={styles.aboutPreview}>
+                {aboutImageUrl && (
+                  <span className={styles.aboutImageHover}>
+                    <img className={styles.aboutImageThumb} src={aboutImageUrl} alt="" />
+                    <img className={styles.aboutImageLarge} src={aboutPreviewUrl} alt="" />
+                  </span>
+                )}
+                <p className={styles.aboutText}>{about.bio}</p>
+              </span>
+              <button onClick={closeMenu}>ABOUT</button>
           </div>
         </SlideOutMenu>
       </div>
@@ -31,10 +41,6 @@ export default function Navbar() {
           <div className={styles.menuContentRow}>
             <button onClick={closeMenu}>CLOSE</button>
             <div className={styles.contactInfoRow}>
-              <div className={styles.contactColumn}>
-                <div>Email:</div>
-                <div>Instagram:</div>
-              </div>
               <div className={styles.contactColumn}>
                 <a href="mailto:angie.jayasinghe@gmail.com" target="_blank">angie.jayasinghe@gmail.com</a>
                 <a href="https://instagram.com/bby_aj" target="_blank">@bby_aj</a>

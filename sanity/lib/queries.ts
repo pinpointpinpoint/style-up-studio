@@ -1,17 +1,26 @@
 import {defineQuery} from 'next-sanity'
 
-export const homePageQuery = defineQuery(`
-  *[_type == "home"][0]{
-    _id,
-    _type,
-    overview,
-    title,
-  }
-`)
-
 export const seoSettingsQuery = `
   *[_type == "settings"][0]{
     "description": seo.description
+  }
+`
+
+export const aboutSectionQuery = `
+*[_type == "about"][0]{
+    image{
+      asset,
+      crop,
+      hotspot
+    },
+    bio
+  }
+`
+
+export const contactSectionQuery = `
+  *[_type == "contact"][0]{
+    email,
+    instagram
   }
 `
 

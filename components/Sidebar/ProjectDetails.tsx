@@ -90,7 +90,9 @@ const ProjectDetails = ({
         () => [...galleryThumbnails, ...videoThumbnails],
         [galleryThumbnails, videoThumbnails],
     )
-    const resolvedVisibleThumbnailCount = visibleThumbnailCount ?? thumbnails.length
+    const resolvedVisibleThumbnailCount = expandDetails
+        ? thumbnails.length
+        : visibleThumbnailCount ?? thumbnails.length
     const hiddenThumbnailCount = Math.max(0, thumbnails.length - resolvedVisibleThumbnailCount)
     const visibleThumbnails = useMemo(
         () => thumbnails.slice(0, resolvedVisibleThumbnailCount),
@@ -102,6 +104,11 @@ const ProjectDetails = ({
     }, [displayedProject?._id])
 
     useEffect(() => {
+        if (expandDetails) {
+            setVisibleThumbnailCount(null)
+            return
+        }
+
         const wrapper = assetsWrapperRef.current
         const measuringWrapper = measuringWrapperRef.current
 
@@ -151,7 +158,7 @@ const ProjectDetails = ({
         observer.observe(measuringWrapper)
 
         return () => observer.disconnect()
-    }, [thumbnails.length])
+    }, [expandDetails, thumbnails.length])
 
     useEffect(() => {
         let cancelled = false
@@ -270,7 +277,10 @@ const ProjectDetails = ({
                             />
                         ))}
                     </div>
-                    <div className={styles.assetsWrapper} ref={assetsWrapperRef}>
+                    <div
+                        className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
+                        ref={assetsWrapperRef}
+                    >
                         {visibleThumbnails.map((thumbnail, idx) => (
                             <img
                                 key={`${thumbnail.key}-${idx}`}

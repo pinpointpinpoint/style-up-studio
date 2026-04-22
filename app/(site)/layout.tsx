@@ -1,14 +1,14 @@
 import '@/styles/index.css'
-import { sanityFetch, SanityLive } from '@/sanity/lib/live'
-import { seoSettingsQuery } from '@/sanity/lib/queries'
+import { sanityFetch } from '@/sanity/lib/live'
+import { aboutSectionQuery, contactSectionQuery, seoSettingsQuery } from '@/sanity/lib/queries'
 import type { Metadata, Viewport } from 'next'
 import { toPlainText } from 'next-sanity'
-import { handleError } from './client-utils'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from 'sonner'
 import SplashGate from '@/components/SplashGate/SplashGate'
 import AccordionNav from '@/components/Accordion/AccordionNav'
 import Navbar from '@/components/Navbar/Navbar'
+import EasterEgg from '@/components/EasterEgg/EasterEgg'
 
 export async function generateMetadata(): Promise<Metadata> {
   const [{ data: settings }] = await Promise.all([
@@ -44,18 +44,24 @@ export const viewport: Viewport = {
 }
 
 export default async function IndexRoute({ children }: { children: React.ReactNode }) {
+   const [{ data: about }, {data: contact}] = await Promise.all([
+    sanityFetch({ query: aboutSectionQuery, stega: false }),
+    sanityFetch({ query: contactSectionQuery, stega: false })
+  ])
+
+
   return (
     <>
       <SplashGate>
         <div className="site">
-          <Navbar />
+          <Navbar about={about} contact={contact}/>
           <AccordionNav />
           <main className="site__main">
               {children}
           </main>
         </div>
+        <EasterEgg />
         <Toaster />
-        <SanityLive onError={handleError} />
         <SpeedInsights />
       </SplashGate>
     </>

@@ -224,6 +224,12 @@
   scrollbar-width: none;
 }
 
+.assetsWrapperExpanded {
+  flex-wrap: wrap;
+  height: auto;
+  overflow: visible;
+}
+
 .assetsMeasurer {
   display: flex;
   gap: 5px;

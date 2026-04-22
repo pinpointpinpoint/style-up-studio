@@ -3,7 +3,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0px 10px;
+  padding: 0px 20px;
   min-height: 30px;
   max-height: 30px;
 }
@@ -13,29 +13,34 @@
     align-items: center;
 }
 
-.navbar img {
-  width: 375px auto;
-  transition: width 2s;
-  padding: 0 30px;
- }
+.navbarItem {
+  align-items: center;
+  display: flex;
+}
+
+.navbarLogo {
+  display: block;
+  height: 18px;
+  width: auto;
+}
 
 .navbarItem button {
-  width: 100% auto;
   white-space: nowrap;
   padding: 0;
   font-size: var(--font-md);
+  line-height: 1;
 }
 
 .navbarItemContent {
   display: flex;
   align-items: center;
-  padding: 5px 5px;
+  padding: 0;
   justify-content: space-between;
   position: absolute;
   top: 0;
   width: 100vw;
-  min-height: 40px;
-  max-height: 40px;
+  min-height: 30px;
+  max-height: 30px;
   background-color: white;
 }
 
@@ -48,25 +53,84 @@
 }
 
 .menuContentRow {
+  align-items: center;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
+  min-height: 30px;
   width: 100%;
+  padding: 0px 20px;
+}
+
+.aboutPreview {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.aboutImageHover {
+  display: block;
+  flex: 0 0 auto;
+  height: 24px;
+  position: relative;
+}
+
+.aboutImageThumb {
+  display: block;
+  flex: 0 0 auto;
+  height: 24px;
+  max-height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.aboutImageLarge {
+  border: 1px solid black;
+  height: 400px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 30px;
+  width: auto;
+  z-index: 9999;
+}
+
+.aboutImageHover:hover .aboutImageLarge,
+.aboutImageHover:focus-within .aboutImageLarge {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .aboutText {
   display: flex;
   align-items: center;
-  width: 50%;
+  min-width: 0;
+  overflow: hidden;
   text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-sm);
+  line-height: 1;
 }
 
 .contactInfoRow {
+  align-items: center;
   display: flex;
   gap: 5rem;
   text-align: right;
+  font-size: var(--font-sm);
+  line-height: 1;
 }
 
 .contactColumn {
   display: flex;
-  flex-direction: column;
+  gap: 15px;
+}
+
+.contactColumn a {
+  white-space: nowrap;
 }
