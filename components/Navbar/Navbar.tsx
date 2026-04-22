@@ -34,7 +34,9 @@ export default function Navbar({about, contact}) {
           </div>
         </SlideOutMenu>
       </div>
-      <Link href="/"><img className={styles.navbarLogo} alt="Style Up Studio" width="140px" src="/minimal_logo.svg"/></Link>
+      <Link href="/">
+        <img className={styles.navbarLogo} alt="Style Up Studio" width="140px" src="/minimal_logo.svg"/>
+      </Link>
       <div className={styles.navbarItem}>
         <button onClick={() => setOpenMenu(openMenu === 'contact' ? null : 'contact')}>CONTACT</button>
         <SlideOutMenu isOpen={openMenu === 'contact'} direction="right" onClose={closeMenu}>

@@ -1,6 +1,6 @@
 .accordion {
-  --accordion-header-height: 30px;
-  --accordion-top-offset: 30px;
+  --accordion-header-height: 35px;
+  --accordion-top-offset: 35px;
   position: fixed;
   top: var(--accordion-top-offset);
   left: 0;
@@ -25,7 +25,7 @@
   width: 100%;
   background: white;
   color: black;
-  padding: 0px 20px;
+  padding: 0px 10px;
   text-align: left;
   border-top: 1px solid black;
   font-size: 16px;

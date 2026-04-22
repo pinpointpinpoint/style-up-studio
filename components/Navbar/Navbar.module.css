@@ -3,9 +3,9 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0px 20px;
-  min-height: 30px;
-  max-height: 30px;
+  padding: 0px 10px;
+  min-height: 35px;
+  max-height: 35px;
 }
 
 .navbar a {
@@ -39,8 +39,8 @@
   position: absolute;
   top: 0;
   width: 100vw;
-  min-height: 30px;
-  max-height: 30px;
+  min-height: 35px;
+  max-height: 35px;
   background-color: white;
 }
 
@@ -57,9 +57,9 @@
   box-sizing: border-box;
   display: flex;
   justify-content: space-between;
-  min-height: 30px;
+  min-height: 35px;
   width: 100%;
-  padding: 0px 20px;
+  padding: 0px 10px;
 }
 
 .aboutPreview {
@@ -92,7 +92,7 @@
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  top: 30px;
+  top: 35px;
   width: auto;
   z-index: 9999;
 }

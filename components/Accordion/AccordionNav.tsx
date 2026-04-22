@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 import styles from "./Accordion.module.css";
 
-const HEADER_HEIGHT = 30;
+const HEADER_HEIGHT = 35;
 const OPEN_HEIGHT = `calc(100vh - ${HEADER_HEIGHT * 2}px)`;
 
 export default function AccordionNav() {
