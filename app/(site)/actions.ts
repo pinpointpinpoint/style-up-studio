@@ -33,15 +33,3 @@ export async function getProjects(input: ProjectsQueryInput) {
 
   return data;
 }
-
-export async function getProjectBySlug(slug: string) {
-  if (!slug) return null
-
-  const { data } = await sanityFetch({
-    query: projectBySlugQuery,
-    stega: false,
-    params: { slug },
-  })
-
-  return data
-}

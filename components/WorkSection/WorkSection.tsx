@@ -28,7 +28,6 @@ interface WorkSectionProps {
   initialProjects: Project[] | null
   initialFilter: Filter
   sidebarFilters: SidebarFilters | null
-  selectedProject?: Project | null
   isProjectsLoading?: boolean
 }
 
@@ -41,11 +40,11 @@ function getProjectSlugFromPathname(pathname: string) {
   return match?.[1] ? decodeURIComponent(match[1]) : null
 }
 
-function isWorkPathname(pathname: string) {
-  return pathname === '/' || pathname.startsWith('/work/')
+function isWorkGalleryPathname(pathname: string) {
+  return pathname === '/'
 }
 
-export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, selectedProject = null, isProjectsLoading = false }) => {
+export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, isProjectsLoading = false }) => {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -60,7 +59,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   const activeSidebarFilters = sidebarFilters
   const hasSkippedInitialFetchRef = useRef(false)
   const selectedProjectSlug = getProjectSlugFromPathname(pathname)
-  const activeProject = routeProject ?? selectedProject
+  const activeProject = routeProject
   const isProjectDetail = Boolean(selectedProjectSlug)
 
   const displayedProject = hoveredProject ?? activeProject
@@ -78,7 +77,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   }
 
   useEffect(() => {
-    if (!isWorkPathname(pathname)) return
+    if (!isWorkGalleryPathname(pathname)) return
 
     const nextFilter = parseProjectFilter(searchParams, activeSidebarFilters)
     const nextFilterKey = getFilterKey(nextFilter)

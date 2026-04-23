@@ -1,4 +1,5 @@
 import '@/styles/index.css'
+import { Suspense } from 'react'
 import { DEFAULT_PROJECT_FILTER } from '@/lib/projectFilters'
 import { sanityFetch } from '@/sanity/lib/live'
 import { getProjects } from './actions'
@@ -76,14 +77,16 @@ export default async function IndexRoute({ children }: { children: React.ReactNo
       <SplashGate>
         <div className="site">
           <Navbar about={about} contact={contact}/>
-          <AccordionNav
-            initialProjects={initialProjects}
-            initialFilter={DEFAULT_PROJECT_FILTER}
-            sidebarFilters={sidebarFilters}
-            styleUps={styleUps as StyleUpItem[]}
-          >
-            {children}
-          </AccordionNav>
+          <Suspense fallback={null}>
+            <AccordionNav
+              initialProjects={initialProjects}
+              initialFilter={DEFAULT_PROJECT_FILTER}
+              sidebarFilters={sidebarFilters}
+              styleUps={styleUps as StyleUpItem[]}
+            >
+              {children}
+            </AccordionNav>
+          </Suspense>
         </div>
         <EasterEgg />
         <Toaster />

@@ -41,8 +41,22 @@ export default function ProjectGallery({
   hasMouseMoved = false
 }: ProjectGalleryProps) {
   const introDone = useIntro()
+  const [hasPlayedIntro, setHasPlayedIntro] = useState(introDone)
+  const shouldRunIntroAnimation = introDone && !hasPlayedIntro
 
   const galleryRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!shouldRunIntroAnimation) return
+
+    const animationTimer = setTimeout(() => {
+      setHasPlayedIntro(true)
+    }, 700)
+
+    return () => {
+      clearTimeout(animationTimer)
+    }
+  }, [shouldRunIntroAnimation])
 
   useEffect(() => {
     const el = galleryRef.current
@@ -84,9 +98,13 @@ export default function ProjectGallery({
         {projects?.map((project, idx) => (
         <motion.div
           key={project._id}
-          initial={{ opacity: 0 }}
-          animate={introDone ? { opacity: 1} : {}}
-          transition={{ duration: 0.25, ease: 'easeOut', delay: getStableDelay(project._id) }}
+          initial={hasPlayedIntro ? false : { opacity: 0 }}
+          animate={introDone ? { opacity: 1 } : { opacity: 0 }}
+          transition={{
+            duration: shouldRunIntroAnimation ? 0.25 : 0,
+            ease: 'easeOut',
+            delay: shouldRunIntroAnimation ? getStableDelay(project._id) : 0,
+          }}
         >
           <ProjectCard
             project={project}
