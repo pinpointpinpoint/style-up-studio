@@ -21,10 +21,6 @@ export default function ProjectRouteBridge({
     } else {
       setRouteProject(project)
     }
-
-    return () => {
-      setRouteProject(null)
-    }
   }, [notFound, project, setRouteProject, setRouteProjectNotFound])
 
   return null

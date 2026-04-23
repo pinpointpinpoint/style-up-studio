@@ -51,6 +51,7 @@ export default function AccordionNav({
     const queryString = searchParams.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
   }, [pathname, searchParams]);
+  const visibleWorkRoute = routeSection === "work" ? currentRoute : lastWorkRoute;
 
   useEffect(() => {
     router.prefetch(WORK_HOME_ROUTE);
@@ -96,6 +97,7 @@ export default function AccordionNav({
             initialProjects={initialProjects}
             initialFilter={initialFilter}
             sidebarFilters={sidebarFilters}
+            activeWorkRoute={visibleWorkRoute}
           />
         </AccordionNavItem>
         <AccordionNavItem

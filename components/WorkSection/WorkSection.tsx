@@ -28,6 +28,7 @@ interface WorkSectionProps {
   initialProjects: Project[] | null
   initialFilter: Filter
   sidebarFilters: SidebarFilters | null
+  activeWorkRoute?: string
   isProjectsLoading?: boolean
 }
 
@@ -44,7 +45,13 @@ function isWorkGalleryPathname(pathname: string) {
   return pathname === '/'
 }
 
-export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, isProjectsLoading = false }) => {
+export const WorkSection: FC<WorkSectionProps> = ({
+  initialProjects,
+  initialFilter,
+  sidebarFilters,
+  activeWorkRoute,
+  isProjectsLoading = false,
+}) => {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -55,10 +62,11 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   const [isLoading, setIsLoading] = useState(isProjectsLoading)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [filter, setFilter] = useState<Filter>(initialFilter)
-  const { routeProject, routeProjectNotFound } = useProjectRoute()
+  const { routeProject, routeProjectNotFound, setRouteProject } = useProjectRoute()
   const activeSidebarFilters = sidebarFilters
   const hasSkippedInitialFetchRef = useRef(false)
-  const selectedProjectSlug = getProjectSlugFromPathname(pathname)
+  const visibleWorkRoute = activeWorkRoute ?? pathname
+  const selectedProjectSlug = getProjectSlugFromPathname(visibleWorkRoute)
   const activeProject = routeProject
   const isProjectDetail = Boolean(selectedProjectSlug)
 
@@ -86,6 +94,12 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
       getFilterKey(currentFilter) === nextFilterKey ? currentFilter : nextFilter
     ))
   }, [pathname, searchParams, activeSidebarFilters])
+
+  useEffect(() => {
+    if (isProjectDetail || !routeProject) return
+
+    setRouteProject(null)
+  }, [isProjectDetail, routeProject, setRouteProject])
 
   useEffect(() => {
     if (!hasSkippedInitialFetchRef.current) {

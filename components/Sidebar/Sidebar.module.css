@@ -75,13 +75,6 @@
   height: auto;
 } */
 
-@media (max-height: 700px) {
-  .section:nth-child(1) {
-    /* collapse the filter menu */
-    background-color: red;
-}
-}
-
 /* The Project Info section */
 .section:nth-child(2) { 
     /* display: flex;
