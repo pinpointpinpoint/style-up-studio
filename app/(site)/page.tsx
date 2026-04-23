@@ -1,32 +1,12 @@
-import { sanityFetch } from '@/sanity/lib/live'
-import {sidebarFiltersQuery} from '@/sanity/lib/queries'
-import { WorkSection } from '@/components/WorkSection/WorkSection';
-import { getProjects } from './actions';
-import { parseProjectFilter } from '@/lib/projectFilters';
+import type { Metadata } from 'next'
 
-type IndexRouteProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+export const metadata: Metadata = {
+  title: 'Work',
+  alternates: {
+    canonical: '/',
+  },
 }
 
-export default async function IndexRoute({ searchParams }: IndexRouteProps) {
-  const [{ data: sidebarFilters }, resolvedSearchParams] = await Promise.all([
-    sanityFetch({
-      query: sidebarFiltersQuery,
-      stega: false,
-    }),
-    searchParams,
-  ])
-  const initialFilter = parseProjectFilter(resolvedSearchParams, sidebarFilters)
-  const initialProjects = await getProjects({
-    filter: initialFilter,
-    limit: 15,
-  })
-
-  return (
-    <WorkSection
-      initialProjects={initialProjects}
-      initialFilter={initialFilter}
-      sidebarFilters={sidebarFilters}
-    />
-  )
+export default function IndexRoute() {
+  return null
 }

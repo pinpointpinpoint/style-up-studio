@@ -1,0 +1,64 @@
+.sidebar {
+    height: 100%;
+    max-width: 350px;
+    border-left: solid 1px black;
+    flex: 1 0 0;
+}
+
+
+.main {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-top: solid 1px black;
+}
+
+.styleUps {
+    height: 100%;
+    isolation: isolate;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 30px;
+    width: 100%;
+    scrollbar-width: none;
+    flex: 2;
+}
+
+.canvas {
+    min-height: 100%;
+    position: relative;
+    width: 100%;
+}
+
+.canvas::-webkit-scrollbar {
+    display: none;
+}
+
+.card {
+    cursor: grab;
+    outline: none;
+    position: absolute;
+    touch-action: none;
+    user-select: none;
+    will-change: transform;
+}
+
+.card:active {
+    cursor: grabbing;
+}
+
+.card:focus-visible img {
+    outline: 2px solid black;
+    outline-offset: 4px;
+}
+
+.card img {
+    border: 1px solid black;
+    box-shadow: 0 0 0 0 white;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+    width: 100%;
+}

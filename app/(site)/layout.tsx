@@ -1,6 +1,14 @@
 import '@/styles/index.css'
+import { DEFAULT_PROJECT_FILTER } from '@/lib/projectFilters'
 import { sanityFetch } from '@/sanity/lib/live'
-import { aboutSectionQuery, contactSectionQuery, seoSettingsQuery } from '@/sanity/lib/queries'
+import { getProjects } from './actions'
+import {
+  aboutSectionQuery,
+  allStyleUpsQuery,
+  contactSectionQuery,
+  seoSettingsQuery,
+  sidebarFiltersQuery,
+} from '@/sanity/lib/queries'
 import type { Metadata, Viewport } from 'next'
 import { toPlainText } from 'next-sanity'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -9,6 +17,7 @@ import SplashGate from '@/components/SplashGate/SplashGate'
 import AccordionNav from '@/components/Accordion/AccordionNav'
 import Navbar from '@/components/Navbar/Navbar'
 import EasterEgg from '@/components/EasterEgg/EasterEgg'
+import type { StyleUpItem } from '@/components/StyleUps/StyleUps'
 
 export async function generateMetadata(): Promise<Metadata> {
   const [{ data: settings }] = await Promise.all([
@@ -44,9 +53,21 @@ export const viewport: Viewport = {
 }
 
 export default async function IndexRoute({ children }: { children: React.ReactNode }) {
-   const [{ data: about }, {data: contact}] = await Promise.all([
+   const [
+    { data: about },
+    { data: contact },
+    { data: sidebarFilters },
+    { data: styleUps },
+    initialProjects,
+  ] = await Promise.all([
     sanityFetch({ query: aboutSectionQuery, stega: false }),
-    sanityFetch({ query: contactSectionQuery, stega: false })
+    sanityFetch({ query: contactSectionQuery, stega: false }),
+    sanityFetch({ query: sidebarFiltersQuery, stega: false }),
+    sanityFetch({ query: allStyleUpsQuery, stega: false }),
+    getProjects({
+      filter: DEFAULT_PROJECT_FILTER,
+      limit: 15,
+    }),
   ])
 
 
@@ -55,10 +76,14 @@ export default async function IndexRoute({ children }: { children: React.ReactNo
       <SplashGate>
         <div className="site">
           <Navbar about={about} contact={contact}/>
-          <AccordionNav />
-          <main className="site__main">
-              {children}
-          </main>
+          <AccordionNav
+            initialProjects={initialProjects}
+            initialFilter={DEFAULT_PROJECT_FILTER}
+            sidebarFilters={sidebarFilters}
+            styleUps={styleUps as StyleUpItem[]}
+          >
+            {children}
+          </AccordionNav>
         </div>
         <EasterEgg />
         <Toaster />

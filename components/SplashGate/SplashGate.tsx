@@ -9,46 +9,25 @@ export default function SplashGate({
 }: {
   children: React.ReactNode
 }) {
-  const [ready, setReady] = useState(false)
-  const [showSplash, setShowSplash] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
   const [visible, setVisible] = useState(true)
   const [introDone, setIntroDone] = useState(false)
 
   useEffect(() => {
-    let holdTimer: ReturnType<typeof setTimeout> | undefined
-    let removeTimer: ReturnType<typeof setTimeout> | undefined
-
-    const visited = sessionStorage.getItem('visited')
-
-    if (visited) {
-      setIntroDone(true)
-      setShowSplash(false)
+    const holdTimer = setTimeout(() => {
       setVisible(false)
-    } else {
-      sessionStorage.setItem('visited', 'true')
+    }, 1200)
 
-      setShowSplash(true)
-      setVisible(true)
-
-      holdTimer = setTimeout(() => {
-        setVisible(false)
-      }, 1200)
-
-      removeTimer = setTimeout(() => {
-        setShowSplash(false)
-        setIntroDone(true)
-      }, 1400)
-    }
-
-    setReady(true)
+    const removeTimer = setTimeout(() => {
+      setShowSplash(false)
+      setIntroDone(true)
+    }, 1400)
 
     return () => {
-      if (holdTimer) clearTimeout(holdTimer)
-      if (removeTimer) clearTimeout(removeTimer)
+      clearTimeout(holdTimer)
+      clearTimeout(removeTimer)
     }
   }, [])
-
-  if (!ready) return null
 
   return (
     <IntroContext.Provider value={introDone}>

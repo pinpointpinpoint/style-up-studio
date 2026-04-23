@@ -1,7 +1,7 @@
 'use server'
 
 import { sanityFetch } from "@/sanity/lib/live";
-import { featuredProjectsQuery, projectsQuery } from "@/sanity/lib/queries";
+import { featuredProjectsQuery, projectBySlugQuery, projectsQuery } from "@/sanity/lib/queries";
 import { DEFAULT_PROJECT_FILTER } from "@/lib/projectFilters";
 import type { Filter, ProjectsQueryInput } from "@/types";
 
@@ -32,4 +32,16 @@ export async function getProjects(input: ProjectsQueryInput) {
   });
 
   return data;
+}
+
+export async function getProjectBySlug(slug: string) {
+  if (!slug) return null
+
+  const { data } = await sanityFetch({
+    query: projectBySlugQuery,
+    stega: false,
+    params: { slug },
+  })
+
+  return data
 }

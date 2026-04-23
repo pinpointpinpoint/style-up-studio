@@ -1,7 +1,6 @@
 'use client';
 
 import { Dispatch, SetStateAction } from 'react';
-import { motion } from 'framer-motion';
 import { Project } from '@/types';
 import FilterMenu from './FilterMenu';
 import ProjectDetails from './ProjectDetails';
@@ -39,11 +38,8 @@ export function Sidebar({
                     />
                 </div>
             )}
-            <motion.div
+            <div
                 className={`${styles.section} ${isProjectDetail ? styles.projectDetailSection : ''}`}
-                initial={isProjectDetail ? { y: '100%' } : false}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
             >
                 <div className={`${styles.title} ${isProjectDetail ? styles.projectDetailTitle : ''}`}>
                     <span>INFO</span>
@@ -62,7 +58,7 @@ export function Sidebar({
                     renderAsset={renderAsset}
                     expandDetails={isProjectDetail}
                 />
-            </motion.div>
+            </div>
         </aside>
     )
 }

@@ -1,48 +1,43 @@
 import { notFound } from 'next/navigation'
-import { WorkSection } from '@/components/WorkSection/WorkSection'
-import { parseProjectFilter } from '@/lib/projectFilters'
+import ProjectRouteBridge from '@/components/WorkSection/ProjectRouteBridge'
 import { sanityFetch } from '@/sanity/lib/live'
-import { projectBySlugQuery, sidebarFiltersQuery } from '@/sanity/lib/queries'
+import { projectBySlugQuery } from '@/sanity/lib/queries'
 import type { Project } from '@/types'
-import { getProjects } from '../../actions'
+import type { Metadata } from 'next'
 
 type ProjectRouteProps = {
   params: Promise<{ slug: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function ProjectRoute({ params, searchParams }: ProjectRouteProps) {
-  const [{ slug }, resolvedSearchParams, { data: sidebarFilters }] = await Promise.all([
-    params,
-    searchParams,
-    sanityFetch({
-      query: sidebarFiltersQuery,
-      stega: false,
-    }),
-  ])
-  const initialFilter = parseProjectFilter(resolvedSearchParams, sidebarFilters)
-  const [{ data: selectedProject }, initialProjects] = await Promise.all([
-    sanityFetch({
-      query: projectBySlugQuery,
-      params: { slug },
-      stega: false,
-    }),
-    getProjects({
-      filter: initialFilter,
-      limit: 15,
-    }),
-  ])
+async function getProject(slug: string) {
+  const { data } = await sanityFetch({
+    query: projectBySlugQuery,
+    params: { slug },
+    stega: false,
+  })
+
+  return data
+}
+
+export async function generateMetadata({ params }: ProjectRouteProps): Promise<Metadata> {
+  const { slug } = await params
+  const selectedProject = await getProject(slug)
+
+  return {
+    title: selectedProject?.title ?? 'Work',
+    alternates: {
+      canonical: `/work/${slug}`,
+    },
+  }
+}
+
+export default async function ProjectRoute({ params }: ProjectRouteProps) {
+  const { slug } = await params
+  const selectedProject = await getProject(slug)
 
   if (!selectedProject) {
     notFound()
   }
 
-  return (
-    <WorkSection
-      initialProjects={initialProjects}
-      initialFilter={initialFilter}
-      sidebarFilters={sidebarFilters}
-      selectedProject={selectedProject as Project}
-    />
-  )
+  return <ProjectRouteBridge project={selectedProject as Project} />
 }

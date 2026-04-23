@@ -88,15 +88,23 @@ export default function EasterEgg() {
   return (
     <>
       {isButtonVisible && !isModalOpen && (
-        <button
-          type="button"
-          className={styles.trigger}
+        <div
+          className={styles.triggerWrap}
           style={{ left: position.x, top: position.y }}
-          onClick={handleOpen}
-          aria-label="Open hidden message"
         >
-          [?]
-        </button>
+          <img className={`${styles.sparkle} ${styles.sparkleOne}`} src="/featured.svg" alt="" aria-hidden="true" />
+          <img className={`${styles.sparkle} ${styles.sparkleTwo}`} src="/featured.svg" alt="" aria-hidden="true" />
+          <img className={`${styles.sparkle} ${styles.sparkleThree}`} src="/featured.svg" alt="" aria-hidden="true" />
+          <img className={`${styles.sparkle} ${styles.sparkleFour}`} src="/featured.svg" alt="" aria-hidden="true" />
+          <button
+            type="button"
+            className={styles.trigger}
+            onClick={handleOpen}
+            aria-label="Open hidden message"
+          >
+            [?]
+          </button>
+        </div>
       )}
       {isModalOpen && (
         <div className={styles.backdrop} role="presentation">

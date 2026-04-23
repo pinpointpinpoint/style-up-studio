@@ -1,12 +1,12 @@
-import { StyleUps, type StyleUpItem } from "@/components/StyleUps";
-import { sanityFetch } from "@/sanity/lib/live"
-import { allStyleUpsQuery } from "@/sanity/lib/queries"
+import type { Metadata } from 'next'
 
-export default async function StylePage() {
-  const [{ data: styleUps}] = await Promise.all([
-    sanityFetch({query: allStyleUpsQuery, stega: false}),
-  ]);
-  return (
-    <StyleUps styleUps={styleUps as StyleUpItem[]}/>
-  )
+export const metadata: Metadata = {
+  title: 'Style Ups',
+  alternates: {
+    canonical: '/style-ups',
+  },
+}
+
+export default function StylePage() {
+  return null
 }

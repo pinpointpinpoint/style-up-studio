@@ -13,6 +13,7 @@ import ProjectGallery from '../ProjectGallery/ProjectGallery'
 import ProjectDetailView from '../ProjectDetailView/ProjectDetailView'
 import { useMouseMoved } from '@/hooks/useMouseInitiatedHover'
 import { getProjects } from '@/app/(site)/actions'
+import { useProjectRoute } from './ProjectRouteContext'
 import {
   getProjectCursor,
   parseProjectFilter,
@@ -35,6 +36,15 @@ function getFilterKey(filter: Filter) {
   return JSON.stringify(filter)
 }
 
+function getProjectSlugFromPathname(pathname: string) {
+  const match = pathname.match(/^\/work\/([^/?#]+)/)
+  return match?.[1] ? decodeURIComponent(match[1]) : null
+}
+
+function isWorkPathname(pathname: string) {
+  return pathname === '/' || pathname.startsWith('/work/')
+}
+
 export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilter, sidebarFilters, selectedProject = null, isProjectsLoading = false }) => {
   const pathname = usePathname()
   const router = useRouter()
@@ -46,10 +56,14 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   const [isLoading, setIsLoading] = useState(isProjectsLoading)
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [filter, setFilter] = useState<Filter>(initialFilter)
+  const { routeProject, routeProjectNotFound } = useProjectRoute()
   const activeSidebarFilters = sidebarFilters
   const hasSkippedInitialFetchRef = useRef(false)
+  const selectedProjectSlug = getProjectSlugFromPathname(pathname)
+  const activeProject = routeProject ?? selectedProject
+  const isProjectDetail = Boolean(selectedProjectSlug)
 
-  const displayedProject = hoveredProject ?? selectedProject
+  const displayedProject = hoveredProject ?? activeProject
 
   const renderAsset = (asset: any) => {
     switch (asset.kind) {
@@ -64,13 +78,15 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
   }
 
   useEffect(() => {
+    if (!isWorkPathname(pathname)) return
+
     const nextFilter = parseProjectFilter(searchParams, activeSidebarFilters)
     const nextFilterKey = getFilterKey(nextFilter)
 
     setFilter((currentFilter) => (
       getFilterKey(currentFilter) === nextFilterKey ? currentFilter : nextFilter
     ))
-  }, [searchParams, activeSidebarFilters])
+  }, [pathname, searchParams, activeSidebarFilters])
 
   useEffect(() => {
     if (!hasSkippedInitialFetchRef.current) {
@@ -152,6 +168,7 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
     const savedReturnUrl = sessionStorage.getItem(PROJECT_GALLERY_RETURN_URL_KEY)
 
     if (savedReturnUrl) {
+      sessionStorage.removeItem(PROJECT_GALLERY_RETURN_URL_KEY)
       router.push(savedReturnUrl)
       return
     }
@@ -179,28 +196,49 @@ export const WorkSection: FC<WorkSectionProps> = ({ initialProjects, initialFilt
 
   return (
     <div className={styles.workSection}>
-      {selectedProject ? (
-        <ProjectDetailView project={selectedProject} />
-      ) : (
-        <ProjectGallery
-          projects={visibleProjects}
-          hasMore={hasMore}
-          isLoading={isLoading}
-          onLoadMore={handleLoadMore}
-          getProjectHref={getProjectHref}
-          onProjectOpen={handleProjectOpen}
-          onProjectHover={setHoveredProject}
-          onProjectLeave={() => setHoveredProject(null)}
-          hasMouseMoved={hasMouseMoved}
-        />
-      )}
+      <div className={styles.contentPane}>
+        <div
+          className={`${styles.contentLayer} ${isProjectDetail ? styles.contentLayerHidden : styles.contentLayerActive}`}
+          aria-hidden={isProjectDetail}
+          inert={isProjectDetail ? true : undefined}
+        >
+          <ProjectGallery
+            projects={visibleProjects}
+            hasMore={hasMore}
+            isLoading={isLoading}
+            onLoadMore={handleLoadMore}
+            getProjectHref={getProjectHref}
+            onProjectOpen={handleProjectOpen}
+            onProjectHover={setHoveredProject}
+            onProjectLeave={() => setHoveredProject(null)}
+            hasMouseMoved={hasMouseMoved}
+          />
+        </div>
+        <div
+          className={`${styles.contentLayer} ${isProjectDetail ? styles.contentLayerActive : styles.contentLayerHidden}`}
+          aria-hidden={!isProjectDetail}
+          inert={!isProjectDetail ? true : undefined}
+        >
+          {activeProject ? (
+            <ProjectDetailView project={activeProject} />
+          ) : routeProjectNotFound ? (
+            <div className={styles.projectLoading}>
+              [PROJECT NOT FOUND]
+            </div>
+          ) : (
+            <div className={styles.projectLoading}>
+              {isProjectDetail ? '[LOADING PROJECT...]' : null}
+            </div>
+          )}
+        </div>
+      </div>
       <Sidebar
         displayedProject={displayedProject}
         sidebarFilters={activeSidebarFilters}
         filter={filter}
         setFilter={handleFilterChange}
         renderAsset={renderAsset}
-        isProjectDetail={Boolean(selectedProject)}
+        isProjectDetail={isProjectDetail}
         onCloseProjectDetail={handleProjectDetailClose}
       />
     </div>

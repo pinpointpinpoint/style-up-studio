@@ -13,7 +13,6 @@ interface ProjectCardProps {
     onOpen?: () => void
     onHoverStart: (e: React.MouseEvent<HTMLAnchorElement>) => void
     onHoverMove: (e: React.MouseEvent<HTMLAnchorElement>) => void
-    onHoverEnd: () => void
     hasMouseMoved: boolean
 }
 
@@ -33,7 +32,6 @@ const ProjectCard = ({
     index,
     href,
     onOpen,
-    onHoverEnd,
     onHoverMove,
     onHoverStart
 }: ProjectCardProps) => {
@@ -41,9 +39,12 @@ const ProjectCard = ({
     const [isHovered, setIsHovered] = useState(false)
     const [isPreviewReady, setIsPreviewReady] = useState(false)
     const [activeMediaIndex, setActiveMediaIndex] = useState(0)
+    const coverImageRef = useRef<HTMLImageElement>(null)
     const previewVideoRef = useRef<HTMLVideoElement>(null)
     const imageUrl = urlForImage(project.coverImage)?.height(1200).width(1200).url()
     const previewVideoUrl = project.previewUrl
+    const shouldPrioritizeImage = index < 12
+    const showPlaceholder = loading || !imageUrl
     const hoverMedia = useMemo<ProjectCardMedia[]>(
         () => {
             const coverAssetRef = getAssetRef(project.coverImage)
@@ -62,6 +63,16 @@ const ProjectCard = ({
     const activeHoverMedia = isHovered && hoverMedia.length > 0
         ? hoverMedia[activeMediaIndex % hoverMedia.length]
         : null
+
+    useEffect(() => {
+        setLoading(Boolean(imageUrl))
+
+        const image = coverImageRef.current
+
+        if (image?.complete) {
+            setLoading(false)
+        }
+    }, [imageUrl])
 
     useEffect(() => {
         if (previewVideoUrl) return
@@ -117,7 +128,6 @@ const ProjectCard = ({
     const handleMouseLeave = () => {
         setIsHovered(false)
         setActiveMediaIndex(0)
-        onHoverEnd()
     }
 
     const renderHoverMedia = () => {
@@ -156,22 +166,25 @@ const ProjectCard = ({
     return (
         <Link
             href={href}
-            className={`${styles.projectCard} ${loading ? styles.projectCardLoading : ''}`}
+            className={`${styles.projectCard} ${showPlaceholder ? styles.projectCardLoading : ''}`}
             aria-label={`View ${project.title ?? "project"}`}
             onMouseEnter={handleMouseEnter}
             onMouseMove={onHoverMove}
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            <img
-                src={imageUrl}
-                alt={`Cover image for ${project.title ?? "project"}`}     
-                className={`${styles.projectCardImage} ${!loading ? styles.projectCardImageLoaded : ''}`}
-                loading={index < 6 ? "eager" : "lazy"} 
-                fetchPriority={index < 6 ? "high" : "low"}               
-                onLoad={() => setLoading(false)}
-                onError={() => setLoading(false)}
-            />
+            {imageUrl && (
+                <img
+                    ref={coverImageRef}
+                    src={imageUrl}
+                    alt={`Cover image for ${project.title ?? "project"}`}
+                    className={`${styles.projectCardImage} ${!loading ? styles.projectCardImageLoaded : ''}`}
+                    loading={shouldPrioritizeImage ? "eager" : "lazy"}
+                    fetchPriority={shouldPrioritizeImage ? "high" : "low"}
+                    onLoad={() => setLoading(false)}
+                    onError={() => setLoading(false)}
+                />
+            )}
             {renderHoverMedia()}
         </Link>
     )

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import styles from'./ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import { Project } from '@/types'
-import ProjectHoverCursor from '../ProjectHoverCursor'
 import { motion } from "framer-motion";
 import { useIntro } from '@/contexts/IntroContext'
 
@@ -42,7 +41,6 @@ export default function ProjectGallery({
   hasMouseMoved = false
 }: ProjectGalleryProps) {
   const introDone = useIntro()
-  const [cursor, setCursor] = useState({show: false, x: 0, y: 0 })
 
   const galleryRef = useRef<HTMLDivElement | null>(null)
 
@@ -63,20 +61,10 @@ export default function ProjectGallery({
 
   const onEnter = (project: Project) => (e: React.MouseEvent) => {
     onProjectHover?.(project)
-    setCursor({ show: true, x: e.clientX, y: e.clientY })
-  }
-  
-  const onMove = (e: React.MouseEvent) => {
-    setCursor((prev) => ({ ...prev, x: e.clientX, y: e.clientY }))
   }
 
   const onLeave = () => {
     onProjectLeave?.()
-    setCursor((prev) => ({ ...prev, show: false }))
-  }
-
-  const onCardLeave = () => {
-    setCursor((prev) => ({ ...prev, show: false }))
   }
 
   if (projects.length < 1) {
@@ -91,7 +79,6 @@ export default function ProjectGallery({
     <div
       ref={galleryRef}
       className={styles.projectGallery}
-      onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
         {projects?.map((project, idx) => (
@@ -108,15 +95,10 @@ export default function ProjectGallery({
             onOpen={onProjectOpen}
             onHoverStart={onEnter(project)}
             onHoverMove={() => {}}
-            onHoverEnd={onCardLeave}
             hasMouseMoved={hasMouseMoved}
           />
         </motion.div>
         ))}
-        {cursor.show && (
-          <ProjectHoverCursor x={cursor.x} y={cursor.y} text="[VIEW]" />
-        )}
-
         {hasMore && (
         <button 
           onClick={onLoadMore} 
