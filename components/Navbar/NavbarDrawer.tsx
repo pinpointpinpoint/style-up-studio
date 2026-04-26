@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import styles from './Navbar.module.css'
 
@@ -7,7 +7,7 @@ interface NavbarDrawerProps {
   label: string
   isOpen: boolean
   onClose: () => void
-  children: React.ReactNode
+  children: ReactNode
   direction?: 'left' | 'right'
 }
 
@@ -17,8 +17,14 @@ const FOCUSABLE_SELECTOR = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
-  '[tabindex]:not([tabindex="-1"])',
+  '[tabindex]:not([tabindex^="-"])',
 ].join(', ')
+
+function getFocusableElements(container: HTMLElement) {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+  ).filter((element) => !element.hasAttribute('disabled'))
+}
 
 export function NavbarDrawer({
   id,
@@ -36,9 +42,6 @@ export function NavbarDrawer({
   const transition = prefersReducedMotion
     ? { duration: 0 }
     : { type: 'tween' as const, duration: 0.3 }
-  const closeDrawer = useEffectEvent(() => {
-    onClose()
-  })
 
   useEffect(() => {
     if (!isOpen) return
@@ -50,24 +53,20 @@ export function NavbarDrawer({
 
     if (!drawerElement) return
 
-    const focusableElements = Array.from(
-      drawerElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-    ).filter((element) => !element.hasAttribute('disabled'))
+    const focusableElements = getFocusableElements(drawerElement)
 
     focusableElements[0]?.focus({ preventScroll: true }) ??
       drawerElement.focus({ preventScroll: true })
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        closeDrawer()
+        onClose()
         return
       }
 
       if (e.key !== 'Tab') return
 
-      const currentFocusableElements = Array.from(
-        drawerElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      ).filter((element) => !element.hasAttribute('disabled'))
+      const currentFocusableElements = getFocusableElements(drawerElement)
 
       if (currentFocusableElements.length === 0) {
         e.preventDefault()
@@ -100,23 +99,23 @@ export function NavbarDrawer({
       window.removeEventListener('keydown', handleKeyDown)
       previouslyFocusedElementRef.current?.focus({ preventScroll: true })
     }
-  }, [closeDrawer, isOpen])
+  }, [onClose, isOpen])
 
   useEffect(() => {
     if (!isOpen) return
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        closeDrawer()
+        onClose()
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', handlePointerDown)
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('pointerdown', handlePointerDown)
     }
-  }, [closeDrawer, isOpen])
+  }, [isOpen, onClose])
 
   return (
     <AnimatePresence>
