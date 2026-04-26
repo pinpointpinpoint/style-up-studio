@@ -71,7 +71,6 @@ export default async function IndexRoute({ children }: { children: React.ReactNo
     }),
   ])
 
-
   return (
     <>
       <SplashGate>

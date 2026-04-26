@@ -242,7 +242,7 @@
 }
 
 .asset {
-  border: 1px solid black;
+  /* border: 1px solid black; */
   height: 30px;
   width: auto;
   object-fit: cover;

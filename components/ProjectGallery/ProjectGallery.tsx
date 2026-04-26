@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import styles from'./ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import { Project } from '@/types'
-import { motion } from "framer-motion";
+import { motion } from 'motion/react'
 import { useIntro } from '@/contexts/IntroContext'
 
 type ProjectGalleryProps = {

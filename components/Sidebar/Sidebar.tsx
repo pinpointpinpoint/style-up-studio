@@ -12,9 +12,6 @@ type SidebarProps = {
     sidebarFilters: any | null
     filter: Filter
     setFilter: Dispatch<SetStateAction<Filter>>
-    renderAsset: (asset: any) => React.ReactNode
-    isProjectDetail?: boolean
-    onCloseProjectDetail?: () => void
 }
 
 export function Sidebar({
@@ -22,41 +19,25 @@ export function Sidebar({
     sidebarFilters,
     filter,
     setFilter,
-    renderAsset,
-    isProjectDetail = false,
-    onCloseProjectDetail,
 }: SidebarProps) {
 
     return (
-        <aside className={`${styles.container} ${isProjectDetail ? styles.projectDetailContainer : ''}`}>
-            {!isProjectDetail && (
-                <div className={styles.section}>
-                    <FilterMenu
-                        sidebarFilters={sidebarFilters}
-                        filter={filter}
-                        setFilter={setFilter}
-                    />
-                </div>
-            )}
+        <aside className={styles.container}>
+            <div className={styles.section}>
+                <FilterMenu
+                    sidebarFilters={sidebarFilters}
+                    filter={filter}
+                    setFilter={setFilter}
+                />
+            </div>
             <div
-                className={`${styles.section} ${isProjectDetail ? styles.projectDetailSection : ''}`}
+                className={styles.section}
             >
-                <div className={`${styles.title} ${isProjectDetail ? styles.projectDetailTitle : ''}`}>
+                <div className={styles.title}>
                     <span>INFO</span>
-                    {isProjectDetail && onCloseProjectDetail && (
-                        <button
-                            type="button"
-                            className={styles.closeButton}
-                            onClick={onCloseProjectDetail}
-                        >
-                            [CLOSE]
-                        </button>
-                    )}
                 </div>
                 <ProjectDetails
                     displayedProject={displayedProject}
-                    renderAsset={renderAsset}
-                    expandDetails={isProjectDetail}
                 />
             </div>
         </aside>

@@ -15,7 +15,7 @@ export default defineType({
     }),
     defineField({
       name: 'email',
-      title: 'Email Address',
+      title: 'Email Address*',
       type: 'string',
       description: 'Your email will be a clickable link in the Contact section.',
       validation: (Rule) =>
@@ -25,13 +25,24 @@ export default defineType({
     }),
     defineField({
       name: 'instagram',
-      title: 'Instagram',
+      title: 'Instagram*',
       type: 'url',
       description: 'Full Instagram profile URL. Displays as @username in the Contact section.',
       validation: (Rule) =>
         Rule.required()
           .uri({ allowRelative: false, scheme: ['http', 'https'] })
-          .error('Enter a valid URL starting with https:// or http://.'),
+          .custom((value) => {
+            if (!value) return true
+
+            try {
+              const { hostname } = new URL(value)
+              return hostname === 'instagram.com' || hostname.endsWith('.instagram.com')
+                ? true
+                : 'Enter a valid Instagram URL.'
+            } catch {
+              return 'Enter a valid Instagram URL starting with https:// or http://.'
+            }
+          }),
     })
   ],
 

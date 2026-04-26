@@ -1,136 +1,130 @@
-.navbar {
+.header {
+  height: 40px;
+  width: 100%;
+  position: relative;
+}
+
+.nav {
+  align-items: center;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  height: 40px;
+  padding: 0 30px;
   width: 100%;
-  padding: 0px 30px;
-  min-height: 35px;
-  max-height: 35px;
 }
 
-.navbar a {
-    display: flex;
-    align-items: center;
-}
-
-.navbarItem {
-  align-items: center;
-  display: flex;
-}
-
-.navbarLogo {
+.logo {
   display: block;
   height: 18px;
   width: auto;
 }
 
-.navbarItem button {
-  white-space: nowrap;
-  padding: 0;
-  font-size: var(--font-md);
-  line-height: 1;
+.navItem {
+  align-items: center;
+  display: flex;
 }
 
-.navbarItemContent {
-  display: flex;
+.navItem button {
   align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-md);
+  gap: 6px;
   padding: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.drawer {
+  align-items: center;
+  background-color: white;
+  display: flex;
   justify-content: space-between;
+  left: 0;
+  min-height: 40px;
+  padding: 0;
   position: absolute;
   top: 0;
-  width: 100vw;
-  min-height: 35px;
-  max-height: 35px;
-  background-color: white;
-}
-
-.menuLeft {
-  left: 0;
-}
-
-.menuRight {
-  right: 0;
-}
-
-.menuContentRow {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  min-height: 35px;
   width: 100%;
-  padding: 0px 30px;
+  z-index: 30;
 }
 
-.aboutPreview {
+.drawer:focus {
+  outline: none;
+}
+
+.drawerInner {
   align-items: center;
   display: flex;
-  gap: 10px;
-  min-width: 0;
+  gap: 16px;
+  height: 40px;
+  justify-content: space-between;
+  padding: 0 30px;
+  width: 100%;
 }
 
-.aboutImageHover {
-  display: block;
-  flex: 0 0 auto;
-  height: 24px;
+.aboutSummary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aboutImage {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .aboutImageThumb {
-  display: block;
-  flex: 0 0 auto;
-  height: 24px;
-  max-height: 24px;
+  height: 25px;
   width: auto;
-  object-fit: contain;
 }
 
-.aboutImageLarge {
+.aboutImageFull {
   border: 1px solid black;
   height: 400px;
   left: 0;
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  top: 35px;
+  top: 0;
   width: auto;
-  z-index: 9999;
+  z-index: 40;
 }
 
-.aboutImageHover:hover .aboutImageLarge,
-.aboutImageHover:focus-within .aboutImageLarge {
+.aboutImage:hover .aboutImageFull {
   opacity: 1;
-  transform: translateY(0);
 }
 
-.aboutText {
-  display: flex;
+.bio {
   align-items: center;
-  min-width: 0;
+  display: flex;
+  font-size: var(--font-sm);
+  margin: 0;
   overflow: hidden;
+  min-width: 0;
+  padding: 0;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 0;
-  margin: 0;
-  font-size: var(--font-sm);
-  line-height: 1;
 }
 
-.contactInfoRow {
+.contactLinks {
   align-items: center;
   display: flex;
-  gap: 5rem;
-  text-align: right;
   font-size: var(--font-sm);
   line-height: 1;
+  text-align: right;
 }
 
-.contactColumn {
+.contactLinkList {
   display: flex;
   gap: 15px;
 }
 
-.contactColumn a {
+.contactLinkList a {
   white-space: nowrap;
 }

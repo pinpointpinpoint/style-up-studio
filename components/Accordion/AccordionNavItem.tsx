@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from 'motion/react'
 import type { MouseEvent, ReactNode } from "react";
 import styles from "./Accordion.module.css";
 

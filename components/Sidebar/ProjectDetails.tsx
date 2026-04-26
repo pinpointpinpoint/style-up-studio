@@ -1,6 +1,5 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion'
 import { PortableText } from 'next-sanity'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Project } from '@/types'
@@ -64,11 +63,9 @@ function getProjectYear(date?: string | null) {
 
 const ProjectDetails = ({
     displayedProject,
-    renderAsset,
     expandDetails = false,
 }: {
     displayedProject: Project | null
-    renderAsset: any
     expandDetails?: boolean
 }) => {
     const [videoThumbnails, setVideoThumbnails] = useState<SidebarThumbnail[]>([])
@@ -219,51 +216,6 @@ const ProjectDetails = ({
             <div className={`${styles.title} ${!displayedProject?.title ? styles.titleEmpty : ''}`}>
                 {displayedProject?.title || 'Title'}
             </div>
-            <AnimatePresence initial={false}>
-                {shouldRevealDetails && displayedProject && (
-                    <motion.div
-                        className={styles.revealedDetails}
-                        initial={{ height: 0, opacity: 0, y: 32 }}
-                        animate={{ height: 'auto', opacity: 1, y: 0 }}
-                        exit={{ height: 0, opacity: 0, y: 32 }}
-                        transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                        {projectYear && (
-                            <div className={styles.metaRow}>
-                                <span>Year</span>
-                                <span>{projectYear}</span>
-                            </div>
-                        )}
-                        {hasDescription && (
-                            <section className={styles.description}>
-                                <h3>Description</h3>
-                                <div className={styles.portableText}>
-                                    <PortableText value={displayedProject.description ?? []} />
-                                </div>
-                            </section>
-                        )}
-                        {hasCredits && (
-                            <section className={styles.credits}>
-                                <h3>Credits</h3>
-                                <ul>
-                                    {displayedProject.credits?.map((credit, idx) => (
-                                        <li key={`${credit.role}-${credit.name}-${idx}`}>
-                                            <span>{credit.role}</span>
-                                            {credit.link ? (
-                                                <a href={credit.link} target="_blank" rel="noreferrer">
-                                                    {credit.name}
-                                                </a>
-                                            ) : (
-                                                <span>{credit.name}</span>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
             </div>
             {thumbnails.length > 0 ? (
                 <>

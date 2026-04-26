@@ -1,20 +1,4 @@
-import type {PortableTextBlock} from 'next-sanity'
-import type {Image} from 'sanity'
 import type {ProjectsQueryResult} from '@/sanity.types'
-
-export interface AboutPage {
-  _id: string
-  _type: 'about'
-  image?: Image
-  blurb?: PortableTextBlock[]
-}
-
-export interface ContactPage {
-  _id: string
-  _type: 'contact'
-  email: string
-  instagram: string
-}
 
 export interface Video {
   fileUrl: string,

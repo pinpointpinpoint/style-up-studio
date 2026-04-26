@@ -99,7 +99,6 @@
     align-items: center;
     padding-right: 5px;
     font-size: var(--font-sm);
-    font-family: Geist;
 }
 
 .categoryName .dot,
@@ -111,8 +110,8 @@
 }
 
 .activeImage {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     object-fit: contain;
     flex: 0 0 auto;
 }

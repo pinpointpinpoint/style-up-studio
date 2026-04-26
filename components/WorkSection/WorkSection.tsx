@@ -1,10 +1,8 @@
 'use client';
 
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Sidebar } from '../Sidebar/Sidebar'
-import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
 import { Filter, Project } from '@/types'
 import type { SidebarFiltersQueryResult } from '@/sanity.types'
 import '@vidstack/react/player/styles/base.css'
@@ -71,18 +69,6 @@ export const WorkSection: FC<WorkSectionProps> = ({
   const isProjectDetail = Boolean(selectedProjectSlug)
 
   const displayedProject = hoveredProject ?? activeProject
-
-  const renderAsset = (asset: any) => {
-    switch (asset.kind) {
-      case 'image':
-        return <Image key={asset.value._key} src={asset.value.image} alt={asset.value.alt} width={600} height={400} className="rounded-lg" />
-      case 'videoUrl':
-      case 'video':
-        return <VideoPlayer key={asset.value._key} asset={asset} title={asset.value.title} />
-      default:
-        return null
-    }
-  }
 
   useEffect(() => {
     if (!isWorkGalleryPathname(pathname)) return
@@ -233,7 +219,10 @@ export const WorkSection: FC<WorkSectionProps> = ({
           inert={!isProjectDetail ? true : undefined}
         >
           {activeProject ? (
-            <ProjectDetailView project={activeProject} />
+            <ProjectDetailView
+              project={activeProject}
+              onClose={handleProjectDetailClose}
+            />
           ) : routeProjectNotFound ? (
             <div className={styles.projectLoading}>
               [PROJECT NOT FOUND]
@@ -245,15 +234,14 @@ export const WorkSection: FC<WorkSectionProps> = ({
           )}
         </div>
       </div>
-      <Sidebar
-        displayedProject={displayedProject}
-        sidebarFilters={activeSidebarFilters}
-        filter={filter}
-        setFilter={handleFilterChange}
-        renderAsset={renderAsset}
-        isProjectDetail={isProjectDetail}
-        onCloseProjectDetail={handleProjectDetailClose}
-      />
+      {!isProjectDetail && (
+        <Sidebar
+          displayedProject={displayedProject}
+          sidebarFilters={activeSidebarFilters}
+          filter={filter}
+          setFilter={handleFilterChange}
+        />
+      )}
     </div>
   )
 }

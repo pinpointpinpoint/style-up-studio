@@ -1,9 +1,12 @@
+* {
+  font-family: var(--font-body), sans-serif;
+}
+
 body,
 html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
-    font-family: var(--font-body), sans-serif;
 }
 
 .loading {
@@ -23,6 +26,18 @@ button {
 
 button:hover {
     cursor: pointer;
+}
+
+:where(
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+    outline: 4px dotted teal;   
 }
 
 .site {

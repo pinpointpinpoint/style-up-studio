@@ -26,11 +26,11 @@ export default defineType({
       name: 'bio',
       title: 'Bio*',
       type: 'text',
-      description: 'A short bio displayed in the About section. Maximum 150 characters.',
+      description: 'A short bio displayed in the About section. Maximum 75 characters.',
       validation: (Rule) =>
         Rule.required()
-          .max(150)
-          .warning('Should be 150 characters or less.'),
+          .max(75)
+          .error('Bio must be 75 characters or less.'),
     }),
   ],
 
