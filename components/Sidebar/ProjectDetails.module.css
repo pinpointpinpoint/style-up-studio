@@ -1,21 +1,21 @@
 .container {
-    /* flex: 0 0 auto; */
-    border-top: 1px solid black;
     min-height: 0;
     position: relative;
     height: 100%;
-
     flex: 1;
     display: flex;
     flex-direction: column;
-
     overflow: auto;
+    background-color: white;
   }
 
 .title {
-    padding: 3px 30px;
+    padding: 0px 30px;
     border-bottom: solid 1px black;
     font-size: var(--font-sm);
+    min-height: 30px;
+    display: flex;
+    align-items: center;
 }
 
 .titleEmpty {
@@ -25,6 +25,7 @@
 
 .body {
     height: fit-content;
+    border-top: 1px solid black;
 }
 
 .revealedDetails {
@@ -51,7 +52,7 @@
 
 .description,
 .credits {
-  padding: 18px 30px 20px;
+  padding: 10px 30px 10px;
 }
 
 .description + .credits {
@@ -127,14 +128,7 @@
   margin: 2px; /* top/bottom space */
 }
 
-
-/* Assets */
 .assets {
-    /* for mobile */
-    /* scroll-snap-type: x mandatory; */
-    /* cursor: grab; */
-    /* scrollbar-width: none; */
-    /* touch-action: pan-y; */
     padding: 0 30px 30px 30px;
     gap: 15px;
     display: flex;
@@ -146,72 +140,11 @@
     padding: 10px 30px 5px 30px;
 }
 
-/* .work__project-assets-multiple {
-  display: flex;
-  gap: 15px;
-  overflow-x: auto;
-}
-
-.work__project-assets-multiple-count {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 30px 15px 30px;
-} */
-
-/* .assets::-webkit-scrollbar {
-    display: none;
-} */
-
-/* .work__project-assets:active {
-  cursor: grabbing;
-} */
-
-/* .work__project-image {
-  width: 250px;
-  height: auto;
-  display: block;
-  flex: 0 0 auto;
-  for mobile
-  scroll-snap-align: start;
-} */
-
-/* .work__project-image img {
-  width: 100%;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-} */
-
-/* .work__project-images::after {
-  content: "";
-  pointer-events: none;
-  position: sticky;
-  right: 0;
-  width: 40px;
-  background: linear-gradient(to left, rgba(255,255,255,1), transparent);
-} */
-
-/* .player-wrapper {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%; 
-}
-
-.react-player {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-} */
-
-
-
 .credits details>summary,
 .description details>summary {
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none;     /* IE 10+ */
-  user-select: none;         /* Standard syntax */
+  -webkit-user-select: none; 
+  -ms-user-select: none;     
+  user-select: none;  
 }
 
 .assetsWrapper {
@@ -225,9 +158,12 @@
 }
 
 .assetsWrapperExpanded {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   height: auto;
+  gap: 20px;
   overflow: visible;
+  padding: 20px 30px;
 }
 
 .assetsMeasurer {
@@ -242,10 +178,45 @@
 }
 
 .asset {
-  /* border: 1px solid black; */
   height: 30px;
   width: auto;
   object-fit: cover;
+  transition: opacity 0.18s ease;
+}
+
+.assetButton {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  break-inside: avoid;
+  cursor: pointer;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.assetsWrapperExpanded .assetButton {
+  align-self: start;
+  width: 100%;
+}
+
+.assetButton:focus-visible {
+  outline: var(--focus);
+  outline-offset: 2px;
+}
+
+.assetButton .asset {
+  display: block;
+}
+
+.assetExpanded {
+  height: auto;
+  object-position: top center;
+  width: 100%;
+}
+
+.assetInactive {
+  opacity: 0.35;
 }
 
 .assetCount {
@@ -289,4 +260,19 @@
 
 .assetsWrapper::-webkit-scrollbar {
   display: none;
+}
+
+.heading {
+    align-items: flex-end;
+    display: flex;
+    font-size: 16px;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 10px 30px;
+    font-weight: 600;
+    font-size: var(--font-sm);
+}
+
+.headingEmpty {
+    color: var(--disabled);
 }

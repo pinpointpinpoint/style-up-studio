@@ -147,9 +147,9 @@ export default function Navbar({ about, contact }: NavbarProps) {
         <div className={styles.navItem}>
           <button
             type="button"
-            aria-haspopup="dialog"
+            aria-haspopup="true"
             aria-expanded={activeMenu === 'about'}
-            aria-controls={activeMenu === 'about' ? aboutMenuId : undefined}
+            aria-controls={aboutMenuId}
             onClick={() => toggleMenu('about')}
           >
             <span>ABOUT</span>
@@ -176,9 +176,9 @@ export default function Navbar({ about, contact }: NavbarProps) {
         <div className={styles.navItem}>
           <button
             type="button"
-            aria-haspopup="dialog"
+            aria-haspopup="true"
             aria-expanded={activeMenu === 'contact'}
-            aria-controls={activeMenu === 'contact' ? contactMenuId : undefined}
+            aria-controls={contactMenuId}
             onClick={() => toggleMenu('contact')}
           >
             <ArrowIcon direction="left" />

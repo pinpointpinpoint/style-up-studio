@@ -48,9 +48,10 @@ export default defineType({
         }),
         defineField({
             name: 'client',
-            title: 'Client*',
+            title: 'Client/Primary Collaborator*',
+            description: 'The main associated name for this project, such as a client, brand, publication, agency, or key collaborator.',
             type: 'string',
-            validation: (rule) => rule.required().error('Client is required.'),
+            validation: (rule) => rule.required().error('Client/Primary Collaborator is required.'),
             fieldset: 'basic',
         }),
         defineField({
@@ -129,42 +130,22 @@ export default defineType({
             fieldset: 'collaborators',
         }),
         defineField({
-            name: 'gallery',
-            title: 'Gallery',
+            name: 'media',
+            title: 'Project Media*',
+            description:
+                'Add images, uploaded videos, and video URLs in the exact order they should appear on the project page.',
             type: 'array',
             of: [
                 defineArrayMember({
+                    name: 'image',
+                    title: 'Image',
                     type: 'image',
                     options: {hotspot: true},
                 }),
-            ],
-            options: {layout: 'grid'},
-            validation: (rule) =>
-                rule.custom((_, context) => {
-                    const {gallery, videos, videoUrls} = context.document as {
-                        gallery?: unknown[]
-                        videos?: unknown[]
-                        videoUrls?: unknown[]
-                    }
-
-                    return [gallery, videos, videoUrls].some(
-                        (field) => Array.isArray(field) && field.length > 0,
-                    )
-                        ? true
-                        : 'Add at least one gallery image, uploaded video, or video URL'
-                }),
-            fieldset: 'media',
-        }),
-        defineField({
-            name: 'videos',
-            title: 'Project Videos',
-            description:
-                'Upload a web-optimized MP4 under 250MB for best browser playback. For longer videos, use a YouTube or Vimeo URL.',
-            type: 'array',
-            of: [
                 defineArrayMember({
+                    name: 'uploadedVideo',
                     type: 'file',
-                    title: 'Video File',
+                    title: 'Uploaded Video',
                     fields: [
                         defineField({
                             name: 'thumbnail',
@@ -215,17 +196,9 @@ export default defineType({
                             return true
                         }),
                 }),
-            ],
-            fieldset: 'media',
-        }),
-        defineField({
-            name: 'videoUrls',
-            title: 'Video URLs',
-            type: 'array',
-            of: [
                 defineArrayMember({
                     type: 'object',
-                    name: 'videoUrlItem',
+                    name: 'videoUrl',
                     title: 'Video URL',
                     fields: [
                         defineField({
@@ -266,6 +239,8 @@ export default defineType({
                     },
                 }),
             ],
+            validation: (rule) =>
+                rule.required().min(1).error('Add at least one image, uploaded video, or video URL.'),
             fieldset: 'media',
         }),
         defineField({
@@ -291,12 +266,11 @@ export default defineType({
             },
             validation: (Rule) =>
                 Rule.custom(async (file, context) => {
-                    const {videos, videoUrls} = context.document as {
-                        videos?: unknown[]
-                        videoUrls?: unknown[]
+                    const {media} = context.document as {
+                        media?: Array<{_type?: string}>
                     }
-                    const hasVideo = [videos, videoUrls].some(
-                        (field) => Array.isArray(field) && field.length > 0,
+                    const hasVideo = media?.some((item) =>
+                        ['uploadedVideo', 'videoUrl'].includes(item?._type ?? ''),
                     )
 
                     if (hasVideo && !file?.asset?._ref) {

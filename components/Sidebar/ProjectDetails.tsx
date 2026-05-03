@@ -1,7 +1,7 @@
 'use client';
 
 import { PortableText } from 'next-sanity'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Project } from '@/types'
 import { urlForImage } from '@/sanity/lib/utils'
 import getVimeoId from '@/utils/getVimeoId'
@@ -12,6 +12,7 @@ type SidebarThumbnail = {
     key: string
     url: string
     alt: string
+    mediaIndex: number
 }
 
 const THUMBNAIL_WIDTH = 30
@@ -64,11 +65,17 @@ function getProjectYear(date?: string | null) {
 const ProjectDetails = ({
     displayedProject,
     expandDetails = false,
+    headerAction,
+    onAssetSelect,
+    activeAssetIndex,
 }: {
     displayedProject: Project | null
     expandDetails?: boolean
+    headerAction?: ReactNode
+    onAssetSelect?: (mediaIndex: number) => void
+    activeAssetIndex?: number
 }) => {
-    const [videoThumbnails, setVideoThumbnails] = useState<SidebarThumbnail[]>([])
+    const [videoUrlThumbnails, setVideoUrlThumbnails] = useState<Record<string, string | null>>({})
     const [visibleThumbnailCount, setVisibleThumbnailCount] = useState<number | null>(null)
     const assetsWrapperRef = useRef<HTMLDivElement | null>(null)
     const measuringWrapperRef = useRef<HTMLDivElement | null>(null)
@@ -76,17 +83,48 @@ const ProjectDetails = ({
     const hasDescription = Boolean(displayedProject?.description?.length)
     const hasCredits = Boolean(displayedProject?.credits?.length)
     const shouldRevealDetails = expandDetails && Boolean(displayedProject) && (hasDescription || hasCredits)
-    const galleryThumbnails = useMemo(() => (displayedProject?.gallery ?? [])
-        .map((image) => ({
-            key: image.asset?._ref,
-            url: urlForImage(image)?.height(80).quality(75).url(),
-            alt: `Gallery thumbnail for ${displayedProject?.title ?? 'project'}`,
-        }))
-        .filter((thumbnail): thumbnail is SidebarThumbnail => Boolean(thumbnail.key && thumbnail.url)), [displayedProject?.gallery, displayedProject?.title])
-    const thumbnails = useMemo(
-        () => [...galleryThumbnails, ...videoThumbnails],
-        [galleryThumbnails, videoThumbnails],
-    )
+    const thumbnailImageHeight = expandDetails ? 400 : 80
+    const thumbnails = useMemo(() => (displayedProject?.media ?? [])
+        .map((item, idx) => {
+            if (item._type === 'image') {
+                return {
+                    key: item._key ?? item.asset?._ref,
+                    url: urlForImage(item)?.height(thumbnailImageHeight).quality(75).url(),
+                    alt: `Gallery thumbnail for ${displayedProject?.title ?? 'project'}`,
+                    mediaIndex: idx,
+                }
+            }
+
+            if (item._type === 'uploadedVideo') {
+                return {
+                    key: item._key ?? `uploaded-video-${idx}`,
+                    url: urlForImage(item.thumbnail)?.height(thumbnailImageHeight).quality(75).url(),
+                    alt: `Video thumbnail ${idx + 1} for ${displayedProject?.title ?? 'project'}`,
+                    mediaIndex: idx,
+                }
+            }
+
+            if (item._type === 'videoUrl') {
+                const key = item._key ?? `video-url-${idx}`
+                const url = item.url
+                const thumbnailUrl = url
+                    ? urlForImage(item.thumbnail)?.height(thumbnailImageHeight).quality(75).url()
+                        ?? getYouTubeThumbnail(url)
+                        ?? videoUrlThumbnails[key]
+                    : null
+
+                return {
+                    key,
+                    url: thumbnailUrl,
+                    alt: `Video link thumbnail ${idx + 1} for ${displayedProject?.title ?? 'project'}`,
+                    mediaIndex: idx,
+                }
+            }
+
+            return null
+        })
+        .filter((thumbnail): thumbnail is SidebarThumbnail => Boolean(thumbnail?.key && thumbnail.url)),
+        [displayedProject?.media, displayedProject?.title, thumbnailImageHeight, videoUrlThumbnails])
     const resolvedVisibleThumbnailCount = expandDetails
         ? thumbnails.length
         : visibleThumbnailCount ?? thumbnails.length
@@ -161,45 +199,25 @@ const ProjectDetails = ({
         let cancelled = false
 
         async function resolveVideoThumbnails() {
-            const videos = displayedProject?.videos ?? []
-            const videoUrls = displayedProject?.videoUrls ?? []
-            const nextThumbnails = await Promise.all([
-                ...videos.map(async (video, idx) => {
-                    const url = urlForImage(video.thumbnail)?.height(80).quality(75).url()
+            const videoUrlItems = (displayedProject?.media ?? [])
+                .map((item, idx) => ({item, key: item._key ?? `video-url-${idx}`}))
+                .filter(({item}) => item._type === 'videoUrl' && item.url)
+                .filter(({item}) => !urlForImage(item.thumbnail)?.height(80).quality(75).url())
+                .filter(({item}) => !getYouTubeThumbnail(item.url ?? ''))
 
-                    if (!url) return null
-
-                    return {
-                        key: video._key ?? `video-${idx}`,
-                        url,
-                        alt: `Video thumbnail ${idx + 1} for ${displayedProject?.title ?? 'project'}`,
-                    }
-                }),
-                ...videoUrls.map(async (videoUrl, idx) => {
-                    const url = videoUrl.url
-
-                    if (!url) return null
-
-                    const thumbnailUrl = urlForImage(videoUrl.thumbnail)?.height(80).quality(75).url()
-                        ?? getYouTubeThumbnail(url)
-                        ?? await getVimeoThumbnail(url)
-
-                    return thumbnailUrl ? {
-                        key: videoUrl._key ?? `video-url-${idx}`,
-                        url: thumbnailUrl,
-                        alt: `Video link thumbnail ${idx + 1} for ${displayedProject?.title ?? 'project'}`,
-                    } : null
-                }),
-            ])
+            const nextThumbnails = await Promise.all(videoUrlItems.map(async ({item, key}) => ({
+                key,
+                url: item.url ? await getVimeoThumbnail(item.url) : null,
+            })))
 
             if (!cancelled) {
-                setVideoThumbnails(
-                    nextThumbnails.filter((thumbnail): thumbnail is SidebarThumbnail => Boolean(thumbnail)),
-                )
+                setVideoUrlThumbnails(Object.fromEntries(
+                    nextThumbnails.map((thumbnail) => [thumbnail.key, thumbnail.url]),
+                ))
             }
         }
 
-        setVideoThumbnails([])
+        setVideoUrlThumbnails({})
         resolveVideoThumbnails()
 
         return () => {
@@ -209,6 +227,10 @@ const ProjectDetails = ({
 
     return (
         <div className={styles.container}>
+            <div className={`${styles.heading} ${!displayedProject ? styles.headingEmpty : ''}`}>
+                <span>INFO</span>
+                {headerAction}
+            </div>
             <div className={styles.body}>
             <div className={`${styles.title} ${!displayedProject?.client ? styles.titleEmpty : ''}`}>
                 {displayedProject?.client || 'Client'}
@@ -217,6 +239,44 @@ const ProjectDetails = ({
                 {displayedProject?.title || 'Title'}
             </div>
             </div>
+            {shouldRevealDetails && (
+                <div className={styles.revealedDetails}>
+                    <div className={`${styles.title} ${!projectYear ? styles.titleEmpty : ''}`}>
+                        {projectYear || 'Year'}
+                    </div>
+                    {hasDescription && displayedProject?.description && (
+                        <section className={styles.description}>
+                            <div className={styles.portableText}>
+                                <PortableText value={displayedProject.description} />
+                            </div>
+                        </section>
+                    )}
+                    {hasCredits && displayedProject?.credits && (
+                        <section className={styles.credits}>
+                            <ul>
+                                {displayedProject.credits.map((credit, index) => {
+                                    const key = `${credit.role ?? 'credit'}-${credit.name ?? index}`
+                                    const name = credit.name ?? ''
+                                    const content = credit.link ? (
+                                        <a href={credit.link} target="_blank" rel="noopener noreferrer">
+                                            {name}
+                                        </a>
+                                    ) : (
+                                        <span>{name}</span>
+                                    )
+
+                                    return (
+                                        <li key={key}>
+                                            <span>{credit.role}</span>
+                                            {content}
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </section>
+                    )}
+                </div>
+            )}
             {thumbnails.length > 0 ? (
                 <>
                     <div className={styles.assetsMeasurer} ref={measuringWrapperRef} aria-hidden="true">
@@ -233,18 +293,37 @@ const ProjectDetails = ({
                         className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
                         ref={assetsWrapperRef}
                     >
-                        {visibleThumbnails.map((thumbnail, idx) => (
-                            <img
-                                key={`${thumbnail.key}-${idx}`}
-                                src={thumbnail.url}
-                                alt={thumbnail.alt}
-                                className={styles.asset}
-                                height={30}
-                                loading={idx < 6 ? 'eager' : 'lazy'}
-                                decoding="async"
-                                fetchPriority={idx < 6 ? 'high' : 'low'}
-                            />
-                        ))}
+                        {visibleThumbnails.map((thumbnail, idx) => {
+                            const isInactiveAsset = activeAssetIndex !== undefined
+                                && thumbnail.mediaIndex !== activeAssetIndex
+                            const assetImage = (
+                                <img
+                                    src={thumbnail.url}
+                                    alt={thumbnail.alt}
+                                    className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
+                                    height={expandDetails ? 80 : 30}
+                                    loading={idx < 6 ? 'eager' : 'lazy'}
+                                    decoding="async"
+                                    fetchPriority={idx < 6 ? 'high' : 'low'}
+                                />
+                            )
+
+                            return onAssetSelect ? (
+                                <button
+                                    key={`${thumbnail.key}-${idx}`}
+                                    className={styles.assetButton}
+                                    type="button"
+                                    onClick={() => onAssetSelect(thumbnail.mediaIndex)}
+                                    aria-label={`Go to ${thumbnail.alt}`}
+                                >
+                                    {assetImage}
+                                </button>
+                            ) : (
+                                <React.Fragment key={`${thumbnail.key}-${idx}`}>
+                                    {assetImage}
+                                </React.Fragment>
+                            )
+                        })}
                         {hiddenThumbnailCount > 0 && (
                             <div className={styles.assetCount} aria-label={`${hiddenThumbnailCount} hidden assets`}>
                                 +{hiddenThumbnailCount}

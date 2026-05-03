@@ -59,9 +59,10 @@ function getRandomLayout(): StyleUpLayout {
 
 export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
   const dragStateRef = useRef<DragState | null>(null);
+  const nextZIndexRef = useRef(1);
   const [randomLayouts, setRandomLayouts] = useState<Record<string, StyleUpLayout>>({});
   const [layouts, setLayouts] = useState<Record<string, StyleUpLayout>>({});
-  const [topItemId, setTopItemId] = useState<string | null>(null);
+  const [zIndexes, setZIndexes] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const nextLayouts: Record<string, StyleUpLayout> = {}
@@ -70,8 +71,9 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
       nextLayouts[styleUp._id] = getRandomLayout()
     })
 
+    nextZIndexRef.current = styleUps?.length ? styleUps.length + 1 : 1
     setLayouts({})
-    setTopItemId(null)
+    setZIndexes({})
     setRandomLayouts(nextLayouts)
   }, [styleUps]);
 
@@ -85,7 +87,11 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
   )
 
   const bringToFront = (id: string) => {
-    setTopItemId(id)
+    setZIndexes((currentZIndexes) => ({
+      ...currentZIndexes,
+      [id]: nextZIndexRef.current,
+    }))
+    nextZIndexRef.current += 1
   }
 
   const handlePointerDown = (styleUp: StyleUpItem) => (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -148,7 +154,7 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
                   left: `${layout.left}%`,
                   top: `${layout.top}%`,
                   width: `${layout.width}%`,
-                  zIndex: topItemId === su._id ? 1000 : index + 1,
+                  zIndex: zIndexes[su._id] ?? index + 1,
                   transform: `translate(${layout.x}px, ${layout.y}px) translate(-50%, -50%)`,
                 }}
                 onMouseEnter={() => bringToFront(su._id)}

@@ -1,5 +1,5 @@
 .header {
-  height: 40px;
+  height: var(--header-height);
   width: 100%;
   position: relative;
 }
@@ -8,7 +8,7 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  height: 40px;
+  height: var(--header-height);
   padding: 0 30px;
   width: 100%;
 }
@@ -25,45 +25,47 @@
 }
 
 .navItem button {
+  display: flex;
   align-items: center;
   background: transparent;
   border: 0;
-  color: inherit;
   cursor: pointer;
-  display: inline-flex;
   font-size: var(--font-md);
   gap: 6px;
   padding: 0;
-  line-height: 1;
-  white-space: nowrap;
 }
 
 .drawer {
   align-items: center;
   background-color: white;
-  display: flex;
-  justify-content: space-between;
-  left: 0;
-  min-height: 40px;
+  display: inline-flex;
+  min-height: var(--header-height);
   padding: 0;
   position: absolute;
   top: 0;
-  width: 100%;
   z-index: 30;
 }
 
-.drawer:focus {
-  outline: none;
+.drawer[data-direction="left"] {
+  border-right: 1px solid black;
+}
+
+.drawer[data-direction="right"] {
+  border-left: 1px solid black;
 }
 
 .drawerInner {
   align-items: center;
-  display: flex;
-  gap: 16px;
-  height: 40px;
-  justify-content: space-between;
+  display: inline-flex;
+  gap: 15px;
+  height: var(--header-height);
+  justify-content: flex-start;
   padding: 0 30px;
-  width: 100%;
+  width: fit-content;
+}
+
+.drawerInner:focus {
+  outline: none;
 }
 
 .aboutSummary {
@@ -90,7 +92,7 @@
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  top: 0;
+  top: var(--header-height);
   width: auto;
   z-index: 40;
 }
@@ -127,4 +129,7 @@
 
 .contactLinkList a {
   white-space: nowrap;
+  color: black;
+  text-decoration: none;
+  text-transform: uppercase;
 }

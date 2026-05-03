@@ -32,6 +32,10 @@ type SidebarFilters = {
   projectTypes?: SidebarFilterItem[]
   brands?: SidebarFilterItem[]
   personalities?: SidebarFilterItem[]
+  settings?: {
+    showPersonalities?: boolean | null
+    showBrands?: boolean | null
+  } | null
 } | null | undefined
 
 function readParam(searchParams: SearchParamsInput, key: string) {
@@ -41,7 +45,7 @@ function readParam(searchParams: SearchParamsInput, key: string) {
     return searchParams.get(key) ?? undefined
   }
 
-  const value = searchParams[key]
+  const value = (searchParams as Record<string, SearchParamValue>)[key]
   return Array.isArray(value) ? value[0] : value
 }
 
@@ -64,19 +68,33 @@ function filterBySlug(
   return id ? {type, id} : null
 }
 
+function isSidebarFilterTypeEnabled(
+  sidebarFilters: SidebarFilters,
+  type: 'brand' | 'personality' | 'projectType',
+) {
+  if (type === 'brand') return sidebarFilters?.settings?.showBrands ?? true
+  if (type === 'personality') return sidebarFilters?.settings?.showPersonalities ?? true
+
+  return true
+}
+
 export function parseProjectFilter(
   searchParams: SearchParamsInput,
   sidebarFilters?: SidebarFilters,
 ): Filter {
-  const brandFilter = filterBySlug('brand', sidebarFilters?.brands, readParam(searchParams, PARAM_KEYS.brand))
-  if (brandFilter) return brandFilter
+  if (isSidebarFilterTypeEnabled(sidebarFilters, 'brand')) {
+    const brandFilter = filterBySlug('brand', sidebarFilters?.brands, readParam(searchParams, PARAM_KEYS.brand))
+    if (brandFilter) return brandFilter
+  }
 
-  const personalityFilter = filterBySlug(
-    'personality',
-    sidebarFilters?.personalities,
-    readParam(searchParams, PARAM_KEYS.personality),
-  )
-  if (personalityFilter) return personalityFilter
+  if (isSidebarFilterTypeEnabled(sidebarFilters, 'personality')) {
+    const personalityFilter = filterBySlug(
+      'personality',
+      sidebarFilters?.personalities,
+      readParam(searchParams, PARAM_KEYS.personality),
+    )
+    if (personalityFilter) return personalityFilter
+  }
 
   const view = readParam(searchParams, PARAM_KEYS.view)
   if (view === 'all') return {type: 'all'}
@@ -108,8 +126,8 @@ export function writeProjectFilterToParams(
 
   const itemsByType = {
     projectType: sidebarFilters?.projectTypes,
-    brand: sidebarFilters?.brands,
-    personality: sidebarFilters?.personalities,
+    brand: isSidebarFilterTypeEnabled(sidebarFilters, 'brand') ? sidebarFilters?.brands : undefined,
+    personality: isSidebarFilterTypeEnabled(sidebarFilters, 'personality') ? sidebarFilters?.personalities : undefined,
   }
   const slug = findSlugById(itemsByType[filter.type], filter.id)
 

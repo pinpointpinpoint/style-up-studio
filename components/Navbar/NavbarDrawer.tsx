@@ -41,7 +41,7 @@ export function NavbarDrawer({
   const closedPosition = prefersReducedMotion ? { x: 0 } : { x: initialX }
   const transition = prefersReducedMotion
     ? { duration: 0 }
-    : { type: 'tween' as const, duration: 0.3 }
+    : { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const }
 
   useEffect(() => {
     if (!isOpen) return
@@ -123,14 +123,19 @@ export function NavbarDrawer({
         <motion.div
           id={id}
           ref={drawerRef}
-          role="dialog"
           aria-label={label}
+          role="group"
           tabIndex={-1}
           initial={closedPosition}
           animate={{ x: 0 }}
           exit={closedPosition}
           transition={transition}
           className={styles.drawer}
+          data-direction={direction}
+          style={{
+            left: direction === 'left' ? 0 : 'auto',
+            right: direction === 'right' ? 0 : 'auto',
+          }}
         >
           <div className={styles.drawerInner}>{children}</div>
         </motion.div>

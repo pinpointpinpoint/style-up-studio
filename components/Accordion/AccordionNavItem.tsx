@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from 'motion/react'
 import type { MouseEvent, ReactNode } from "react";
+import ArrowIcon, { type ArrowDirection } from "../ArrowIcon/ArrowIcon";
 import styles from "./Accordion.module.css";
 
 type AccordionNavItemProps = {
@@ -9,6 +10,7 @@ type AccordionNavItemProps = {
   active: boolean
   current: boolean
   height: string | number
+  arrowDirection?: ArrowDirection
   children?: ReactNode
   onNavigate: (event: MouseEvent<HTMLAnchorElement>) => void
 }
@@ -19,6 +21,7 @@ export default function AccordionNavItem({
   active,
   current,
   height,
+  arrowDirection,
   children,
   onNavigate,
 }: AccordionNavItemProps) {
@@ -40,7 +43,12 @@ export default function AccordionNavItem({
         onClick={onNavigate}
         aria-current={current ? "page" : undefined}
       >
-        {title}
+        <span>{title}</span>
+        {arrowDirection && (
+          <span className={styles.headerArrow} aria-hidden="true">
+            <ArrowIcon direction={arrowDirection} />
+          </span>
+        )}
       </Link>
       <div
         id={`${title.toLowerCase().replace(/\s+/g, '-')}-panel`}

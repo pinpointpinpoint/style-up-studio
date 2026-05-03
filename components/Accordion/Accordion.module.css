@@ -1,5 +1,4 @@
 .accordion {
-  --accordion-header-height: 35px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -25,12 +24,12 @@
   text-align: left;
   border-top: 1px solid black;
   font-size: 16px;
-  height: var(--accordion-header-height);
-  min-height: var(--accordion-header-height);
+  height: var(--header-height);
+  min-height: var(--header-height);
   text-decoration: none;
   display: flex;
   align-items: center;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  justify-content: space-between;
 }
 
 .open .header {
@@ -38,6 +37,17 @@
   color: white;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
+}
+
+.headerArrow {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.headerArrow img {
+  display: block;
+  height: 12px;
+  width: 12px;
 }
 
 .panel {

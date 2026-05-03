@@ -19,7 +19,7 @@ export default function getSafeInstagramProfile(value?: string | null) {
     if (!handle) return null
 
     return {
-      href: url.toString(),
+      href: `https://www.instagram.com/${encodeURIComponent(handle)}/`,
       label: `@${handle}`,
     }
   } catch {

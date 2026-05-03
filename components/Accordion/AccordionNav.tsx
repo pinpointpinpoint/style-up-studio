@@ -10,8 +10,8 @@ import type { Filter, Project } from "@/types";
 import type { SidebarFiltersQueryResult } from "@/sanity.types";
 import styles from "./Accordion.module.css";
 
-const HEADER_HEIGHT = 35;
-const OPEN_HEIGHT = `calc(100% - ${HEADER_HEIGHT}px)`;
+const CLOSED_HEIGHT = 'var(--header-height)';
+const OPEN_HEIGHT = `calc(100% - var(--header-height))`;
 const WORK_HOME_ROUTE = "/";
 const STYLE_UPS_ROUTE = "/style-ups";
 
@@ -45,8 +45,8 @@ export default function AccordionNav({
   const [optimisticSection, setOptimisticSection] = useState<AccordionSection | null>(null);
   const [lastWorkRoute, setLastWorkRoute] = useState(WORK_HOME_ROUTE);
   const activeSection = optimisticSection ?? routeSection;
-  const workHeight = activeSection === "work" ? OPEN_HEIGHT : HEADER_HEIGHT;
-  const styleUpsHeight = activeSection === "style-ups" ? OPEN_HEIGHT : HEADER_HEIGHT;
+  const workHeight = activeSection === "work" ? OPEN_HEIGHT : CLOSED_HEIGHT;
+  const styleUpsHeight = activeSection === "style-ups" ? OPEN_HEIGHT : CLOSED_HEIGHT;
   const currentRoute = useMemo(() => {
     const queryString = searchParams.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
@@ -91,6 +91,7 @@ export default function AccordionNav({
           active={activeSection === "work"}
           current={routeSection === "work"}
           height={workHeight}
+          arrowDirection={activeSection === "style-ups" ? "down" : undefined}
           onNavigate={handleNavigate("work")}
         >
           <WorkSection
@@ -106,6 +107,7 @@ export default function AccordionNav({
           active={activeSection === "style-ups"}
           current={routeSection === "style-ups"}
           height={styleUpsHeight}
+          arrowDirection={activeSection === "work" ? "up" : undefined}
           onNavigate={handleNavigate("style-ups")}
         >
           <StyleUps styleUps={styleUps} />

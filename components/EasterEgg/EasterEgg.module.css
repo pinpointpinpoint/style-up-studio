@@ -26,49 +26,6 @@
   color: white;
 }
 
-.sparkle {
-  animation: sparkle-pop 900ms steps(2, end) infinite;
-  display: block;
-  height: 10px;
-  pointer-events: none;
-  position: absolute;
-  width: 10px;
-}
-
-.sparkleOne {
-  animation-delay: 0ms;
-  left: -24px;
-  top: -26px;
-}
-
-.sparkleTwo {
-  animation-delay: 180ms;
-  left: 17px;
-  top: -31px;
-}
-
-.sparkleThree {
-  animation-delay: 360ms;
-  left: 22px;
-  top: 14px;
-}
-
-.sparkleFour {
-  animation-delay: 720ms;
-  left: -22px;
-  top: 30px;
-}
-
-@keyframes sparkle-pop {
-  0%, 100% {
-    transform: scale(0.7) rotate(0deg);
-  }
-
-  35%, 70% {
-    transform: scale(1.15) rotate(18deg);
-  }
-}
-
 .backdrop {
   inset: 0;
   pointer-events: none;

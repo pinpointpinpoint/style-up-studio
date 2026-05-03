@@ -92,10 +92,6 @@ export default function EasterEgg() {
           className={styles.triggerWrap}
           style={{ left: position.x, top: position.y }}
         >
-          <img className={`${styles.sparkle} ${styles.sparkleOne}`} src="/featured.svg" alt="" aria-hidden="true" />
-          <img className={`${styles.sparkle} ${styles.sparkleTwo}`} src="/featured.svg" alt="" aria-hidden="true" />
-          <img className={`${styles.sparkle} ${styles.sparkleThree}`} src="/featured.svg" alt="" aria-hidden="true" />
-          <img className={`${styles.sparkle} ${styles.sparkleFour}`} src="/featured.svg" alt="" aria-hidden="true" />
           <button
             type="button"
             className={styles.trigger}

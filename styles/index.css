@@ -37,12 +37,10 @@ button:hover {
   summary,
   [tabindex]:not([tabindex="-1"])
 ):focus-visible {
-    outline: 4px dotted teal;   
+    outline: var(--focus);   
 }
 
 .site {
-    --site-nav-height: 35px;
-    --site-collapsed-accordion-height: 35px;
     display: flex;
     flex-direction: column;
     height: 100vh;

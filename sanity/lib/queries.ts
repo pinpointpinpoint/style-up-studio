@@ -48,6 +48,10 @@ export const sidebarFiltersQuery = defineQuery(`
     _type == "project" &&
     !(_id in path("drafts.**"))
   ]),
+  "settings": {
+    "showPersonalities": coalesce(*[_type == "settings"][0].sidebarFilters.showPersonalities, true),
+    "showBrands": coalesce(*[_type == "settings"][0].sidebarFilters.showBrands, true)
+  },
 
   "projectTypes": *[
     _type == "projectType" &&
@@ -114,26 +118,14 @@ const projectProjection = `
   featured,
   "personalities": personalities[]->{_id, name, "slug": slug.current},
   "brands": brands[]->{_id, name, "slug": slug.current},
-  gallery[]{
+  media[]{
     _key,
+    _type,
     asset,
     crop,
-    hotspot
-  },
-  "previewUrl": previewClip.asset->url,
-  videos[]{
-    _key,
+    hotspot,
     "title": asset->originalFilename,
     "fileUrl": asset->url,
-    thumbnail{
-      asset,
-      crop,
-      hotspot
-    }
-  },
-  videoUrls[]{
-    _key,
-    title,
     url,
     thumbnail{
       asset,
@@ -141,6 +133,7 @@ const projectProjection = `
       hotspot
     }
   },
+  "previewUrl": previewClip.asset->url,
   coverImage{
     asset,
     crop,

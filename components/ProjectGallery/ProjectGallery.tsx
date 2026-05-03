@@ -81,6 +81,36 @@ export default function ProjectGallery({
     onProjectLeave?.()
   }
 
+  const onGalleryMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target
+
+    if (!(target instanceof Element)) return
+    if (target.closest('[data-project-gallery-item]')) return
+
+    const gallery = galleryRef.current
+
+    if (!gallery) return
+
+    const galleryItems = Array.from(
+      gallery.querySelectorAll<HTMLElement>('[data-project-gallery-item]'),
+    )
+    const itemRects = galleryItems.map((item) => item.getBoundingClientRect())
+
+    const { columnGap, rowGap } = getComputedStyle(gallery)
+    const horizontalGap = Number.parseFloat(columnGap) || 0
+    const verticalGap = Number.parseFloat(rowGap) || 0
+    const isNearProjectItem = itemRects.some((rect) => (
+      event.clientX >= rect.left - horizontalGap / 2 &&
+      event.clientX <= rect.right + horizontalGap / 2 &&
+      event.clientY >= rect.top - verticalGap / 2 &&
+      event.clientY <= rect.bottom + verticalGap / 2
+    ))
+
+    if (isNearProjectItem) return
+
+    onProjectLeave?.()
+  }
+
   if (projects.length < 1) {
     return (
       <div className={styles.projectGallery}>
@@ -93,11 +123,13 @@ export default function ProjectGallery({
     <div
       ref={galleryRef}
       className={styles.projectGallery}
+      onMouseMove={onGalleryMove}
       onMouseLeave={onLeave}
     >
         {projects?.map((project, idx) => (
         <motion.div
           key={project._id}
+          data-project-gallery-item
           initial={hasPlayedIntro ? false : { opacity: 0 }}
           animate={introDone ? { opacity: 1 } : { opacity: 0 }}
           transition={{

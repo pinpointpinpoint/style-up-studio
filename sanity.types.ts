@@ -107,59 +107,61 @@ export type Project = {
         _key: string
         [internalGroqTypeReferenceTo]?: 'brand'
     }>
-    gallery?: Array<{
-        asset?: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        }
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        _type: 'image'
-        _key: string
-    }>
-    videos?: Array<{
-        asset?: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
-        }
-        media?: unknown
-        thumbnail?: {
-            asset?: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            }
-            media?: unknown
-            hotspot?: SanityImageHotspot
-            crop?: SanityImageCrop
-            _type: 'image'
-        }
-        _type: 'file'
-        _key: string
-    }>
-    videoUrls?: Array<{
-        url?: string
-        thumbnail?: {
-            asset?: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            }
-            media?: unknown
-            hotspot?: SanityImageHotspot
-            crop?: SanityImageCrop
-            _type: 'image'
-        }
-        _type: 'videoUrlItem'
-        _key: string
-    }>
+    media?: Array<
+        | {
+              asset?: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+              }
+              media?: unknown
+              hotspot?: SanityImageHotspot
+              crop?: SanityImageCrop
+              _type: 'image'
+              _key: string
+          }
+        | {
+              asset?: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+              }
+              media?: unknown
+              thumbnail?: {
+                  asset?: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  }
+                  media?: unknown
+                  hotspot?: SanityImageHotspot
+                  crop?: SanityImageCrop
+                  _type: 'image'
+              }
+              _type: 'uploadedVideo'
+              _key: string
+          }
+        | {
+              url?: string
+              thumbnail?: {
+                  asset?: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  }
+                  media?: unknown
+                  hotspot?: SanityImageHotspot
+                  crop?: SanityImageCrop
+                  _type: 'image'
+              }
+              _type: 'videoUrl'
+              _key: string
+          }
+    >
     coverImage?: {
         asset?: {
             _ref: string
@@ -414,10 +416,14 @@ export type AllProjectTypesQueryResult = Array<{
     referenceCount: number
 }>
 // Variable: sidebarFiltersQuery
-// Query: {  "featuredCount": count(*[    _type == "project" &&    featured == true &&    !(_id in path("drafts.**"))  ]),  "allCount": count(*[    _type == "project" &&    !(_id in path("drafts.**"))  ]),  "projectTypes": *[    _type == "projectType" &&    !(_id in path("drafts.**"))  ] | order(title asc) {    _id,    title,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  },  "personalities": *[    _type == "personality" &&    !(_id in path("drafts.**"))  ] | order(name asc) {    _id,    "title": name,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  },  "brands": *[    _type == "brand" &&    !(_id in path("drafts.**"))  ] | order(name asc) {    _id,    "title": name,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  }}
+// Query: {  "featuredCount": count(*[    _type == "project" &&    featured == true &&    !(_id in path("drafts.**"))  ]),  "allCount": count(*[    _type == "project" &&    !(_id in path("drafts.**"))  ]),  "settings": {    "showPersonalities": coalesce(*[_type == "settings"][0].sidebarFilters.showPersonalities, true),    "showBrands": coalesce(*[_type == "settings"][0].sidebarFilters.showBrands, true)  },  "projectTypes": *[    _type == "projectType" &&    !(_id in path("drafts.**"))  ] | order(title asc) {    _id,    title,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  },  "personalities": *[    _type == "personality" &&    !(_id in path("drafts.**"))  ] | order(name asc) {    _id,    "title": name,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  },  "brands": *[    _type == "brand" &&    !(_id in path("drafts.**"))  ] | order(name asc) {    _id,    "title": name,    "slug": slug.current,    "referenceCount": count(*[      _type == "project" &&      !(_id in path("drafts.**")) &&      references(^._id)    ])  }}
 export type SidebarFiltersQueryResult = {
     featuredCount: number
     allCount: number
+    settings: {
+        showPersonalities: boolean | true
+        showBrands: boolean | true
+    }
     projectTypes: Array<{
         _id: string
         title: string | null
@@ -454,7 +460,7 @@ export type AllStyleUpsQueryResult = Array<{
     } | null
 }>
 // Variable: projectBySlugQuery
-// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    slug.current == $slug  ][0]{     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  gallery[]{    _key,    asset,    crop,    hotspot  },  "previewUrl": previewClip.asset->url,  videos[]{    _key,    "title": asset->originalFilename,    "fileUrl": asset->url,    thumbnail{      asset,      crop,      hotspot    }  },  videoUrls[]{    _key,    title,    url,    thumbnail{      asset,      crop,      hotspot    }  },  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
+// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    slug.current == $slug  ][0]{     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  media[]{    _key,    _type,    asset,    crop,    hotspot,    "title": asset->originalFilename,    "fileUrl": asset->url,    url,    thumbnail{      asset,      crop,      hotspot    }  },  "previewUrl": previewClip.asset->url,  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
 export type ProjectBySlugQueryResult = {
     _id: string
     _type: 'project'
@@ -478,48 +484,70 @@ export type ProjectBySlugQueryResult = {
         name: string | null
         slug: string | null
     }> | null
-    gallery: Array<{
-        _key: string
-        asset: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        } | null
-        crop: SanityImageCrop | null
-        hotspot: SanityImageHotspot | null
-    }> | null
+    media: Array<
+        | {
+              _key: string
+              _type: 'image'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+              } | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: null
+          }
+        | {
+              _key: string
+              _type: 'uploadedVideo'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+              } | null
+              crop: null
+              hotspot: null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+        | {
+              _key: string
+              _type: 'videoUrl'
+              asset: null
+              crop: null
+              hotspot: null
+              title: null
+              fileUrl: null
+              url: string | null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+    > | null
     previewUrl: string | null
-    videos: Array<{
-        _key: string
-        title: string | null
-        fileUrl: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
-    videoUrls: Array<{
-        _key: string
-        title: null
-        url: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
     coverImage: {
         asset: {
             _ref: string
@@ -557,7 +585,7 @@ export type ProjectBySlugQueryResult = {
     orderRank: string | null
 } | null
 // Variable: projectsQuery
-// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    (      $filterType == "all" ||      ($filterType == "featured" && featured == true) ||      ($filterType == "projectType" && $filterId in projectType[]._ref) ||      ($filterType == "brand" && $filterId in brands[]._ref) ||      ($filterType == "personality" && $filterId in personalities[]._ref)    ) &&    (      !defined($cursorDate) ||      $cursorId == "" ||      date < $cursorDate ||      (date == $cursorDate && _id < $cursorId)    )  ]  | order(date desc, _id desc)  [0...$limit]{     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  gallery[]{    _key,    asset,    crop,    hotspot  },  "previewUrl": previewClip.asset->url,  videos[]{    _key,    "title": asset->originalFilename,    "fileUrl": asset->url,    thumbnail{      asset,      crop,      hotspot    }  },  videoUrls[]{    _key,    title,    url,    thumbnail{      asset,      crop,      hotspot    }  },  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
+// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&    (      $filterType == "all" ||      ($filterType == "featured" && featured == true) ||      ($filterType == "projectType" && $filterId in projectType[]._ref) ||      ($filterType == "brand" && $filterId in brands[]._ref) ||      ($filterType == "personality" && $filterId in personalities[]._ref)    ) &&    (      !defined($cursorDate) ||      $cursorId == "" ||      date < $cursorDate ||      (date == $cursorDate && _id < $cursorId)    )  ]  | order(date desc, _id desc)  [0...$limit]{     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  media[]{    _key,    _type,    asset,    crop,    hotspot,    "title": asset->originalFilename,    "fileUrl": asset->url,    url,    thumbnail{      asset,      crop,      hotspot    }  },  "previewUrl": previewClip.asset->url,  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
 export type ProjectsQueryResult = Array<{
     _id: string
     _type: 'project'
@@ -581,48 +609,70 @@ export type ProjectsQueryResult = Array<{
         name: string | null
         slug: string | null
     }> | null
-    gallery: Array<{
-        _key: string
-        asset: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        } | null
-        crop: SanityImageCrop | null
-        hotspot: SanityImageHotspot | null
-    }> | null
+    media: Array<
+        | {
+              _key: string
+              _type: 'image'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+              } | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: null
+          }
+        | {
+              _key: string
+              _type: 'uploadedVideo'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+              } | null
+              crop: null
+              hotspot: null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+        | {
+              _key: string
+              _type: 'videoUrl'
+              asset: null
+              crop: null
+              hotspot: null
+              title: null
+              fileUrl: null
+              url: string | null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+    > | null
     previewUrl: string | null
-    videos: Array<{
-        _key: string
-        title: string | null
-        fileUrl: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
-    videoUrls: Array<{
-        _key: string
-        title: null
-        url: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
     coverImage: {
         asset: {
             _ref: string
@@ -660,7 +710,7 @@ export type ProjectsQueryResult = Array<{
     orderRank: string | null
 }>
 // Variable: featuredProjectsQuery
-// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&      featured == true &&    (      $cursorId == "" ||      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||      (        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&        _id > $cursorId      )    )  ]  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  gallery[]{    _key,    asset,    crop,    hotspot  },  "previewUrl": previewClip.asset->url,  videos[]{    _key,    "title": asset->originalFilename,    "fileUrl": asset->url,    thumbnail{      asset,      crop,      hotspot    }  },  videoUrls[]{    _key,    title,    url,    thumbnail{      asset,      crop,      hotspot    }  },  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
+// Query: *[    _type == "project" &&    !(_id in path("drafts.**")) &&      featured == true &&    (      $cursorId == "" ||      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||      (        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&        _id > $cursorId      )    )  ]  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {     _id,  _type,  title,  client,  date,  "slug": slug.current,  "projectType": projectType[]->{_id, title, "slug": slug.current},  featured,  "personalities": personalities[]->{_id, name, "slug": slug.current},  "brands": brands[]->{_id, name, "slug": slug.current},  media[]{    _key,    _type,    asset,    crop,    hotspot,    "title": asset->originalFilename,    "fileUrl": asset->url,    url,    thumbnail{      asset,      crop,      hotspot    }  },  "previewUrl": previewClip.asset->url,  coverImage{    asset,    crop,    hotspot  },  description[],  credits[]{    role,    name,    link  },  orderRank  }
 export type FeaturedProjectsQueryResult = Array<{
     _id: string
     _type: 'project'
@@ -684,48 +734,70 @@ export type FeaturedProjectsQueryResult = Array<{
         name: string | null
         slug: string | null
     }> | null
-    gallery: Array<{
-        _key: string
-        asset: {
-            _ref: string
-            _type: 'reference'
-            _weak?: boolean
-            [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-        } | null
-        crop: SanityImageCrop | null
-        hotspot: SanityImageHotspot | null
-    }> | null
+    media: Array<
+        | {
+              _key: string
+              _type: 'image'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+              } | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: null
+          }
+        | {
+              _key: string
+              _type: 'uploadedVideo'
+              asset: {
+                  _ref: string
+                  _type: 'reference'
+                  _weak?: boolean
+                  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+              } | null
+              crop: null
+              hotspot: null
+              title: string | null
+              fileUrl: string | null
+              url: null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+        | {
+              _key: string
+              _type: 'videoUrl'
+              asset: null
+              crop: null
+              hotspot: null
+              title: null
+              fileUrl: null
+              url: string | null
+              thumbnail: {
+                  asset: {
+                      _ref: string
+                      _type: 'reference'
+                      _weak?: boolean
+                      [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+                  } | null
+                  crop: SanityImageCrop | null
+                  hotspot: SanityImageHotspot | null
+              } | null
+          }
+    > | null
     previewUrl: string | null
-    videos: Array<{
-        _key: string
-        title: string | null
-        fileUrl: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
-    videoUrls: Array<{
-        _key: string
-        title: null
-        url: string | null
-        thumbnail: {
-            asset: {
-                _ref: string
-                _type: 'reference'
-                _weak?: boolean
-                [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
-            } | null
-            crop: SanityImageCrop | null
-            hotspot: SanityImageHotspot | null
-        } | null
-    }> | null
     coverImage: {
         asset: {
             _ref: string
@@ -769,10 +841,10 @@ declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult
         '\n  *[_type == "projectType" && !(_id in path("drafts.**"))]{\n    _id,\n    title,\n    "slug": slug.current,\n    "referenceCount": count(*[_type in ["project"] && references(^._id)]),\n  }\n': AllProjectTypesQueryResult
-        '\n{\n  "featuredCount": count(*[\n    _type == "project" &&\n    featured == true &&\n    !(_id in path("drafts.**"))\n  ]),\n  "allCount": count(*[\n    _type == "project" &&\n    !(_id in path("drafts.**"))\n  ]),\n\n  "projectTypes": *[\n    _type == "projectType" &&\n    !(_id in path("drafts.**"))\n  ] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "personalities": *[\n    _type == "personality" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "brands": *[\n    _type == "brand" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  }\n}\n': SidebarFiltersQueryResult
+        '\n{\n  "featuredCount": count(*[\n    _type == "project" &&\n    featured == true &&\n    !(_id in path("drafts.**"))\n  ]),\n  "allCount": count(*[\n    _type == "project" &&\n    !(_id in path("drafts.**"))\n  ]),\n  "settings": {\n    "showPersonalities": coalesce(*[_type == "settings"][0].sidebarFilters.showPersonalities, true),\n    "showBrands": coalesce(*[_type == "settings"][0].sidebarFilters.showBrands, true)\n  },\n\n  "projectTypes": *[\n    _type == "projectType" &&\n    !(_id in path("drafts.**"))\n  ] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "personalities": *[\n    _type == "personality" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  },\n  "brands": *[\n    _type == "brand" &&\n    !(_id in path("drafts.**"))\n  ] | order(name asc) {\n    _id,\n    "title": name,\n    "slug": slug.current,\n    "referenceCount": count(*[\n      _type == "project" &&\n      !(_id in path("drafts.**")) &&\n      references(^._id)\n    ])\n  }\n}\n': SidebarFiltersQueryResult
         '\n*[_type == "styleUp" && !(_id in path("drafts.**"))] | order(_createdAt desc) {\n  _id,\n  name,\n  image{\n    asset,\n    crop,\n    hotspot\n  },\n}\n': AllStyleUpsQueryResult
-        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n    slug.current == $slug\n  ][0]{\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  gallery[]{\n    _key,\n    asset,\n    crop,\n    hotspot\n  },\n  "previewUrl": previewClip.asset->url,\n  videos[]{\n    _key,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  videoUrls[]{\n    _key,\n    title,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': ProjectBySlugQueryResult
-        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n    (\n      $filterType == "all" ||\n      ($filterType == "featured" && featured == true) ||\n      ($filterType == "projectType" && $filterId in projectType[]._ref) ||\n      ($filterType == "brand" && $filterId in brands[]._ref) ||\n      ($filterType == "personality" && $filterId in personalities[]._ref)\n    ) &&\n    (\n      !defined($cursorDate) ||\n      $cursorId == "" ||\n      date < $cursorDate ||\n      (date == $cursorDate && _id < $cursorId)\n    )\n  ]\n  | order(date desc, _id desc)\n  [0...$limit]{\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  gallery[]{\n    _key,\n    asset,\n    crop,\n    hotspot\n  },\n  "previewUrl": previewClip.asset->url,\n  videos[]{\n    _key,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  videoUrls[]{\n    _key,\n    title,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': ProjectsQueryResult
-        '\n*[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n      featured == true &&\n    (\n      $cursorId == "" ||\n      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||\n      (\n        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&\n        _id > $cursorId\n      )\n    )\n  ]\n  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  gallery[]{\n    _key,\n    asset,\n    crop,\n    hotspot\n  },\n  "previewUrl": previewClip.asset->url,\n  videos[]{\n    _key,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  videoUrls[]{\n    _key,\n    title,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': FeaturedProjectsQueryResult
+        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n    slug.current == $slug\n  ][0]{\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  media[]{\n    _key,\n    _type,\n    asset,\n    crop,\n    hotspot,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  "previewUrl": previewClip.asset->url,\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': ProjectBySlugQueryResult
+        '\n  *[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n    (\n      $filterType == "all" ||\n      ($filterType == "featured" && featured == true) ||\n      ($filterType == "projectType" && $filterId in projectType[]._ref) ||\n      ($filterType == "brand" && $filterId in brands[]._ref) ||\n      ($filterType == "personality" && $filterId in personalities[]._ref)\n    ) &&\n    (\n      !defined($cursorDate) ||\n      $cursorId == "" ||\n      date < $cursorDate ||\n      (date == $cursorDate && _id < $cursorId)\n    )\n  ]\n  | order(date desc, _id desc)\n  [0...$limit]{\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  media[]{\n    _key,\n    _type,\n    asset,\n    crop,\n    hotspot,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  "previewUrl": previewClip.asset->url,\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': ProjectsQueryResult
+        '\n*[\n    _type == "project" &&\n    !(_id in path("drafts.**")) &&\n      featured == true &&\n    (\n      $cursorId == "" ||\n      coalesce(orderRank, "~~~~") > coalesce($cursorOrderRank, "~~~~") ||\n      (\n        coalesce(orderRank, "~~~~") == coalesce($cursorOrderRank, "~~~~") &&\n        _id > $cursorId\n      )\n    )\n  ]\n  | order(coalesce(orderRank, "~~~~") asc, _id asc)[0...$limit] {\n   \n  _id,\n  _type,\n  title,\n  client,\n  date,\n  "slug": slug.current,\n  "projectType": projectType[]->{_id, title, "slug": slug.current},\n  featured,\n  "personalities": personalities[]->{_id, name, "slug": slug.current},\n  "brands": brands[]->{_id, name, "slug": slug.current},\n  media[]{\n    _key,\n    _type,\n    asset,\n    crop,\n    hotspot,\n    "title": asset->originalFilename,\n    "fileUrl": asset->url,\n    url,\n    thumbnail{\n      asset,\n      crop,\n      hotspot\n    }\n  },\n  "previewUrl": previewClip.asset->url,\n  coverImage{\n    asset,\n    crop,\n    hotspot\n  },\n  description[],\n  credits[]{\n    role,\n    name,\n    link\n  },\n  orderRank\n\n  }\n': FeaturedProjectsQueryResult
     }
 }

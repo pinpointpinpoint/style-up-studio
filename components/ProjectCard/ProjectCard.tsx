@@ -48,17 +48,17 @@ const ProjectCard = ({
     const hoverMedia = useMemo<ProjectCardMedia[]>(
         () => {
             const coverAssetRef = getAssetRef(project.coverImage)
-            const galleryImages = project.gallery ?? []
-            const nonCoverGalleryImages = galleryImages.filter((image) => getAssetRef(image) !== coverAssetRef)
+            const mediaImages = (project.media ?? []).filter((item) => item._type === 'image')
+            const nonCoverMediaImages = mediaImages.filter((image) => getAssetRef(image) !== coverAssetRef)
 
             return [
-                ...nonCoverGalleryImages.map((image) => urlForImage(image)?.height(1200).width(1200).url()),
+                ...nonCoverMediaImages.map((image) => urlForImage(image)?.height(1200).width(1200).url()),
                 imageUrl,
             ]
             .filter((url): url is string => Boolean(url))
             .map((url) => ({ kind: 'image' as const, url }))
         },
-        [imageUrl, project.gallery]
+        [imageUrl, project.media]
     )
     const activeHoverMedia = isHovered && hoverMedia.length > 0
         ? hoverMedia[activeMediaIndex % hoverMedia.length]
