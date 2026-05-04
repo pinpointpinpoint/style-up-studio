@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import {
+  getVimeoOEmbedUrl,
+  getYouTubePosterCandidates,
+  normalizeVimeoThumbnailUrl,
+} from "@/lib/videoMedia";
 import { SanityAsset } from "@/types";
 import resolveSource from "@/utils/resolveSource";
-import getYouTubeId from "@/utils/getYouTubeId";
-import getVimeoId from "@/utils/getVimeoId";
 
 export default function useAutoPoster(asset: SanityAsset): string | undefined {
   const [poster, setPoster] = useState<string | undefined>(asset.value.poster);
@@ -20,30 +23,26 @@ export default function useAutoPoster(asset: SanityAsset): string | undefined {
 
     async function resolve() {
       // ── YouTube ──
-      const ytId = getYouTubeId(src);
-      if (ytId) {
-        const max = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-        const hq = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      const youtubePoster = getYouTubePosterCandidates(src);
+      if (youtubePoster) {
         try {
-          const res = await fetch(max, { method: "HEAD" });
-          if (!cancelled) setPoster(res.ok ? max : hq);
+          const res = await fetch(youtubePoster.primary, { method: "HEAD" });
+          if (!cancelled) setPoster(res.ok ? youtubePoster.primary : youtubePoster.fallback);
         } catch {
-          if (!cancelled) setPoster(hq);
+          if (!cancelled) setPoster(youtubePoster.fallback);
         }
         return;
       }
 
       // ── Vimeo ──
-      const vimeoId = getVimeoId(src);
-      if (vimeoId) {
+      const vimeoOEmbedUrl = getVimeoOEmbedUrl(src);
+      if (vimeoOEmbedUrl) {
         try {
-          const res = await fetch(
-            `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${vimeoId}`
-          );
+          const res = await fetch(vimeoOEmbedUrl);
           if (!res.ok) return;
           const data = await res.json();
           if (!cancelled && data.thumbnail_url) {
-            setPoster(data.thumbnail_url.replace(/_\d+x\d+/, "_1280"));
+            setPoster(normalizeVimeoThumbnailUrl(data.thumbnail_url, 1280));
           }
         } catch {
           // silently skip

@@ -1,83 +1,96 @@
-import type {ProjectsQueryResult} from '@/sanity.types'
+import type {ProjectBySlugQueryResult} from '@/sanity.types'
 
 export interface Video {
-  fileUrl: string,
-  title?: string,
-  _key: string
+    fileUrl: string
+    title?: string
+    _key: string
 }
 
 export interface VideoUrls {
-  url: string,
-  title?: string,
-  _key: string
+    url: string
+    title?: string
+    _key: string
 }
 
 export interface Credit {
-  link?: string;
-  name: string;
-  role: string;
+    link?: string
+    name: string
+    role: string
 }
 
-export type Project = ProjectsQueryResult[number]
+type ProjectQueryItem = NonNullable<ProjectBySlugQueryResult>
+
+export type Project = Omit<
+    ProjectQueryItem,
+    'brands' | 'credits' | 'description' | 'featured' | 'media' | 'personalities' | 'projectType'
+> & {
+    featured: boolean
+    projectType: NonNullable<ProjectQueryItem['projectType']>
+    personalities: NonNullable<ProjectQueryItem['personalities']>
+    brands: NonNullable<ProjectQueryItem['brands']>
+    media: NonNullable<ProjectQueryItem['media']>
+    description: NonNullable<ProjectQueryItem['description']>
+    credits: NonNullable<ProjectQueryItem['credits']>
+}
 
 export interface Personality {
-  _id: string;
-  name: string;
-  slug?: string;
+    _id: string
+    name: string
+    slug?: string
 }
 
 export interface Brand {
-  _id: string;
-  name: string;
-  slug?: string;
+    _id: string
+    name: string
+    slug?: string
 }
 
 export interface ProjectType {
-  _id: string,
-  title: string | null,
-  slug: string | null
+    _id: string
+    title: string | null
+    slug: string | null
 }
 
 export interface FilterOption {
-  _id: string,
-  title: string,
-  slug: string,
-  referenceCount: number
+    _id: string
+    title: string
+    slug: string
+    referenceCount: number
 }
 
 export interface CollaboratorFilterOption extends FilterOption {
-  filterType: 'brand' | 'personality'
+    filterType: 'brand' | 'personality'
 }
 
 export type Filter =
-  | {type: 'featured'}
-  | {type: 'all'}
-  | {type: 'projectType'; id: string}
-  | {type: 'brand'; id: string}
-  | {type: 'personality'; id: string}
+    | {type: 'featured'}
+    | {type: 'all'}
+    | {type: 'projectType'; id: string}
+    | {type: 'brand'; id: string}
+    | {type: 'personality'; id: string}
 
 export type ProjectCursor =
-  | {
-      type: 'featured'
-      orderRank?: string | null
-      id?: string
-    }
-  | {
-      type: 'date'
-      date?: string | null
-      id?: string
-    }
+    | {
+          type: 'featured'
+          orderRank?: string | null
+          id?: string
+      }
+    | {
+          type: 'date'
+          date?: string | null
+          id?: string
+      }
 
 export type ProjectsQueryInput = {
-  filter: Filter
-  cursor?: ProjectCursor | null
-  limit?: number
+    filter: Filter
+    cursor?: ProjectCursor | null
+    limit?: number
 }
 
 export type SanityAsset = {
-  value: {
-    url?: string;      
-    fileUrl?: string;  
-    poster?: string; 
-  };
+    value: {
+        url?: string
+        fileUrl?: string
+        poster?: string
+    }
 }

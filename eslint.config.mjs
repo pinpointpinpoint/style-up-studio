@@ -1,7 +1,9 @@
-import {defineConfig} from 'eslint/config'
-import reactHooks from 'eslint-plugin-react-hooks'
+import {defineConfig, globalIgnores} from 'eslint/config'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 
 export default defineConfig([
-  {ignores: ['.next/', 'next-env.d.ts', 'public/', 'node_modules/']},
-  reactHooks.configs.flat.recommended,
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  globalIgnores(['.next/**', 'next-env.d.ts', 'public/**', 'node_modules/**']),
 ])

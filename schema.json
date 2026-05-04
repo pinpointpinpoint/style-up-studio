@@ -441,6 +441,23 @@
         },
         "optional": true
       },
+      "projectFormat": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "photo"
+            },
+            {
+              "type": "string",
+              "value": "video"
+            }
+          ]
+        },
+        "optional": true
+      },
       "personalities": {
         "type": "objectAttribute",
         "value": {

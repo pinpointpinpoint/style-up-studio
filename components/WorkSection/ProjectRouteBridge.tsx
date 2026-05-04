@@ -13,15 +13,11 @@ export default function ProjectRouteBridge({
   project = null,
   notFound = false,
 }: ProjectRouteBridgeProps) {
-  const { setRouteProject, setRouteProjectNotFound } = useProjectRoute()
+  const { applyRouteProject } = useProjectRoute()
 
   useEffect(() => {
-    if (notFound) {
-      setRouteProjectNotFound()
-    } else {
-      setRouteProject(project)
-    }
-  }, [notFound, project, setRouteProject, setRouteProjectNotFound])
+    applyRouteProject(project, notFound)
+  }, [applyRouteProject, notFound, project])
 
   return null
 }

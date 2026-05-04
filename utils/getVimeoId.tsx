@@ -1,4 +1,7 @@
+import {getExternalVideoProvider} from '@/lib/videoMedia'
+
 export default function getVimeoId(url: string): string | null {
-  const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  return match ? match[1] : null;
+    const video = getExternalVideoProvider(url)
+
+    return video?.provider === 'vimeo' ? video.id : null
 }

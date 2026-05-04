@@ -1,54 +1,25 @@
 'use client'
 
 import {Filter} from '@/types'
+import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import {Dispatch, SetStateAction, useEffect, useState} from 'react'
 import styles from './FilterMenu.module.css'
-import {normalizeSidebarFilters} from '@/lib/normalizeSidebarFilters'
+import {buildWorkFilterIndex, toggleWorkFilter} from '@/lib/workFilterIndex'
 import ArrowIcon from '../ArrowIcon/ArrowIcon'
 
-type CollaboratorFilterType = 'brand' | 'personality'
 const FEATURED_ACTIVE_IMAGE_SRC = '/featured.svg'
 
 type FilterMenuProps = {
-    sidebarFilters: any | null
+    sidebarFilters: SidebarFiltersQueryResult | null
     filter: Filter
     setFilter: Dispatch<SetStateAction<Filter>>
 }
 
 export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMenuProps) {
-    const {projectTypes, collaborators} = normalizeSidebarFilters(sidebarFilters)
+    const {projectTypes, collaborators} = buildWorkFilterIndex(sidebarFilters)
 
     const [hoveredId, setHoveredId] = useState<string | null>(null)
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
-
-    const handleProjectTypeClick = (projectTypeId: string) => {
-        if (projectTypeId === 'featured') {
-            setFilter({type: 'featured'})
-            return
-        }
-
-        if (projectTypeId === 'all') {
-            setFilter({type: 'all'})
-            return
-        }
-
-        setFilter((prev) =>
-            prev.type === 'projectType' && prev.id === projectTypeId
-                ? {type: 'featured'}
-                : {type: 'projectType', id: projectTypeId},
-        )
-    }
-
-    const handleCollaboratorClick = (
-        filterType: CollaboratorFilterType,
-        collaboratorId: string,
-    ) => {
-        setFilter((prev) =>
-            prev.type === filterType && prev.id === collaboratorId
-                ? {type: 'featured'}
-                : {type: filterType, id: collaboratorId},
-        )
-    }
 
     useEffect(() => {
         if (!['brand', 'personality'].includes(filter.type)) return
@@ -65,27 +36,30 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
             <div className={styles.scroller} data-sidebar-scroll-area>
                 <div className={styles.projectTypeList}>
                     {projectTypes.map((type) => {
-                        if (type.referenceCount <= 0 || !type.slug) return null
-
                         const isActive =
-                            (filter.type === 'featured' && type._id === 'featured') ||
-                            (filter.type === 'all' && type._id === 'all') ||
-                            (filter.type === 'projectType' && filter.id === type._id)
+                            (filter.type === 'featured' && type.filter.type === 'featured') ||
+                            (filter.type === 'all' && type.filter.type === 'all') ||
+                            ('id' in filter &&
+                                'id' in type.filter &&
+                                filter.type === type.filter.type &&
+                                filter.id === type.filter.id)
 
                         return (
                             <button
-                                key={type._id}
+                                key={type.id}
                                 className={styles.projectTypeButton}
                                 type="button"
                                 onMouseEnter={() => {
-                                    setHoveredId(type._id)
+                                    setHoveredId(type.id)
                                 }}
                                 onMouseLeave={() => setHoveredId(null)}
-                                onClick={() => handleProjectTypeClick(type._id)}
+                                onClick={() =>
+                                    setFilter((prev) => toggleWorkFilter(prev, type.filter))
+                                }
                             >
                                 <span className={styles.filterLabel}>
                                     {filter.type === 'featured' &&
-                                    type._id === 'featured' &&
+                                    type.filter.type === 'featured' &&
                                     FEATURED_ACTIVE_IMAGE_SRC ? (
                                         <img
                                             src={FEATURED_ACTIVE_IMAGE_SRC}
@@ -98,7 +72,7 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
                                     )}
                                     {type.title}
                                 </span>
-                                <span className={styles.filterCount}>({type.referenceCount})</span>
+                                <span className={styles.filterCount}>({type.count})</span>
                             </button>
                         )
                     })}
@@ -109,12 +83,12 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
                         const isOpen = openGroups[c.filterType] ?? isActiveGroup
                         const activeItem =
                             'id' in filter && isActiveGroup
-                                ? c.items.find((item) => item._id === filter.id)
+                                ? c.options.find((item) => item.id === filter.id)
                                 : undefined
 
                         return (
                             <details
-                                key={c.label}
+                                key={c.title}
                                 className={styles.collaboratorGroup}
                                 open={isOpen}
                                 onToggle={(event) => {
@@ -129,7 +103,7 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
                                 <summary
                                     className={styles.collaboratorSummary}
                                     onMouseEnter={() => {
-                                        setHoveredId(c._id)
+                                        setHoveredId(c.id)
                                     }}
                                     onMouseLeave={() => setHoveredId(null)}
                                 >
@@ -137,11 +111,9 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
                                         {isActiveGroup && !isOpen && (
                                             <span className={styles.collapsedMarker}></span>
                                         )}
-                                        {c.label}
+                                        {c.title}
                                         {isActiveGroup && !isOpen && activeItem?.title && (
-                                            <span>
-                                                ({activeItem.title})
-                                            </span>
+                                            <span>({activeItem.title})</span>
                                         )}
                                     </span>
                                     <span className={styles.collaboratorArrow} aria-hidden="true">
@@ -150,39 +122,36 @@ export default function FilterMenu({sidebarFilters, filter, setFilter}: FilterMe
                                 </summary>
 
                                 <div className={styles.collaboratorOptions}>
-                                    {c.items
-                                        .filter((i) => i.slug)
-                                        .map((i) => (
-                                            <button
-                                                className={styles.collaboratorOption}
-                                                key={i._id}
-                                                type="button"
-                                                onMouseEnter={() => {
-                                                    setHoveredId(i._id)
-                                                }}
-                                                onMouseLeave={() => setHoveredId(null)}
-                                                onClick={() =>
-                                                    handleCollaboratorClick(
-                                                        c.filterType as CollaboratorFilterType,
-                                                        i._id,
-                                                    )
-                                                }
-                                            >
-                                                <span className={styles.filterLabel}>
-                                                    {'id' in filter &&
-                                                        filter.type === c.filterType &&
-                                                        filter.id === i._id && (
-                                                            <span
-                                                                className={styles.collaboratorActiveMarker}
-                                                            ></span>
-                                                        )}
-                                                    {i.title}
-                                                </span>
-                                                <span className={styles.filterCount}>
-                                                    ({i.referenceCount})
-                                                </span>
-                                            </button>
-                                        ))}
+                                    {c.options.map((i) => (
+                                        <button
+                                            className={styles.collaboratorOption}
+                                            key={i.id}
+                                            type="button"
+                                            onMouseEnter={() => {
+                                                setHoveredId(i.id)
+                                            }}
+                                            onMouseLeave={() => setHoveredId(null)}
+                                            onClick={() =>
+                                                setFilter((prev) =>
+                                                    toggleWorkFilter(prev, i.filter),
+                                                )
+                                            }
+                                        >
+                                            <span className={styles.filterLabel}>
+                                                {'id' in filter &&
+                                                    filter.type === c.filterType &&
+                                                    filter.id === i.id && (
+                                                        <span
+                                                            className={
+                                                                styles.collaboratorActiveMarker
+                                                            }
+                                                        ></span>
+                                                    )}
+                                                {i.title}
+                                            </span>
+                                            <span className={styles.filterCount}>({i.count})</span>
+                                        </button>
+                                    ))}
                                 </div>
                             </details>
                         )

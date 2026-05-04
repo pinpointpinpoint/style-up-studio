@@ -1,9 +1,11 @@
-'use client';
+'use client'
 
 import Link from 'next/link'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { urlForImage } from '@/sanity/lib/utils'
-import { Project } from '@/types'
+import Image from 'next/image'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
+import {getProjectCardMedia} from '@/lib/projectMediaPresentation'
+import {getSanityProjectImageUrl} from '@/lib/sanityProjectImageUrl'
+import {Project} from '@/types'
 import styles from './ProjectCard.module.css'
 
 interface ProjectCardProps {
@@ -16,16 +18,10 @@ interface ProjectCardProps {
     hasMouseMoved: boolean
 }
 
-type ProjectCardMedia =
-    | { kind: 'image'; url: string }
-
 const CAROUSEL_INTERVAL_MS = 900
-const PRELOAD_HOVER_IMAGE_COUNT = 2
-const MIN_CAROUSEL_IMAGE_COUNT = 3
-
-function getAssetRef(image: Project['coverImage'] | undefined) {
-    return image?.asset?._ref
-}
+const PRIORITY_PROJECT_CARD_COUNT = 9
+const PROJECT_CARD_HOVER_IMAGE_COUNT = 3
+const PROJECT_CARD_IMAGE_SIZE = 1200
 
 const ProjectCard = ({
     project,
@@ -33,68 +29,35 @@ const ProjectCard = ({
     href,
     onOpen,
     onHoverMove,
-    onHoverStart
+    onHoverStart,
 }: ProjectCardProps) => {
-    const [loading, setLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false)
     const [isPreviewReady, setIsPreviewReady] = useState(false)
-    const [activeMediaIndex, setActiveMediaIndex] = useState(0)
-    const coverImageRef = useRef<HTMLImageElement>(null)
+    const [activeHoverIndex, setActiveHoverIndex] = useState(0)
     const previewVideoRef = useRef<HTMLVideoElement>(null)
-    const imageUrl = urlForImage(project.coverImage)?.height(1200).width(1200).url()
-    const previewVideoUrl = project.previewUrl
-    const shouldPrioritizeImage = index < 12
-    const showPlaceholder = loading || !imageUrl
-    const hoverMedia = useMemo<ProjectCardMedia[]>(
-        () => {
-            const coverAssetRef = getAssetRef(project.coverImage)
-            const mediaImages = (project.media ?? []).filter((item) => item._type === 'image')
-            const nonCoverMediaImages = mediaImages.filter((image) => getAssetRef(image) !== coverAssetRef)
-
-            return [
-                ...nonCoverMediaImages.map((image) => urlForImage(image)?.height(1200).width(1200).url()),
-                imageUrl,
-            ]
-            .filter((url): url is string => Boolean(url))
-            .map((url) => ({ kind: 'image' as const, url }))
-        },
-        [imageUrl, project.media]
+    const cardMedia = useMemo(
+        () => getProjectCardMedia(project, {imageUrl: getSanityProjectImageUrl}),
+        [project],
     )
-    const activeHoverMedia = isHovered && hoverMedia.length > 0
-        ? hoverMedia[activeMediaIndex % hoverMedia.length]
-        : null
-
-    useEffect(() => {
-        setLoading(Boolean(imageUrl))
-
-        const image = coverImageRef.current
-
-        if (image?.complete) {
-            setLoading(false)
-        }
-    }, [imageUrl])
+    const previewVideoUrl = cardMedia.previewVideoUrl
+    const shouldPrioritizeImage = index < PRIORITY_PROJECT_CARD_COUNT
+    const hoverImages = cardMedia.hoverImages.slice(0, PROJECT_CARD_HOVER_IMAGE_COUNT)
+    const activeImage =
+        isHovered && !previewVideoUrl && hoverImages.length > 0
+            ? hoverImages[activeHoverIndex % hoverImages.length]
+            : cardMedia.cardImage
+    const showPlaceholder = !activeImage
 
     useEffect(() => {
         if (previewVideoUrl) return
-        if (!isHovered || hoverMedia.length < MIN_CAROUSEL_IMAGE_COUNT) return
+        if (!isHovered || hoverImages.length <= 1) return
 
         const intervalId = window.setInterval(() => {
-            setActiveMediaIndex((currentIndex) => (currentIndex + 1) % hoverMedia.length)
+            setActiveHoverIndex((currentIndex) => (currentIndex + 1) % hoverImages.length)
         }, CAROUSEL_INTERVAL_MS)
 
         return () => window.clearInterval(intervalId)
-    }, [hoverMedia.length, isHovered, previewVideoUrl])
-
-    useEffect(() => {
-        if (hoverMedia.length === 0) return
-        if (previewVideoUrl) return
-
-        hoverMedia.slice(0, PRELOAD_HOVER_IMAGE_COUNT).forEach((media) => {
-            const image = new Image()
-            image.decoding = 'async'
-            image.src = media.url
-        })
-    }, [hoverMedia, previewVideoUrl])
+    }, [hoverImages.length, isHovered, previewVideoUrl])
 
     useEffect(() => {
         const video = previewVideoRef.current
@@ -115,19 +78,13 @@ const ProjectCard = ({
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
         setIsHovered(true)
-        setActiveMediaIndex(0)
-        if (!previewVideoUrl && hoverMedia[0]) {
-            const image = new Image()
-            image.decoding = 'async'
-            image.src = hoverMedia[0].url
-            image.decode?.().catch(() => {})
-        }
+        setActiveHoverIndex(0)
         onHoverStart(e)
     }
 
     const handleMouseLeave = () => {
         setIsHovered(false)
-        setActiveMediaIndex(0)
+        setActiveHoverIndex(0)
     }
 
     const renderHoverMedia = () => {
@@ -136,26 +93,15 @@ const ProjectCard = ({
                 <video
                     ref={previewVideoRef}
                     src={previewVideoUrl}
-                    poster={imageUrl}
-                    className={`${styles.projectCardMedia} ${(!isHovered || !isPreviewReady) ? styles.projectCardMediaHidden : ''}`}
+                    className={`${styles.projectCardMedia} ${!isHovered || !isPreviewReady ? styles.projectCardMediaHidden : ''}`}
                     muted
                     loop
                     playsInline
                     preload="auto"
                     onCanPlay={() => setIsPreviewReady(true)}
-                    aria-label={`Preview video for ${project.title ?? "project"}`}
-                />
-            )
-        }
-
-        if (!activeHoverMedia) return null
-
-        if (activeHoverMedia.kind === 'image') {
-            return (
-                <img
-                    src={activeHoverMedia.url}
-                    alt={`Gallery image for ${project.title ?? "project"}`}
-                    className={styles.projectCardMedia}
+                    aria-label={`Preview video for ${project.title ?? 'project'}`}
+                    width="300"
+                    height="300"
                 />
             )
         }
@@ -167,24 +113,37 @@ const ProjectCard = ({
         <Link
             href={href}
             className={`${styles.projectCard} ${showPlaceholder ? styles.projectCardLoading : ''}`}
-            aria-label={`View ${project.title ?? "project"}`}
+            aria-label={`View ${project.title ?? 'project'}`}
             onMouseEnter={handleMouseEnter}
             onMouseMove={onHoverMove}
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            {imageUrl && (
-                <img
-                    ref={coverImageRef}
-                    src={imageUrl}
-                    alt={`Cover image for ${project.title ?? "project"}`}
-                    className={`${styles.projectCardImage} ${!loading ? styles.projectCardImageLoaded : ''}`}
-                    loading={shouldPrioritizeImage ? "eager" : "lazy"}
-                    fetchPriority={shouldPrioritizeImage ? "high" : "low"}
-                    onLoad={() => setLoading(false)}
-                    onError={() => setLoading(false)}
+            {activeImage && (
+                <Image
+                    src={activeImage.url}
+                    alt={activeImage.alt}
+                    className={`${styles.projectCardImage} ${styles.projectCardImageLoaded}`}
+                    fill
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    priority={shouldPrioritizeImage}
+                    unoptimized
                 />
             )}
+            {!previewVideoUrl &&
+                hoverImages.map((hoverImage) => (
+                    <Image
+                        key={hoverImage.url}
+                        src={hoverImage.url}
+                        alt=""
+                        aria-hidden="true"
+                        className={styles.projectCardPreloadImage}
+                        width={PROJECT_CARD_IMAGE_SIZE}
+                        height={PROJECT_CARD_IMAGE_SIZE}
+                        loading="eager"
+                        unoptimized
+                    />
+                ))}
             {renderHoverMedia()}
         </Link>
     )

@@ -1,13 +1,14 @@
 'use client'
 
 import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
+    createContext,
+    type ReactNode,
+    useCallback,
+    useContext,
+    useMemo,
+    useState,
 } from 'react'
+import {applyProjectRouteBridge, type ProjectRouteSelection} from '@/lib/workRouteSelection'
 import type { Project } from '@/types'
 
 type ProjectRouteContextValue = {
@@ -15,29 +16,36 @@ type ProjectRouteContextValue = {
   routeProjectNotFound: boolean
   setRouteProject: (project: Project | null) => void
   setRouteProjectNotFound: () => void
+  applyRouteProject: (project: Project | null, notFound: boolean) => void
 }
 
 const ProjectRouteContext = createContext<ProjectRouteContextValue | null>(null)
 
 export function ProjectRouteProvider({ children }: { children: ReactNode }) {
-  const [routeProject, setRouteProject] = useState<Project | null>(null)
-  const [routeProjectNotFound, setRouteProjectNotFoundState] = useState(false)
+  const [routeSelection, setRouteSelection] = useState<ProjectRouteSelection<Project>>({
+    project: null,
+    notFound: false,
+  })
   const updateRouteProject = useCallback((project: Project | null) => {
-    setRouteProject(project)
-    setRouteProjectNotFoundState(false)
+    setRouteSelection({project, notFound: false})
   }, [])
   const setRouteProjectNotFound = useCallback(() => {
-    setRouteProject(null)
-    setRouteProjectNotFoundState(true)
+    setRouteSelection({project: null, notFound: true})
+  }, [])
+  const applyRouteProject = useCallback((project: Project | null, notFound: boolean) => {
+    setRouteSelection((currentSelection) =>
+      applyProjectRouteBridge(currentSelection, {project, notFound}),
+    )
   }, [])
   const value = useMemo(
     () => ({
-      routeProject,
-      routeProjectNotFound,
+      routeProject: routeSelection.project,
+      routeProjectNotFound: routeSelection.notFound,
       setRouteProject: updateRouteProject,
       setRouteProjectNotFound,
+      applyRouteProject,
     }),
-    [routeProject, routeProjectNotFound, updateRouteProject, setRouteProjectNotFound],
+    [routeSelection, updateRouteProject, setRouteProjectNotFound, applyRouteProject],
   )
 
   return (

@@ -107,18 +107,7 @@ export const allStyleUpsQuery = defineQuery(`
 }
 `)
 
-const projectProjection = `
-  _id,
-  _type,
-  title,
-  client,
-  date,
-  "slug": slug.current,
-  "projectType": projectType[]->{_id, title, "slug": slug.current},
-  featured,
-  "personalities": personalities[]->{_id, name, "slug": slug.current},
-  "brands": brands[]->{_id, name, "slug": slug.current},
-  media[]{
+const projectMediaProjection = `
     _key,
     _type,
     asset,
@@ -132,7 +121,19 @@ const projectProjection = `
       crop,
       hotspot
     }
-  },
+`
+
+const projectBaseProjection = `
+  _id,
+  _type,
+  title,
+  client,
+  date,
+  "slug": slug.current,
+  "projectType": projectType[]->{_id, title, "slug": slug.current},
+  featured,
+  "personalities": personalities[]->{_id, name, "slug": slug.current},
+  "brands": brands[]->{_id, name, "slug": slug.current},
   "previewUrl": previewClip.asset->url,
   coverImage{
     asset,
@@ -146,6 +147,13 @@ const projectProjection = `
     link
   },
   orderRank
+`
+
+const projectProjection = `
+  ${projectBaseProjection},
+  media[]{
+    ${projectMediaProjection}
+  }
 `
 
 export const projectBySlugQuery = defineQuery(`

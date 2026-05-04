@@ -2,10 +2,11 @@
 
 import AccordionNavItem from "./AccordionNavItem";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { StyleUps, type StyleUpItem } from "@/components/StyleUps/StyleUps";
 import { WorkSection } from "@/components/WorkSection/WorkSection";
 import { ProjectRouteProvider } from "@/components/WorkSection/ProjectRouteContext";
+import { getAccordionRouteSelection, type WorkRouteSection } from "@/lib/workRouteSelection";
 import type { Filter, Project } from "@/types";
 import type { SidebarFiltersQueryResult } from "@/sanity.types";
 import styles from "./Accordion.module.css";
@@ -15,7 +16,7 @@ const OPEN_HEIGHT = `calc(100% - var(--header-height))`;
 const WORK_HOME_ROUTE = "/";
 const STYLE_UPS_ROUTE = "/style-ups";
 
-type AccordionSection = 'work' | 'style-ups';
+type AccordionSection = WorkRouteSection;
 
 type AccordionNavProps = {
   children?: ReactNode
@@ -23,12 +24,6 @@ type AccordionNavProps = {
   initialFilter: Filter
   sidebarFilters: SidebarFiltersQueryResult | null
   styleUps: StyleUpItem[] | null
-}
-
-function getActiveSection(pathname: string): AccordionSection {
-  return pathname === STYLE_UPS_ROUTE || pathname.startsWith(`${STYLE_UPS_ROUTE}/`)
-    ? "style-ups"
-    : "work";
 }
 
 export default function AccordionNav({
@@ -41,17 +36,18 @@ export default function AccordionNav({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const routeSection = getActiveSection(pathname);
   const [optimisticSection, setOptimisticSection] = useState<AccordionSection | null>(null);
   const [lastWorkRoute, setLastWorkRoute] = useState(WORK_HOME_ROUTE);
+  const routeSelection = getAccordionRouteSelection({
+    pathname,
+    searchParams,
+    lastWorkRoute,
+  });
+  const routeSection = routeSelection.routeSection;
   const activeSection = optimisticSection ?? routeSection;
   const workHeight = activeSection === "work" ? OPEN_HEIGHT : CLOSED_HEIGHT;
   const styleUpsHeight = activeSection === "style-ups" ? OPEN_HEIGHT : CLOSED_HEIGHT;
-  const currentRoute = useMemo(() => {
-    const queryString = searchParams.toString();
-    return queryString ? `${pathname}?${queryString}` : pathname;
-  }, [pathname, searchParams]);
-  const visibleWorkRoute = routeSection === "work" ? currentRoute : lastWorkRoute;
+  const visibleWorkRoute = routeSelection.visibleWorkRoute;
 
   useEffect(() => {
     router.prefetch(WORK_HOME_ROUTE);
@@ -64,9 +60,9 @@ export default function AccordionNav({
 
   useEffect(() => {
     if (routeSection === "work") {
-      setLastWorkRoute(currentRoute || "/");
+      setLastWorkRoute(routeSelection.nextLastWorkRoute);
     }
-  }, [currentRoute, pathname, routeSection]);
+  }, [routeSection, routeSelection.nextLastWorkRoute]);
 
   const handleNavigate = (section: AccordionSection) => (event: MouseEvent<HTMLAnchorElement>) => {
     if (

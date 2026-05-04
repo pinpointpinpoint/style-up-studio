@@ -1,43 +1,31 @@
-import { notFound } from 'next/navigation'
+import {notFound} from 'next/navigation'
 import ProjectRouteBridge from '@/components/WorkSection/ProjectRouteBridge'
-import { sanityFetch } from '@/sanity/lib/live'
-import { projectBySlugQuery } from '@/sanity/lib/queries'
-import type { Project } from '@/types'
-import type { Metadata } from 'next'
+import {getProjectBySlug} from '@/app/(site)/actions'
+import type {Metadata} from 'next'
 
 type ProjectRouteProps = {
-  params: Promise<{ slug: string }>
+    params: Promise<{slug: string}>
 }
 
-async function getProject(slug: string) {
-  const { data } = await sanityFetch({
-    query: projectBySlugQuery,
-    params: { slug },
-    stega: false,
-  })
+export async function generateMetadata({params}: ProjectRouteProps): Promise<Metadata> {
+    const {slug} = await params
+    const selectedProject = await getProjectBySlug(slug)
 
-  return data
+    return {
+        title: selectedProject?.title ?? 'Work',
+        alternates: {
+            canonical: `/work/${slug}`,
+        },
+    }
 }
 
-export async function generateMetadata({ params }: ProjectRouteProps): Promise<Metadata> {
-  const { slug } = await params
-  const selectedProject = await getProject(slug)
+export default async function ProjectRoute({params}: ProjectRouteProps) {
+    const {slug} = await params
+    const selectedProject = await getProjectBySlug(slug)
 
-  return {
-    title: selectedProject?.title ?? 'Work',
-    alternates: {
-      canonical: `/work/${slug}`,
-    },
-  }
-}
+    if (!selectedProject) {
+        notFound()
+    }
 
-export default async function ProjectRoute({ params }: ProjectRouteProps) {
-  const { slug } = await params
-  const selectedProject = await getProject(slug)
-
-  if (!selectedProject) {
-    notFound()
-  }
-
-  return <ProjectRouteBridge project={selectedProject as Project} />
+    return <ProjectRouteBridge project={selectedProject} />
 }

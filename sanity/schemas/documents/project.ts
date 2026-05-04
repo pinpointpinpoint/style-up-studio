@@ -4,8 +4,6 @@ import {orderRankField} from '@sanity/orderable-document-list'
 
 const MAX_VIDEO_FILE_SIZE_MB = 250
 const MAX_VIDEO_FILE_SIZE_BYTES = MAX_VIDEO_FILE_SIZE_MB * 1024 * 1024
-const MAX_PREVIEW_CLIP_SIZE_MB = 30
-const MAX_PREVIEW_CLIP_SIZE_BYTES = MAX_PREVIEW_CLIP_SIZE_MB * 1024 * 1024
 
 export default defineType({
     name: 'project',
@@ -49,7 +47,8 @@ export default defineType({
         defineField({
             name: 'client',
             title: 'Client/Primary Collaborator*',
-            description: 'The main associated name for this project, such as a client, brand, publication, agency, or key collaborator.',
+            description:
+                'The main associated name for this project, such as a client, brand, publication, agency, or key collaborator.',
             type: 'string',
             validation: (rule) => rule.required().error('Client/Primary Collaborator is required.'),
             fieldset: 'basic',
@@ -101,6 +100,24 @@ export default defineType({
                 layout: 'checkbox',
             },
             initialValue: false,
+            fieldset: 'basic',
+        }),
+        defineField({
+            name: 'projectFormat',
+            title: 'Project Format*',
+            description:
+                'Choose Video only when the project card should use a preview clip. Choose Photo for photo-led projects, even if they include BTS or supporting videos.',
+            type: 'string',
+            options: {
+                list: [
+                    {title: 'Photo', value: 'photo'},
+                    {title: 'Video', value: 'video'},
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'photo',
+            validation: (rule) =>
+                rule.required().error('Choose whether this is a photo or video project.'),
             fieldset: 'basic',
         }),
         defineField({
@@ -240,7 +257,10 @@ export default defineType({
                 }),
             ],
             validation: (rule) =>
-                rule.required().min(1).error('Add at least one image, uploaded video, or video URL.'),
+                rule
+                    .required()
+                    .min(1)
+                    .error('Add at least one image, uploaded video, or video URL.'),
             fieldset: 'media',
         }),
         defineField({
@@ -256,40 +276,23 @@ export default defineType({
         }),
         defineField({
             name: 'previewClip',
-            title: 'Preview Clip',
+            title: 'Preview Clip*',
             description:
-                'Required when this project has video. Upload a 3-5 second MP4 used for project-card hover previews.',
+                'Required for video projects. Upload a 3-5 second MP4 used for project-card hover previews.',
             type: 'file',
+            hidden: ({document}) => document?.projectFormat !== 'video',
             options: {
                 accept: 'video/mp4',
                 storeOriginalFilename: true,
             },
             validation: (Rule) =>
-                Rule.custom(async (file, context) => {
-                    const {media} = context.document as {
-                        media?: Array<{_type?: string}>
-                    }
-                    const hasVideo = media?.some((item) =>
-                        ['uploadedVideo', 'videoUrl'].includes(item?._type ?? ''),
-                    )
-
-                    if (hasVideo && !file?.asset?._ref) {
-                        return 'Add a 3-5 second preview clip for projects with video.'
+                Rule.custom((file, context) => {
+                    const {projectFormat} = context.document as {
+                        projectFormat?: 'photo' | 'video'
                     }
 
-                    const assetRef = file?.asset?._ref
-
-                    if (!assetRef) {
-                        return true
-                    }
-
-                    const client = context.getClient({apiVersion: '2024-01-01'})
-                    const size = await client.fetch<number | null>('*[_id == $assetRef][0].size', {
-                        assetRef,
-                    })
-
-                    if (size && size > MAX_PREVIEW_CLIP_SIZE_BYTES) {
-                        return `Preview clips should be under ${MAX_PREVIEW_CLIP_SIZE_MB}MB. Export a short, web-optimized MP4.`
+                    if (projectFormat === 'video' && !file?.asset?._ref) {
+                        return 'Add a 3-5 second preview clip for video projects.'
                     }
 
                     return true
