@@ -1,5 +1,5 @@
-import ProjectRouteBridge from '@/components/WorkSection/ProjectRouteBridge'
+import WorkProjectRouteLoader from '@/features/work/components/WorkBrowser/WorkProjectRouteLoader'
 
 export default function ProjectNotFoundRoute() {
-  return <ProjectRouteBridge notFound />
+  return <WorkProjectRouteLoader notFound />
 }

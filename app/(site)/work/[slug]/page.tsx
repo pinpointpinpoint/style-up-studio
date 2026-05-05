@@ -1,5 +1,5 @@
 import {notFound} from 'next/navigation'
-import ProjectRouteBridge from '@/components/WorkSection/ProjectRouteBridge'
+import WorkProjectRouteLoader from '@/features/work/components/WorkBrowser/WorkProjectRouteLoader'
 import {getProjectBySlug} from '@/app/(site)/actions'
 import type {Metadata} from 'next'
 
@@ -27,5 +27,5 @@ export default async function ProjectRoute({params}: ProjectRouteProps) {
         notFound()
     }
 
-    return <ProjectRouteBridge project={selectedProject} />
+    return <WorkProjectRouteLoader project={selectedProject} />
 }

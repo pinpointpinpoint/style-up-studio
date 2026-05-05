@@ -1,10 +1,9 @@
 import { StructureBuilder } from 'sanity/structure'
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
 import { 
-  BookIcon,
   BookmarkFilledIcon,
   CogIcon,
-  ComposeSparklesIcon, EnvelopeIcon, FolderIcon, ProjectsIcon, SearchIcon, StarFilledIcon, TagIcon, UserIcon, 
+  ComposeSparklesIcon, EnvelopeIcon, FolderIcon, ProjectsIcon, StarFilledIcon, TagIcon, UserIcon, 
   UsersIcon
 } from '@sanity/icons'
 

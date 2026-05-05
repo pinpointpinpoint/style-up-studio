@@ -6,8 +6,8 @@ This app fetches public Sanity data through `sanityFetch` in `sanity/lib/fetch.t
 
 - published Sanity content only
 - Sanity CDN reads
-- Next revalidation, defaulting to 60 seconds
-- the `sanity:projects` cache tag for project-related reads
+- Next cache tags with on-demand webhook invalidation
+- public Sanity cache tags for site shell, project, Style Ups, and SEO reads
 
 ## Overview
 
@@ -58,8 +58,8 @@ flowchart LR
     Fetch[sanityFetch]
     Actions[getProjects]
     Config[PROJECTS_PAGE_SIZE]
-    Accordion[AccordionNav]
-    WorkSection[WorkSection]
+    Accordion[SiteSectionsAccordion]
+    WorkBrowser[WorkBrowser]
 
     Layout --> Fetch
     Layout --> Actions
@@ -67,23 +67,23 @@ flowchart LR
     Fetch --> Layout
     Actions --> Layout
     Layout --> Accordion
-    Accordion --> WorkSection
+    Accordion --> WorkBrowser
 ```
 
 ## Project Reads
 
-Project read logic lives in `lib/projectReadModel.ts`.
+Project read logic lives in `features/work/lib/projectReadModel.ts`.
 
 It exposes:
 
 - `getProjects`
 - `getProjectBySlug`
 
-The read model receives `sanityFetch` as a dependency from `app/(site)/actions.ts`. That file adds the `sanity:projects` cache tag to project reads.
+The read model receives `sanityFetch` as a dependency from `app/(site)/actions.ts`. The read model adds `sanity:public` and `sanity:projects` cache tags to project reads.
 
 ## Load More
 
-Load more is triggered from the client in `components/WorkSection/useWorkBrowsingSession.ts`.
+Load more is triggered from the client in `features/work/components/WorkBrowser/useWorkBrowsingSession.ts`.
 
 It calls the `getProjects` Server Action from `app/(site)/actions.ts`.
 
@@ -96,7 +96,7 @@ flowchart TD
     Input[getLoadMoreProjectsInput]
     Action[getProjects Server Action]
     ReadModel[projectReadModel.getProjects]
-    Fetch[sanityFetch<br/>tag: sanity:projects]
+    Fetch[sanityFetch<br/>tags: public + projects]
     Sanity[(Sanity CMS)]
     Append[appendLoadedProjects]
     Gallery[ProjectGallery]
@@ -116,7 +116,7 @@ flowchart TD
 
 ## Filtering
 
-Filtering is handled in `components/WorkSection/useWorkBrowsingSession.ts`.
+Filtering is handled in `features/work/components/WorkBrowser/useWorkBrowsingSession.ts`.
 
 When the filter changes:
 
@@ -138,7 +138,7 @@ flowchart TD
     Input[getRefreshProjectsInput]
     Action[getProjects Server Action]
     ReadModel[projectReadModel.getProjects]
-    Fetch[sanityFetch<br/>tag: sanity:projects]
+    Fetch[sanityFetch<br/>tags: public + projects]
     Replace[Replace visible projects]
     Gallery[ProjectGallery]
 
@@ -162,17 +162,17 @@ The route fetches the selected project with `getProjectBySlug(slug)`.
 
 If no project is found, the route calls `notFound()`.
 
-If a project is found, it is passed to `ProjectRouteBridge`.
+If a project is found, it is passed to `WorkProjectRouteLoader`.
 
 ## Project Detail View
 
-`ProjectRouteBridge` stores the route project in `ProjectRouteContext`.
+`WorkProjectRouteLoader` stores the route project in `WorkProjectRouteSelectionProvider`.
 
-`components/WorkSection/WorkSection.tsx` reads that context and renders `ProjectDetailView` when the current route is a project detail route.
+`features/work/components/WorkBrowser/WorkBrowser.tsx` reads that context and renders `ProjectDetailView` when the current route is a project detail route.
 
-`components/ProjectDetailView/ProjectDetailView.tsx` does not fetch Sanity data. It receives the already-fetched project as a prop and renders the project media.
+`features/work/components/ProjectDetailView/ProjectDetailView.tsx` does not fetch Sanity data. It receives the already-fetched project as a prop and renders the project media.
 
-`components/Sidebar/ProjectDetails.tsx` also receives the project as a prop. It may fetch Vimeo oEmbed thumbnail data in the browser when a video URL has no Sanity thumbnail and no direct provider thumbnail.
+`features/work/components/WorkInspector/ProjectInfoPanel.tsx` also receives the project as a prop. It may fetch Vimeo oEmbed thumbnail data in the browser when a video URL has no Sanity thumbnail and no direct provider thumbnail.
 
 ```mermaid
 flowchart TD
@@ -180,12 +180,12 @@ flowchart TD
     Route[work/[slug]/page.tsx]
     Action[getProjectBySlug]
     ReadModel[projectReadModel.getProjectBySlug]
-    Fetch[sanityFetch<br/>tag: sanity:projects]
-    Bridge[ProjectRouteBridge]
-    Context[ProjectRouteContext]
-    WorkSection[WorkSection]
+    Fetch[sanityFetch<br/>tags: public + projects]
+    Loader[WorkProjectRouteLoader]
+    Context[WorkProjectRouteSelectionProvider]
+    WorkBrowser[WorkBrowser]
     DetailView[ProjectDetailView]
-    SidebarDetails[ProjectDetails sidebar]
+    Inspector[ProjectInfoPanel]
 
     Link --> Route
     Route --> Action
@@ -194,28 +194,36 @@ flowchart TD
     Fetch --> ReadModel
     ReadModel --> Action
     Action --> Route
-    Route --> Bridge
-    Bridge --> Context
-    Context --> WorkSection
-    WorkSection --> DetailView
-    WorkSection --> SidebarDetails
+    Route --> Loader
+    Loader --> Context
+    Context --> WorkBrowser
+    WorkBrowser --> DetailView
+    WorkBrowser --> Inspector
 ```
 
-## Revalidation
+## Cache Invalidation
 
-Project reads use the `sanity:projects` cache tag.
+Public Sanity reads use explicit cache tags and do not use timed revalidation windows.
 
-`app/api/revalidate/route.ts` exposes a webhook endpoint for Sanity. When a project is published, Sanity can call this route with `SANITY_REVALIDATE_SECRET`, and the route revalidates the `sanity:projects` tag.
+`app/api/revalidate/route.ts` exposes a webhook endpoint for Sanity. When supported public document types are published, Sanity can call this route with `SANITY_REVALIDATE_SECRET`, and the route revalidates the tags affected by that document type.
+
+The public tags are:
+
+- `sanity:public`
+- `sanity:projects`
+- `sanity:site-shell`
+- `sanity:style-ups`
+- `sanity:seo`
 
 ```mermaid
 flowchart LR
-    Publish[Project published in Sanity]
+    Publish[Public content published in Sanity]
     Webhook[Sanity webhook]
     Route[app/api/revalidate/route.ts]
     Secret[SANITY_REVALIDATE_SECRET check]
-    Tag[revalidateTag<br/>sanity:projects]
+    Tag[revalidateTag<br/>affected public tags]
     NextRequest[Next page request]
-    Fresh[Fresh project data fetched]
+    Fresh[Fresh public data fetched]
 
     Publish --> Webhook
     Webhook --> Route

@@ -29,7 +29,7 @@ export const slugsByTypeQuery = defineQuery(`
 `)
 
 export const allProjectTypesQuery = defineQuery(`
-  *[_type == "projectType" && !(_id in path("drafts.**"))]{
+  *[_type == "projectType"]{
     _id,
     title,
     "slug": slug.current,
@@ -41,12 +41,10 @@ export const sidebarFiltersQuery = defineQuery(`
 {
   "featuredCount": count(*[
     _type == "project" &&
-    featured == true &&
-    !(_id in path("drafts.**"))
+    featured == true
   ]),
   "allCount": count(*[
-    _type == "project" &&
-    !(_id in path("drafts.**"))
+    _type == "project"
   ]),
   "settings": {
     "showPersonalities": coalesce(*[_type == "settings"][0].sidebarFilters.showPersonalities, true),
@@ -54,41 +52,35 @@ export const sidebarFiltersQuery = defineQuery(`
   },
 
   "projectTypes": *[
-    _type == "projectType" &&
-    !(_id in path("drafts.**"))
+    _type == "projectType"
   ] | order(title asc) {
     _id,
     title,
     "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
-      !(_id in path("drafts.**")) &&
       references(^._id)
     ])
   },
   "personalities": *[
-    _type == "personality" &&
-    !(_id in path("drafts.**"))
+    _type == "personality"
   ] | order(name asc) {
     _id,
     "title": name,
     "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
-      !(_id in path("drafts.**")) &&
       references(^._id)
     ])
   },
   "brands": *[
-    _type == "brand" &&
-    !(_id in path("drafts.**"))
+    _type == "brand"
   ] | order(name asc) {
     _id,
     "title": name,
     "slug": slug.current,
     "referenceCount": count(*[
       _type == "project" &&
-      !(_id in path("drafts.**")) &&
       references(^._id)
     ])
   }
@@ -96,7 +88,7 @@ export const sidebarFiltersQuery = defineQuery(`
 `)
 
 export const allStyleUpsQuery = defineQuery(`
-*[_type == "styleUp" && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+*[_type == "styleUp"] | order(_createdAt desc) {
   _id,
   name,
   image{
@@ -159,7 +151,6 @@ const projectProjection = `
 export const projectBySlugQuery = defineQuery(`
   *[
     _type == "project" &&
-    !(_id in path("drafts.**")) &&
     slug.current == $slug
   ][0]{
    ${projectProjection}
@@ -169,7 +160,6 @@ export const projectBySlugQuery = defineQuery(`
 export const projectsQuery = defineQuery(`
   *[
     _type == "project" &&
-    !(_id in path("drafts.**")) &&
     (
       $filterType == "all" ||
       ($filterType == "featured" && featured == true) ||
@@ -193,7 +183,6 @@ export const projectsQuery = defineQuery(`
 export const featuredProjectsQuery = defineQuery(`
 *[
     _type == "project" &&
-    !(_id in path("drafts.**")) &&
       featured == true &&
     (
       $cursorId == "" ||

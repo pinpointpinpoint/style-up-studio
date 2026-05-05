@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Next.js 16 and Sanity portfolio site written in TypeScript. App routes live in `app/`, with the public site under `app/(site)` and Sanity Studio under `app/(admin)/admin/[[...index]]`. Reusable UI belongs in `components/`, hooks in `hooks/`, shared helpers in `lib/` and `utils/`, global styles in `app/globals.css` and `styles/`, and shared types in `types/`. Sanity clients, schemas, desk structure, and CMS plugins live in `sanity/`. Static assets, fonts, logos, shapes, and videos belong in `public/`; documentation is in `docs/`.
+This is a Next.js 16 and Sanity portfolio site written in TypeScript. App routes live in `app/`, with the public site under `app/(site)`, Sanity Studio under `app/(admin)/admin/[[...index]]`, and API handlers under `app/api`. Product code is organized by feature in `features/`: reusable UI belongs in each feature's `components/`, interaction hooks in `hooks/`, domain/session logic in `lib/`, and larger named subdomains such as work media can use their own folder like `features/work/media/`. Cross-feature helpers belong in `shared/`, shared React contexts in `contexts/`, global styles in `app/globals.css` and `styles/`, and shared types in `types/`. Sanity clients, schemas, desk structure, and CMS plugins live in `sanity/`. Static assets, fonts, logos, shapes, and videos belong in `public/`; documentation is in `docs/`.
 
 ## Build, Test, and Development Commands
 
@@ -12,16 +12,17 @@ This is a Next.js 16 and Sanity portfolio site written in TypeScript. App routes
 - `npm run start`: serve the production build locally.
 - `npm run lint`: run ESLint over the repository.
 - `npm run type-check`: run Next type generation and `tsc --noEmit`.
+- `npm test`: run the Vitest test suite once.
 - `npm run typegen`: regenerate Sanity schema and TypeScript types after schema changes.
 - `npm run format`: format files with Prettier.
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript and React function components. Match existing naming: components use PascalCase directories and files such as `components/Navbar/Navbar.tsx`, hooks use `useThing.tsx`, and route folders follow App Router conventions. CSS Modules sit beside components as `Component.module.css`. Prettier uses the Sanity preset with `tabWidth: 4`, import sorting, and Tailwind class sorting. Run `npm run lint:fix` before larger PRs.
+Use TypeScript and React function components. Match existing naming: feature components use PascalCase directories and files such as `features/site-shell/components/Navbar/Navbar.tsx`, hooks use `useThing.tsx`, and route folders follow App Router conventions. CSS Modules sit beside components as `Component.module.css`. Keep domain-specific helpers in the owning feature's `lib/` or a named feature subfolder; keep small generic helpers in `shared/utils/`. Prettier uses the Sanity preset with `tabWidth: 4`, import sorting, and Tailwind class sorting. Run `npm run lint:fix` before larger PRs.
 
 ## Testing Guidelines
 
-There is currently no dedicated test runner or `npm test` script. For changes, run `npm run lint`, `npm run type-check`, and, for user-facing or CMS changes, `npm run build`. If tests are added, prefer colocated `*.test.ts` or `*.test.tsx` files near the module under test and add an explicit `npm test` script to `package.json`.
+Vitest is configured via `npm test`. Prefer colocated `*.test.ts` or `*.test.tsx` files near the module under test, especially for feature `lib/` modules that hold domain, routing, filtering, media, or canvas-session behavior. For changes, run `npm test`, `npm run lint`, `npm run type-check`, and, for user-facing or CMS changes, `npm run build`.
 
 ## Commit & Pull Request Guidelines
 
