@@ -216,20 +216,22 @@ const ProjectInfoPanel = ({
             )}
             {thumbnails.length > 0 ? (
                 <>
+                    {!expandDetails && (
                     <div
                         className={styles.assetsMeasurer}
                         ref={measuringWrapperRef}
                         aria-hidden="true"
                     >
                         {thumbnails.map((thumbnail) => (
-                            <img
-                                key={thumbnail.key}
-                                src={thumbnail.url}
-                                alt=""
-                                className={styles.asset}
-                            />
+                        <img
+                            key={thumbnail.key}
+                            src={thumbnail.url}
+                            alt=""
+                            className={styles.asset}
+                        />
                         ))}
                     </div>
+                    )}
                     <div
                         className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
                         ref={assetsWrapperRef}
