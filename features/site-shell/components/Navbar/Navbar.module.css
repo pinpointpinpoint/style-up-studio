@@ -81,7 +81,11 @@
 }
 
 .aboutImageThumb {
+  animation: thumbnailFadeIn 140ms ease-out;
+  aspect-ratio: 2 / 3;
+  display: block;
   height: 25px;
+  object-fit: cover;
   width: auto;
 }
 
@@ -132,4 +136,14 @@
   color: black;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+@keyframes thumbnailFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

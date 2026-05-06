@@ -1,4 +1,4 @@
-import WorkProjectRouteLoader from '@/features/work/components/WorkBrowser/WorkProjectRouteLoader'
+import WorkProjectRouteLoader from '@/features/work/controllers/WorkProjectRouteLoader'
 
 export default function ProjectNotFoundRoute() {
   return <WorkProjectRouteLoader notFound />

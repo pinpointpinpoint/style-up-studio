@@ -4,19 +4,19 @@ import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from
 import type {Filter, Project} from '@/types'
 import {getProjects} from '@/app/(site)/actions'
 import {
+    applyWorkBrowsingEvent,
     applyWorkBrowsingPaginationResult,
-    applyWorkBrowsingPaginationStart,
-    applyWorkFilterChange,
-    applyWorkFilterRoute,
+    applyWorkBrowsingRequestEnd,
+    applyWorkBrowsingRefreshResult,
     type CachedProjectPage,
-    createWorkBrowsingSessionState,
-    getWorkBrowsingPaginationRequest,
+    createWorkSectionSessionState,
     getProjectDetailCloseNavigation,
     getProjectGalleryOpenNavigation,
     getProjectHref,
+    getWorkBrowsingRefreshRequest,
     getWorkBrowsingFilterKey,
     PROJECT_GALLERY_RETURN_URL_KEY,
-} from '@/features/work/lib/workBrowsingSession'
+} from '@/features/work/state/workSectionSession'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 
 type SearchParamsLike = {
@@ -29,7 +29,7 @@ type WorkRouter = {
     back(): void
 }
 
-type WorkBrowsingSessionOptions = {
+type WorkSectionSessionOptions = {
     initialProjects: Project[] | null
     initialFilter: Filter
     sidebarFilters: SidebarFiltersQueryResult | null
@@ -40,7 +40,7 @@ type WorkBrowsingSessionOptions = {
     pageSize: number
 }
 
-function isWorkGalleryPathname(pathname: string) {
+function isWorkSectionPathname(pathname: string) {
     return pathname === '/'
 }
 
@@ -56,7 +56,7 @@ function canGoBackToSameOrigin() {
     }
 }
 
-export function useWorkBrowsingSession({
+export function useWorkSectionSession({
     initialProjects,
     initialFilter,
     sidebarFilters,
@@ -65,9 +65,9 @@ export function useWorkBrowsingSession({
     searchParams,
     router,
     pageSize,
-}: WorkBrowsingSessionOptions) {
+}: WorkSectionSessionOptions) {
     const [session, setSession] = useState(() =>
-        createWorkBrowsingSessionState({
+        createWorkSectionSessionState({
             initialProjects,
             initialFilter,
             isProjectsLoading,
@@ -75,6 +75,8 @@ export function useWorkBrowsingSession({
         }),
     )
     const hasSkippedInitialFetchRef = useRef(false)
+    const inFlightRefreshFilterKeyRef = useRef<string | null>(null)
+    const sessionRef = useRef(session)
     const projectPagesByFilterRef = useRef(
         new Map<string, CachedProjectPage>([
             [
@@ -87,21 +89,29 @@ export function useWorkBrowsingSession({
         ]),
     )
     const activeFilter = session.filter
-    const activePageSize = session.pageSize
     const activeFilterKey = getWorkBrowsingFilterKey(activeFilter)
 
     useEffect(() => {
-        if (!isWorkGalleryPathname(pathname)) return
+        sessionRef.current = session
+    }, [session])
 
-        setSession((currentSession) =>
-            applyWorkFilterRoute({
+    useEffect(() => {
+        if (!isWorkSectionPathname(pathname)) return
+
+        setSession((currentSession) => {
+            const result = applyWorkBrowsingEvent({
                 state: currentSession,
+                event: {
+                    type: 'routeFilter',
+                },
                 pathname,
                 searchParams,
                 sidebarFilters,
                 cachedProjectPages: projectPagesByFilterRef.current,
-            }).state,
-        )
+            })
+
+            return result.state
+        })
     }, [pathname, searchParams, sidebarFilters])
 
     useEffect(() => {
@@ -110,39 +120,50 @@ export function useWorkBrowsingSession({
             return
         }
 
-        if (projectPagesByFilterRef.current.has(activeFilterKey)) {
+        const request = getWorkBrowsingRefreshRequest({
+            state: sessionRef.current,
+            cachedProjectPages: projectPagesByFilterRef.current,
+        })
+
+        if (!request || inFlightRefreshFilterKeyRef.current === request.filterKey) {
             return
         }
 
+        const refreshRequest = request
         let isCurrent = true
+        inFlightRefreshFilterKeyRef.current = refreshRequest.filterKey
 
         async function refreshProjects() {
             setSession((currentSession) => ({...currentSession, isLoading: true}))
 
             try {
-                const nextProjects = await getProjects({
-                    filter: activeFilter,
-                    cursor: null,
-                    limit: activePageSize,
-                })
+                const nextProjects = await getProjects(refreshRequest.input)
 
                 if (!isCurrent) return
 
-                projectPagesByFilterRef.current.set(activeFilterKey, {
-                    visibleProjects: nextProjects,
-                    hasMore: nextProjects.length >= activePageSize,
-                })
+                setSession((currentSession) => {
+                    const result = applyWorkBrowsingRefreshResult({
+                        state: currentSession,
+                        filterKey: refreshRequest.filterKey,
+                        nextProjects,
+                    })
 
-                setSession((currentSession) => ({
-                    ...currentSession,
-                    visibleProjects: nextProjects,
-                    hasMore: nextProjects.length >= currentSession.pageSize,
-                    hoveredProject: null,
-                    isLoading: false,
-                }))
+                    if (result.didApply && result.cacheKey && result.cachedProjectPage) {
+                        projectPagesByFilterRef.current.set(
+                            result.cacheKey,
+                            result.cachedProjectPage,
+                        )
+                    }
+
+                    return result.state
+                })
             } finally {
+                if (inFlightRefreshFilterKeyRef.current === refreshRequest.filterKey) {
+                    inFlightRefreshFilterKeyRef.current = null
+                }
+
                 if (isCurrent) {
-                    setSession((currentSession) => ({...currentSession, isLoading: false}))
+                    setSession((currentSession) => applyWorkBrowsingRequestEnd(currentSession))
                 }
             }
         }
@@ -152,46 +173,48 @@ export function useWorkBrowsingSession({
         return () => {
             isCurrent = false
         }
-    }, [activeFilter, activeFilterKey, activePageSize])
+    }, [activeFilterKey])
 
     const handleFilterChange: Dispatch<SetStateAction<Filter>> = useCallback(
         (value) => {
             const nextFilter = typeof value === 'function' ? value(session.filter) : value
-            const href = applyWorkFilterChange({
+            const result = applyWorkBrowsingEvent({
                 state: session,
-                nextFilter,
+                event: {
+                    type: 'filterChange',
+                    nextFilter,
+                },
                 cachedProjectPages: projectPagesByFilterRef.current,
                 sidebarFilters,
                 searchParams,
                 pathname,
-            }).href
-
-            setSession((currentSession) => {
-                const result = applyWorkFilterChange({
-                    state: currentSession,
-                    nextFilter,
-                    cachedProjectPages: projectPagesByFilterRef.current,
-                    sidebarFilters,
-                    searchParams,
-                    pathname,
-                })
-
-                return result.state
             })
-            router.push(href, {scroll: false})
+
+            setSession(result.state)
+            router.push(result.navigation.href, {scroll: false})
         },
         [pathname, router, searchParams, session, sidebarFilters],
     )
 
     const handleLoadMore = useCallback(async () => {
-        const request = getWorkBrowsingPaginationRequest(session)
+        const result = applyWorkBrowsingEvent({
+            state: session,
+            event: {
+                type: 'loadMore',
+            },
+            cachedProjectPages: projectPagesByFilterRef.current,
+            sidebarFilters,
+            searchParams,
+            pathname,
+        })
+        const request = result.request
 
         if (!request) return
 
-        setSession((currentSession) => applyWorkBrowsingPaginationStart(currentSession))
+        setSession(result.state)
 
         try {
-            const nextProjects = await getProjects(request.input)
+            const nextProjects = await getProjects(request)
 
             setSession((currentSession) => {
                 const result = applyWorkBrowsingPaginationResult({
@@ -204,9 +227,9 @@ export function useWorkBrowsingSession({
                 return result.state
             })
         } finally {
-            setSession((currentSession) => ({...currentSession, isLoading: false}))
+            setSession((currentSession) => applyWorkBrowsingRequestEnd(currentSession))
         }
-    }, [session])
+    }, [pathname, searchParams, session, sidebarFilters])
 
     const handleProjectOpen = useCallback(() => {
         const navigation = getProjectGalleryOpenNavigation({pathname, searchParams})

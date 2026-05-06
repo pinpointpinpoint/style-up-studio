@@ -51,9 +51,14 @@
 }
 
 .panel {
-  display: flex;
+  /* display: flex;
   flex: 1;
   min-height: 0;
+  overflow: hidden; */
+
+  flex: 0 0 calc(100vh - var(--header-height) * 3);
+  min-height: 0;
+  display: flex;
   overflow: hidden;
 }
 

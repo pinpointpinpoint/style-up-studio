@@ -26,3 +26,5 @@ export async function sanityFetch<T>({
 
     return {data}
 }
+
+// is there a way to use cdn and cache for users but bypass for admins? maybe with a cookie that admin users have set on their browsers, and then we can check for that cookie in the sanityFetch function and decide whether to use cdn or not?

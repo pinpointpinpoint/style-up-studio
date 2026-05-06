@@ -1,14 +1,14 @@
 import {describe, expect, it} from 'vitest'
 import {SANITY_PROJECTS_TAG, SANITY_PUBLIC_TAG} from '../../../sanity/lib/cacheTags'
 import {
-    createProjectReadModel,
-    type ProjectReadFetch,
-    type ProjectReadFetchArgs,
-} from './projectReadModel'
+    createProjectService,
+    type ProjectServiceFetch,
+    type ProjectServiceFetchArgs,
+} from './projectService'
 
-describe('project read model', () => {
+describe('project service', () => {
     it('returns project lists as a stable site-level project shape', async () => {
-        const sanityFetch: ProjectReadFetch = async <T>() => ({
+        const sanityFetch: ProjectServiceFetch = async <T>() => ({
             data: [
                 {
                     _id: 'project-1',
@@ -30,12 +30,12 @@ describe('project read model', () => {
                 },
             ] as T,
         })
-        const readModel = createProjectReadModel({
+        const projectService = createProjectService({
             sanityFetch,
         })
 
         await expect(
-            readModel.getProjects({
+            projectService.getProjects({
                 filter: {type: 'featured'},
                 limit: 1,
             }),
@@ -62,8 +62,8 @@ describe('project read model', () => {
     })
 
     it('returns a stable project shape for a slug and null when missing', async () => {
-        const requests: ProjectReadFetchArgs[] = []
-        const sanityFetch: ProjectReadFetch = async <T>(request: ProjectReadFetchArgs) => {
+        const requests: ProjectServiceFetchArgs[] = []
+        const sanityFetch: ProjectServiceFetch = async <T>(request: ProjectServiceFetchArgs) => {
             requests.push(request)
 
             return {
@@ -89,17 +89,17 @@ describe('project read model', () => {
                     : null) as T,
             }
         }
-        const readModel = createProjectReadModel({
+        const projectService = createProjectService({
             sanityFetch,
         })
 
-        await expect(readModel.getProjectBySlug('editorial-story')).resolves.toMatchObject({
+        await expect(projectService.getProjectBySlug('editorial-story')).resolves.toMatchObject({
             _id: 'project-1',
             slug: 'editorial-story',
             media: [],
             credits: [],
         })
-        await expect(readModel.getProjectBySlug('missing-project')).resolves.toBeNull()
+        await expect(projectService.getProjectBySlug('missing-project')).resolves.toBeNull()
         expect(requests.map((request) => request.params)).toEqual([
             {slug: 'editorial-story'},
             {slug: 'missing-project'},
@@ -111,22 +111,22 @@ describe('project read model', () => {
     })
 
     it('sends stable filter and cursor params when fetching project lists', async () => {
-        const requests: ProjectReadFetchArgs[] = []
-        const sanityFetch: ProjectReadFetch = async <T>(request: ProjectReadFetchArgs) => {
+        const requests: ProjectServiceFetchArgs[] = []
+        const sanityFetch: ProjectServiceFetch = async <T>(request: ProjectServiceFetchArgs) => {
             requests.push(request)
 
             return {data: [] as T}
         }
-        const readModel = createProjectReadModel({
+        const projectService = createProjectService({
             sanityFetch,
         })
 
-        await readModel.getProjects({
+        await projectService.getProjects({
             filter: {type: 'featured'},
             cursor: {type: 'featured', orderRank: 'a', id: 'project-a'},
             limit: 12,
         })
-        await readModel.getProjects({
+        await projectService.getProjects({
             filter: {type: 'brand', id: 'brand-a'},
             cursor: {type: 'date', date: '2026-01-01', id: 'project-b'},
             limit: 6,

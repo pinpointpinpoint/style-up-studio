@@ -18,7 +18,7 @@ import {
     sidebarFiltersQuery,
 } from '../../../sanity/lib/queries'
 import {DEFAULT_PROJECT_FILTER} from '../../work/lib/projectFilters'
-import {PROJECTS_PAGE_SIZE} from '../../work/lib/workBrowsingConfig'
+import {PROJECTS_PAGE_SIZE} from '../../work/lib/constants'
 
 type SiteInitialDataReadName = 'about' | 'contact' | 'sidebarFilters' | 'styleUps'
 

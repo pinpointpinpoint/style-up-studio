@@ -42,21 +42,21 @@ export default function ProjectGallery({
 }: ProjectGalleryProps) {
   const introDone = useIntro()
   const [hasPlayedIntro, setHasPlayedIntro] = useState(introDone)
-  const shouldRunIntroAnimation = introDone && !hasPlayedIntro
+  // const shouldRunIntroAnimation = introDone && !hasPlayedIntro
 
   const galleryRef = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    if (!shouldRunIntroAnimation) return
+  // useEffect(() => {
+  //   if (!shouldRunIntroAnimation) return
 
-    const animationTimer = setTimeout(() => {
-      setHasPlayedIntro(true)
-    }, 700)
+  //   const animationTimer = setTimeout(() => {
+  //     setHasPlayedIntro(true)
+  //   }, 700)
 
-    return () => {
-      clearTimeout(animationTimer)
-    }
-  }, [shouldRunIntroAnimation])
+  //   return () => {
+  //     clearTimeout(animationTimer)
+  //   }
+  // }, [shouldRunIntroAnimation])
 
   useEffect(() => {
     const el = galleryRef.current
@@ -133,9 +133,10 @@ export default function ProjectGallery({
           initial={hasPlayedIntro ? false : { opacity: 0 }}
           animate={introDone ? { opacity: 1 } : { opacity: 0 }}
           transition={{
-            duration: shouldRunIntroAnimation ? 0.25 : 0,
+            // duration: shouldRunIntroAnimation ? 0.2 : 0,
             ease: 'easeOut',
-            delay: shouldRunIntroAnimation ? getStableDelay(project._id) : 0,
+            // delay: shouldRunIntroAnimation ? getStableDelay(project._id) : 0,
+            delay: getStableDelay(project._id),
           }}
         >
           <ProjectCard

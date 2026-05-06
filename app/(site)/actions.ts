@@ -1,11 +1,11 @@
 'use server'
 
-import {createProjectReadModel, type ProjectReadFetch} from '@/features/work/lib/projectReadModel'
+import {createProjectService, type ProjectServiceFetch} from '@/features/work/services/projectService'
 import {sanityFetch} from '@/sanity/lib/fetch'
 
-const projectReadModel = createProjectReadModel({
-    sanityFetch: ((args) => sanityFetch(args)) as ProjectReadFetch,
+const projectService = createProjectService({
+    sanityFetch: ((args) => sanityFetch(args)) as ProjectServiceFetch,
 })
 
-export const getProjects = projectReadModel.getProjects
-export const getProjectBySlug = projectReadModel.getProjectBySlug
+export const getProjects = projectService.getProjects
+export const getProjectBySlug = projectService.getProjectBySlug

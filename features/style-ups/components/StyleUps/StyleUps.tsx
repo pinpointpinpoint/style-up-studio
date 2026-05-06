@@ -3,7 +3,6 @@
 import { urlFor } from "@/sanity/lib/utils";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import {
-  type FC,
   type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
@@ -25,11 +24,11 @@ export type StyleUpItem = {
   image?: SanityImageSource | null
 }
 
-interface StyleUpsProps {
+type StyleUpsProps = {
   styleUps: StyleUpItem[] | null;
 }
 
-export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
+export function StyleUps({ styleUps }: StyleUpsProps) {
   const [session, setSession] = useState(() =>
     createStyleUpCanvasSession({ styleUps })
   );
@@ -136,4 +135,4 @@ export const StyleUps: FC<StyleUpsProps> = ({ styleUps }) => {
       </aside>
     </div>
   );
-};
+}

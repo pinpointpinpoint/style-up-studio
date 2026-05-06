@@ -1,5 +1,5 @@
 import {notFound} from 'next/navigation'
-import WorkProjectRouteLoader from '@/features/work/components/WorkBrowser/WorkProjectRouteLoader'
+import WorkProjectRouteLoader from '@/features/work/controllers/WorkProjectRouteLoader'
 import {getProjectBySlug} from '@/app/(site)/actions'
 import type {Metadata} from 'next'
 

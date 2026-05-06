@@ -9,8 +9,7 @@ import {
     useState,
 } from 'react'
 import {
-  applyWorkProjectRouteSelection,
-  clearInactiveProjectRouteSelection,
+  applyWorkRouteSelectionEvent,
   getWorkRouteSelectionView,
   type ProjectRouteSelection,
 } from '@/features/work/lib/workRouteSelection'
@@ -19,8 +18,6 @@ import type { Project } from '@/types'
 type WorkProjectRouteSelectionContextValue = {
   routeProject: Project | null
   routeProjectNotFound: boolean
-  setRouteProject: (project: Project | null) => void
-  setRouteProjectNotFound: () => void
   applyRouteProject: (project: Project | null, notFound: boolean) => void
   clearRouteProjectSelection: (view: ReturnType<typeof getWorkRouteSelectionView<Project>>) => void
 }
@@ -33,24 +30,36 @@ export function WorkProjectRouteSelectionProvider({ children }: { children: Reac
     project: null,
     notFound: false,
   })
-  const updateRouteProject = useCallback((project: Project | null) => {
-    setRouteSelection({project, notFound: false})
-  }, [])
-  const setRouteProjectNotFound = useCallback(() => {
-    setRouteSelection({project: null, notFound: true})
-  }, [])
   const applyRouteProject = useCallback((project: Project | null, notFound: boolean) => {
     setRouteSelection((currentSelection) =>
-      applyWorkProjectRouteSelection(currentSelection, {project, notFound}),
+      applyWorkRouteSelectionEvent({
+        state: {
+          lastWorkRoute: project?.slug ? `/work/${project.slug}` : '/',
+          projectRouteSelection: currentSelection,
+        },
+        event: {
+          type: 'routeProjectLoaded',
+          project,
+          notFound,
+          pathname: project?.slug ? `/work/${project.slug}` : '/',
+          searchParams: new URLSearchParams(),
+        },
+      }).state.projectRouteSelection,
     )
   }, [])
   const clearRouteProjectSelection = useCallback(
     (view: ReturnType<typeof getWorkRouteSelectionView<Project>>) => {
       setRouteSelection((currentSelection) =>
-        clearInactiveProjectRouteSelection({
-          view,
-          projectRouteSelection: currentSelection,
-        }),
+        applyWorkRouteSelectionEvent({
+          state: {
+            lastWorkRoute: view.nextLastWorkRoute,
+            projectRouteSelection: currentSelection,
+          },
+          event: {
+            type: 'inactiveProjectRouteCleared',
+            view,
+          },
+        }).state.projectRouteSelection,
       )
     },
     [],
@@ -59,15 +68,11 @@ export function WorkProjectRouteSelectionProvider({ children }: { children: Reac
     () => ({
       routeProject: routeSelection.project,
       routeProjectNotFound: routeSelection.notFound,
-      setRouteProject: updateRouteProject,
-      setRouteProjectNotFound,
       applyRouteProject,
       clearRouteProjectSelection,
     }),
     [
       routeSelection,
-      updateRouteProject,
-      setRouteProjectNotFound,
       applyRouteProject,
       clearRouteProjectSelection,
     ],

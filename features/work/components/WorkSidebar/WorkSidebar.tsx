@@ -6,21 +6,21 @@ import type { SidebarFiltersQueryResult } from '@/sanity.types'
 import WorkFilterMenu from './WorkFilterMenu';
 import ProjectInfoPanel from './ProjectInfoPanel';
 import { Filter } from '@/types';
-import styles from "./WorkInspector.module.css";
+import styles from "./WorkSidebar.module.css";
 
-type WorkInspectorProps = {
+type WorkSidebarProps = {
     displayedProject: Project | null
     sidebarFilters: SidebarFiltersQueryResult | null
     filter: Filter
     setFilter: Dispatch<SetStateAction<Filter>>
 }
 
-export function WorkInspector({
+export function WorkSidebar({
     displayedProject,
     sidebarFilters,
     filter,
     setFilter,
-}: WorkInspectorProps) {
+}: WorkSidebarProps) {
     const filterSectionRef = useRef<HTMLDivElement | null>(null)
     const [hasFilterOverflow, setHasFilterOverflow] = useState(false)
 

@@ -17,6 +17,7 @@ import IntroGate from '@/features/site-shell/components/IntroGate/IntroGate'
 import SiteSectionsAccordion from '@/features/site-shell/components/SiteSectionsAccordion/SiteSectionsAccordion'
 import Navbar from '@/features/site-shell/components/Navbar/Navbar'
 import EasterEgg from '@/features/site-shell/components/EasterEgg/EasterEgg'
+import SiteConsoleCredits from '@/features/site-shell/components/SiteConsoleCredits/SiteConsoleCredits'
 import type {StyleUpItem} from '@/features/style-ups/components/StyleUps/StyleUps'
 
 const getSiteInitialData = createGetSiteInitialData({
@@ -65,6 +66,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
                     </Suspense>
                 </div>
                 <EasterEgg />
+                <SiteConsoleCredits />
                 <Toaster />
                 <SpeedInsights />
             </IntroGate>

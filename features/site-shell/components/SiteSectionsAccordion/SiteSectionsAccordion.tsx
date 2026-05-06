@@ -4,9 +4,13 @@ import SiteSectionPanel from "./SiteSectionPanel";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { StyleUps, type StyleUpItem } from "@/features/style-ups/components/StyleUps/StyleUps";
-import { WorkBrowser } from "@/features/work/components/WorkBrowser/WorkBrowser";
-import { WorkProjectRouteSelectionProvider } from "@/features/work/components/WorkBrowser/WorkProjectRouteSelection";
-import { getWorkRouteSelectionView, type WorkRouteSection } from "@/features/work/lib/workRouteSelection";
+import { WorkSection } from "@/features/work/components/WorkSection/WorkSection";
+import { WorkProjectRouteSelectionProvider } from "@/features/work/controllers/WorkProjectRouteSelection";
+import {
+  applyWorkRouteSelectionEvent,
+  type WorkRouteSelectionState,
+  type WorkRouteSection,
+} from "@/features/work/lib/workRouteSelection";
 import type { Filter, Project } from "@/types";
 import type { SidebarFiltersQueryResult } from "@/sanity.types";
 import styles from "./SiteSectionsAccordion.module.css";
@@ -21,6 +25,10 @@ type SiteSection = WorkRouteSection;
 type OptimisticSection = {
   section: SiteSection
   pathname: string
+}
+
+type AccordionRouteProject = {
+  slug?: string | null
 }
 
 type SiteSectionsAccordionProps = {
@@ -42,23 +50,30 @@ export default function SiteSectionsAccordion({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [optimisticSection, setOptimisticSection] = useState<OptimisticSection | null>(null);
-  const [lastWorkRoute, setLastWorkRoute] = useState(WORK_HOME_ROUTE);
-  const routeSelection = getWorkRouteSelectionView({
-    pathname,
-    searchParams,
-    lastWorkRoute,
+  const [routeState, setRouteState] = useState<WorkRouteSelectionState<AccordionRouteProject>>({
+    lastWorkRoute: WORK_HOME_ROUTE,
     projectRouteSelection: {
       project: null,
       notFound: false,
     },
   });
+  const routeResult = applyWorkRouteSelectionEvent({
+    state: routeState,
+    event: {
+      type: "routeChanged",
+      pathname,
+      searchParams,
+    },
+  });
+  const routeSelection = routeResult.view;
   const routeSection = routeSelection.routeSection;
   const activeSection =
     optimisticSection?.pathname === pathname ? optimisticSection.section : routeSection;
   const workHeight = activeSection === "work" ? OPEN_HEIGHT : CLOSED_HEIGHT;
   const styleUpsHeight = activeSection === "style-ups" ? OPEN_HEIGHT : CLOSED_HEIGHT;
   const visibleWorkRoute = routeSelection.visibleWorkRoute;
-  const workRoute = routeSection === "work" ? routeSelection.nextLastWorkRoute : lastWorkRoute;
+  const workRoute =
+    routeSection === "work" ? routeSelection.nextLastWorkRoute : routeState.lastWorkRoute;
 
   useEffect(() => {
     router.prefetch(WORK_HOME_ROUTE);
@@ -76,11 +91,18 @@ export default function SiteSectionsAccordion({
       return;
     }
 
-    if (routeSection === "work") {
-      setLastWorkRoute(routeSelection.nextLastWorkRoute);
-    }
+    const result = applyWorkRouteSelectionEvent({
+      state: routeState,
+      event: {
+        type: "sectionNavigationStarted",
+        section,
+        pathname,
+        searchParams,
+      },
+    });
 
-    setOptimisticSection(section === routeSection ? null : {section, pathname});
+    setRouteState(result.state);
+    setOptimisticSection(result.optimisticSection);
   };
 
   return (
@@ -95,7 +117,7 @@ export default function SiteSectionsAccordion({
           arrowDirection={activeSection === "style-ups" ? "down" : undefined}
           onNavigate={handleNavigate("work")}
         >
-          <WorkBrowser
+          <WorkSection
             initialProjects={initialProjects}
             initialFilter={initialFilter}
             sidebarFilters={sidebarFilters}

@@ -1,23 +1,23 @@
 'use client'
 
-import {FC, useEffect} from 'react'
+import {useEffect} from 'react'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-import {WorkInspector} from '../WorkInspector/WorkInspector'
+import {WorkSidebar} from '../WorkSidebar/WorkSidebar'
 import {Filter, Project} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import '@vidstack/react/player/styles/base.css'
-import styles from './WorkBrowser.module.css'
+import styles from './WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
 import ProjectDetailView from '../ProjectDetailView/ProjectDetailView'
 import {useMouseMoved} from '@/features/work/hooks/useMouseInitiatedHover'
-import {useWorkProjectRouteSelection} from './WorkProjectRouteSelection'
-import {useWorkBrowsingSession} from './useWorkBrowsingSession'
+import {useWorkProjectRouteSelection} from '../../controllers/WorkProjectRouteSelection'
+import {useWorkSectionSession} from '../../hooks/useWorkSectionSession'
 import {getWorkRouteSelectionView} from '@/features/work/lib/workRouteSelection'
-import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/workBrowsingConfig'
+import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
 
 type SidebarFilters = SidebarFiltersQueryResult
 
-interface WorkBrowserProps {
+interface WorkSectionProps {
     initialProjects: Project[] | null
     initialFilter: Filter
     sidebarFilters: SidebarFilters | null
@@ -25,13 +25,13 @@ interface WorkBrowserProps {
     isProjectsLoading?: boolean
 }
 
-export const WorkBrowser: FC<WorkBrowserProps> = ({
+export function WorkSection({
     initialProjects,
     initialFilter,
     sidebarFilters,
     activeWorkRoute,
     isProjectsLoading = false,
-}) => {
+}: WorkSectionProps) {
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -62,7 +62,7 @@ export const WorkBrowser: FC<WorkBrowserProps> = ({
         handleProjectOpen,
         handleProjectDetailClose,
         setHoveredProject,
-    } = useWorkBrowsingSession({
+    } = useWorkSectionSession({
         initialProjects,
         initialFilter,
         sidebarFilters: activeSidebarFilters,
@@ -127,7 +127,7 @@ export const WorkBrowser: FC<WorkBrowserProps> = ({
                 </div>
             </div>
             {!isProjectDetail && (
-                <WorkInspector
+                <WorkSidebar
                     displayedProject={displayedProject}
                     sidebarFilters={activeSidebarFilters}
                     filter={filter}

@@ -6,22 +6,22 @@ import type {
 } from '@/sanity.types'
 import {SANITY_PROJECTS_TAG, SANITY_PUBLIC_TAG} from '../../../sanity/lib/cacheTags'
 import type {Filter, Project, ProjectsQueryInput} from '@/types'
-import {DEFAULT_PROJECT_FILTER} from './projectFilters'
+import {DEFAULT_PROJECT_FILTER} from '../lib/projectFilters'
 
 const DEFAULT_LIMIT = 2
-const PROJECT_READ_TAGS = [SANITY_PUBLIC_TAG, SANITY_PROJECTS_TAG]
+const PROJECT_SERVICE_TAGS = [SANITY_PUBLIC_TAG, SANITY_PROJECTS_TAG]
 
-export type ProjectReadFetchArgs = {
+export type ProjectServiceFetchArgs = {
     query: string
     stega: false
     params?: Record<string, unknown>
     tags?: string[]
 }
 
-export type ProjectReadFetch = <T>(args: ProjectReadFetchArgs) => Promise<{data: T}>
+export type ProjectServiceFetch = <T>(args: ProjectServiceFetchArgs) => Promise<{data: T}>
 
-type ProjectReadModelDependencies = {
-    sanityFetch: ProjectReadFetch
+type ProjectServiceDependencies = {
+    sanityFetch: ProjectServiceFetch
 }
 
 type RawProject =
@@ -48,7 +48,7 @@ function normalizeProject(project: RawProject): Project | null {
     }
 }
 
-export function createProjectReadModel({sanityFetch}: ProjectReadModelDependencies) {
+export function createProjectService({sanityFetch}: ProjectServiceDependencies) {
     return {
         async getProjects(input: ProjectsQueryInput): Promise<Project[]> {
             const filter = normalizeFilter(input.filter)
@@ -60,7 +60,7 @@ export function createProjectReadModel({sanityFetch}: ProjectReadModelDependenci
             const {data} = await sanityFetch<ProjectsQueryResult | FeaturedProjectsQueryResult>({
                 query,
                 stega: false,
-                tags: PROJECT_READ_TAGS,
+                tags: PROJECT_SERVICE_TAGS,
                 params: {
                     filterType: filter.type,
                     filterId: 'id' in filter ? filter.id : '',
@@ -80,7 +80,7 @@ export function createProjectReadModel({sanityFetch}: ProjectReadModelDependenci
             const {data} = await sanityFetch<ProjectBySlugQueryResult>({
                 query: projectBySlugQuery,
                 stega: false,
-                tags: PROJECT_READ_TAGS,
+                tags: PROJECT_SERVICE_TAGS,
                 params: {slug},
             })
 

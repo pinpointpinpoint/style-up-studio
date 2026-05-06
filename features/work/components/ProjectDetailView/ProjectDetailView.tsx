@@ -2,7 +2,7 @@
 
 import {useCallback, useMemo, useRef, useState} from 'react'
 import VideoPlayer from '@/features/video/components/VideoPlayer/VideoPlayer'
-import ProjectInfoPanel from '@/features/work/components/WorkInspector/ProjectInfoPanel'
+import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
 import type {Project} from '@/types'
 import styles from './ProjectDetailView.module.css'
 import { createProjectDetailMediaView, getProjectDetailMediaScrollSelection, selectProjectDetailMedia } from '../../lib/media/projectDetailMediaView'

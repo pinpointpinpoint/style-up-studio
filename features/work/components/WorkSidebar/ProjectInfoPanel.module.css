@@ -178,10 +178,14 @@
 }
 
 .asset {
+  --asset-opacity: 1;
+
+  animation: assetFadeIn 140ms ease-out;
   height: 30px;
+  opacity: var(--asset-opacity);
   width: auto;
   object-fit: cover;
-  transition: opacity 0.18s ease;
+  transition: opacity 120ms ease-out;
 }
 
 .assetButton {
@@ -216,7 +220,7 @@
 }
 
 .assetInactive {
-  opacity: 0.35;
+  --asset-opacity: 0.35;
 }
 
 .assetCount {
@@ -260,6 +264,16 @@
 
 .assetsWrapper::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes assetFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: var(--asset-opacity);
+  }
 }
 
 .heading {

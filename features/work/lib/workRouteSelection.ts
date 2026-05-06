@@ -9,6 +9,56 @@ export type ProjectRouteSelection<ProjectLike extends RouteProjectLike> = {
     notFound: boolean
 }
 
+export type WorkRouteSelectionState<ProjectLike extends RouteProjectLike> = {
+    lastWorkRoute: string
+    projectRouteSelection: ProjectRouteSelection<ProjectLike>
+}
+
+export type WorkRouteChangedEvent = {
+    type: 'routeChanged'
+    pathname: string
+    searchParams: SearchParamsLike
+}
+
+export type WorkSectionNavigationStartedEvent = {
+    type: 'sectionNavigationStarted'
+    section: WorkRouteSection
+    pathname: string
+    searchParams: SearchParamsLike
+}
+
+export type WorkRouteProjectLoadedEvent<ProjectLike extends RouteProjectLike> = {
+    type: 'routeProjectLoaded'
+    project: ProjectLike | null
+    notFound: boolean
+    pathname: string
+    searchParams: SearchParamsLike
+}
+
+export type WorkInactiveProjectRouteClearedEvent<ProjectLike extends RouteProjectLike> = {
+    type: 'inactiveProjectRouteCleared'
+    view: ReturnType<typeof getWorkRouteSelectionView<ProjectLike>>
+}
+
+export type WorkRouteSelectionEvent<ProjectLike extends RouteProjectLike = RouteProjectLike> =
+    | WorkRouteChangedEvent
+    | WorkSectionNavigationStartedEvent
+    | WorkRouteProjectLoadedEvent<ProjectLike>
+    | WorkInactiveProjectRouteClearedEvent<ProjectLike>
+
+type WorkRouteSelectionEventResult<ProjectLike extends RouteProjectLike> = {
+    state: WorkRouteSelectionState<ProjectLike>
+    view: ReturnType<typeof getWorkRouteSelectionView<ProjectLike>>
+}
+
+type WorkSectionNavigationStartedResult<ProjectLike extends RouteProjectLike> =
+    WorkRouteSelectionEventResult<ProjectLike> & {
+        optimisticSection: {
+            section: WorkRouteSection
+            pathname: string
+        } | null
+    }
+
 type SearchParamsLike = {
     toString(): string
 }
@@ -126,6 +176,125 @@ export function getWorkRouteSelectionView<ProjectLike extends RouteProjectLike>(
     return {
         ...routeSelection,
         ...projectView,
+    }
+}
+
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
+    args: {
+        state: WorkRouteSelectionState<ProjectLike>
+        event: WorkRouteChangedEvent
+    },
+): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
+    args: {
+        state: WorkRouteSelectionState<ProjectLike>
+        event: WorkSectionNavigationStartedEvent
+    },
+): WorkSectionNavigationStartedResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
+    args: {
+        state: WorkRouteSelectionState<ProjectLike>
+        event: WorkRouteProjectLoadedEvent<ProjectLike>
+    },
+): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
+    args: {
+        state: WorkRouteSelectionState<ProjectLike>
+        event: WorkInactiveProjectRouteClearedEvent<ProjectLike>
+    },
+): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>({
+    state,
+    event,
+}: {
+    state: WorkRouteSelectionState<ProjectLike>
+    event: WorkRouteSelectionEvent<ProjectLike>
+}): WorkRouteSelectionEventResult<ProjectLike> | WorkSectionNavigationStartedResult<ProjectLike> {
+    if (event.type === 'sectionNavigationStarted') {
+        const view = getWorkRouteSelectionView({
+            pathname: event.pathname,
+            searchParams: event.searchParams,
+            lastWorkRoute: state.lastWorkRoute,
+            projectRouteSelection: state.projectRouteSelection,
+        })
+
+        return {
+            state: {
+                ...state,
+                lastWorkRoute: view.nextLastWorkRoute,
+            },
+            optimisticSection:
+                event.section === view.routeSection
+                    ? null
+                    : {
+                          section: event.section,
+                          pathname: event.pathname,
+                      },
+            view,
+        }
+    }
+
+    if (event.type === 'routeProjectLoaded') {
+        const nextProjectRouteSelection = applyWorkProjectRouteSelection(
+            state.projectRouteSelection,
+            {
+                project: event.project,
+                notFound: event.notFound,
+            },
+        )
+        const view = getWorkRouteSelectionView({
+            pathname: event.pathname,
+            searchParams: event.searchParams,
+            lastWorkRoute: state.lastWorkRoute,
+            projectRouteSelection: nextProjectRouteSelection,
+        })
+
+        return {
+            state: {
+                ...state,
+                lastWorkRoute: view.nextLastWorkRoute,
+                projectRouteSelection: nextProjectRouteSelection,
+            },
+            view,
+        }
+    }
+
+    if (event.type === 'inactiveProjectRouteCleared') {
+        const nextProjectRouteSelection = clearInactiveProjectRouteSelection({
+            view: event.view,
+            projectRouteSelection: state.projectRouteSelection,
+        })
+        const projectView = getWorkProjectRouteView(
+            event.view.visibleWorkRoute,
+            nextProjectRouteSelection,
+        )
+
+        return {
+            state: {
+                ...state,
+                lastWorkRoute: event.view.nextLastWorkRoute,
+                projectRouteSelection: nextProjectRouteSelection,
+            },
+            view: {
+                ...event.view,
+                ...projectView,
+            },
+        }
+    }
+
+    const view = getWorkRouteSelectionView({
+        pathname: event.pathname,
+        searchParams: event.searchParams,
+        lastWorkRoute: state.lastWorkRoute,
+        projectRouteSelection: state.projectRouteSelection,
+    })
+
+    return {
+        state: {
+            ...state,
+            lastWorkRoute: view.nextLastWorkRoute,
+        },
+        view,
     }
 }
 
