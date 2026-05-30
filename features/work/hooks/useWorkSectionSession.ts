@@ -16,7 +16,7 @@ import {
     getWorkBrowsingRefreshRequest,
     getWorkBrowsingFilterKey,
     PROJECT_GALLERY_RETURN_URL_KEY,
-} from '@/features/work/state/workSectionSession'
+} from '@/features/work/lib/session/workSectionSession'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 
 type SearchParamsLike = {

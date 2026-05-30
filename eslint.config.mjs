@@ -3,7 +3,13 @@ import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 
 export default defineConfig([
-  ...nextCoreWebVitals,
-  ...nextTypescript,
-  globalIgnores(['.next/**', 'next-env.d.ts', 'public/**', 'node_modules/**']),
+    ...nextCoreWebVitals,
+    ...nextTypescript,
+    globalIgnores([
+        '.next/**',
+        'next-env.d.ts',
+        'public/**',
+        'node_modules/**',
+        'prettier.config.cjs',
+    ]),
 ])

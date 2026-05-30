@@ -1,12 +1,18 @@
 'use client'
 
-import {useCallback, useMemo, useRef, useState} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import VideoPlayer from '@/features/video/components/VideoPlayer/VideoPlayer'
+import {getExternalVideoPoster} from '@/features/video/services/externalVideoService'
+import {getVideoMediaProviderPosterRequest} from '@/features/video/lib/videoMedia'
 import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
 import type {Project} from '@/types'
 import styles from './ProjectDetailView.module.css'
-import { createProjectDetailMediaView, getProjectDetailMediaScrollSelection, selectProjectDetailMedia } from '../../lib/media/projectDetailMediaView'
-import { getSanityProjectImageUrl } from '../../lib/media/sanityProjectImageUrl'
+import {
+    createProjectDetailMediaView,
+    getProjectDetailMediaScrollSelection,
+    selectProjectDetailMedia,
+} from '../../lib/media/projectDetailMediaView'
+import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
 
 type ProjectDetailViewProps = {
     project: Project
@@ -20,16 +26,13 @@ type ProjectImageProps = {
 }
 
 function ProjectImage({src, alt, eager}: ProjectImageProps) {
-    const [isLoaded, setIsLoaded] = useState(false)
-
     return (
         <img
             src={src}
             alt={alt}
-            className={`${styles.image} ${isLoaded ? styles.imageLoaded : ''}`}
+            className={styles.image}
             loading={eager ? 'eager' : 'lazy'}
             decoding="async"
-            onLoad={() => setIsLoaded(true)}
         />
     )
 }
@@ -41,13 +44,20 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
         projectId: string
         mediaIndex: number
     } | null>(null)
+    const [videoPosterState, setVideoPosterState] = useState<{
+        key: string
+        posters: Record<string, string | null>
+    } | null>(null)
     const mediaView = useMemo(
         () =>
             createProjectDetailMediaView(project, {
                 imageUrl: getSanityProjectImageUrl,
+                externalVideoPosterUrl: (url) =>
+                    videoPosterState?.key === project._id ? videoPosterState.posters[url] : null,
             }),
-        [project],
+        [project, videoPosterState],
     )
+    const videoPosterStateKey = project._id
     const activeMediaIndex =
         selectedMedia?.projectId === project._id
             ? selectedMedia.mediaIndex
@@ -62,17 +72,54 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                 mediaIndex,
             )
 
-            setSelectedMedia({
-                projectId: project._id,
-                mediaIndex: selection.activeMediaIndex,
-            })
             mediaFrameRefs.current[selection.scrollTargetMediaIndex]?.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
             })
         },
-        [activeMediaIndex, mediaView, project._id],
+        [activeMediaIndex, mediaView],
     )
+
+    useEffect(() => {
+        let cancelled = false
+
+        async function resolveVideoPosters() {
+            const posterRequests = project.media
+                .map((item) => {
+                    if (item._type !== 'videoUrl' || !item.url) return null
+
+                    return getVideoMediaProviderPosterRequest({
+                        sourceKind: 'videoUrl',
+                        sourceUrl: item.url,
+                        sanityThumbnail: item.thumbnail,
+                        sanityThumbnailUrl: getSanityProjectImageUrl,
+                    })
+                })
+                .filter((request): request is NonNullable<typeof request> => Boolean(request))
+
+            const resolvedPosters = await Promise.all(
+                posterRequests.map(async ({sourceUrl}) => ({
+                    sourceUrl,
+                    posterUrl: await getExternalVideoPoster(sourceUrl),
+                })),
+            )
+
+            if (!cancelled) {
+                setVideoPosterState({
+                    key: videoPosterStateKey,
+                    posters: Object.fromEntries(
+                        resolvedPosters.map(({sourceUrl, posterUrl}) => [sourceUrl, posterUrl]),
+                    ),
+                })
+            }
+        }
+
+        resolveVideoPosters()
+
+        return () => {
+            cancelled = true
+        }
+    }, [project, videoPosterStateKey])
 
     const handleMediaScroll = useCallback(() => {
         const mediaPane = mediaPaneRef.current
@@ -143,7 +190,12 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                                         mediaFrameRefs.current[item.mediaIndex] = element
                                     }}
                                 >
-                                    <VideoPlayer asset={item.asset} title={item.title} />
+                                    <VideoPlayer
+                                        key={item.fileUrl}
+                                        src={item.fileUrl}
+                                        poster={item.poster}
+                                        title={item.title}
+                                    />
                                 </div>
                             )
                         }
@@ -156,7 +208,12 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                                     mediaFrameRefs.current[item.mediaIndex] = element
                                 }}
                             >
-                                <VideoPlayer asset={item.asset} title={item.title} />
+                                <VideoPlayer
+                                    key={item.url}
+                                    src={item.url}
+                                    poster={item.poster}
+                                    title={item.title}
+                                />
                             </div>
                         )
                     })}

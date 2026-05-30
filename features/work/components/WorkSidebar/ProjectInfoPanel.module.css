@@ -25,7 +25,6 @@
 
 .body {
     height: fit-content;
-    border-top: 1px solid black;
 }
 
 .revealedDetails {
@@ -105,28 +104,6 @@
   overflow-wrap: anywhere;
 }
 
-
-
-/* Webkit browsers (Chrome, Edge, Safari) */
-.details::-webkit-scrollbar,
-.container::-webkit-scrollbar {
-  width: 10px; /* thickness */
-  background: transparent; /* hide track background */
-}
-
-.details::-webkit-scrollbar-thumb,
-.container::-webkit-scrollbar-thumb  {
-  background-color: black; /* thumb color */
-  padding: 2px;
-  border: solid 2px white;
-  border-radius: 0; /* not rounded */
-}
-
-.details::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 2px; /* top/bottom space */
-}
-
 .assets {
     padding: 0 30px 30px 30px;
     gap: 15px;
@@ -181,14 +158,10 @@
 }
 
 .asset {
-  --asset-opacity: 1;
-
-  animation: assetFadeIn 140ms ease-out;
   height: 30px;
-  opacity: var(--asset-opacity);
   width: auto;
   object-fit: cover;
-  transition: opacity 120ms ease-out;
+  transition: filter 0.12s ease-out;
 }
 
 .assetButton {
@@ -200,6 +173,7 @@
   display: block;
   margin: 0;
   padding: 0;
+  
 }
 
 .assetsWrapperExpanded .assetButton {
@@ -214,16 +188,22 @@
 
 .assetButton .asset {
   display: block;
+  
+}
+
+.assetInactive {
+  filter: opacity(50%);
 }
 
 .assetExpanded {
+  box-sizing: border-box;
   height: auto;
   object-position: top center;
   width: 100%;
 }
 
-.assetInactive {
-  --asset-opacity: 0.35;
+.assetActive {
+  border-color: black;
 }
 
 .assetCount {
@@ -269,16 +249,6 @@
   display: none;
 }
 
-@keyframes assetFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: var(--asset-opacity);
-  }
-}
-
 .heading {
     align-items: flex-end;
     display: flex;
@@ -288,6 +258,10 @@
     padding: 10px 30px;
     font-weight: 600;
     font-size: var(--font-sm);
+    position: sticky;
+    top: 0;
+    background-color: white;
+    border-bottom: 1px solid black;
 }
 
 .headingEmpty {

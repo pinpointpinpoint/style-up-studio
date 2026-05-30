@@ -1,20 +1,20 @@
 import {describe, expect, it} from 'vitest'
 import {SANITY_PUBLIC_TAG, SANITY_SEO_TAG} from '../../../sanity/lib/cacheTags'
-import {createGetSiteMetadata, type SiteMetadataFetchArgs} from './getSiteMetadata'
+import {createSiteMetadataService, type SiteMetadataServiceFetchArgs} from './siteMetadataService'
 
-describe('get site metadata', () => {
+describe('site metadata service', () => {
     it('loads SEO settings and maps them to public site metadata', async () => {
-        const fetchRequests: SiteMetadataFetchArgs[] = []
-        const getSiteMetadata = createGetSiteMetadata({
+        const fetchRequests: SiteMetadataServiceFetchArgs[] = []
+        const siteMetadataService = createSiteMetadataService({
             siteUrl: 'https://styleup.example',
-            sanityFetch: async <T>(args: SiteMetadataFetchArgs) => {
+            sanityFetch: async <T>(args: SiteMetadataServiceFetchArgs) => {
                 fetchRequests.push(args)
 
                 return {data: {description: 'Editorial styling portfolio'} as T}
             },
         })
 
-        await expect(getSiteMetadata()).resolves.toMatchObject({
+        await expect(siteMetadataService.getMetadata()).resolves.toMatchObject({
             metadataBase: new URL('https://styleup.example'),
             title: {
                 template: '%s | Style Up Studio',
@@ -44,11 +44,11 @@ describe('get site metadata', () => {
     })
 
     it('falls back to the local site URL when no public site URL is configured', async () => {
-        const getSiteMetadata = createGetSiteMetadata({
+        const siteMetadataService = createSiteMetadataService({
             sanityFetch: async <T>() => ({data: null as T}),
         })
 
-        await expect(getSiteMetadata()).resolves.toMatchObject({
+        await expect(siteMetadataService.getMetadata()).resolves.toMatchObject({
             metadataBase: new URL('http://localhost:3000'),
             openGraph: {
                 url: 'http://localhost:3000',

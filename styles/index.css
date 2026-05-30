@@ -9,10 +9,6 @@ html {
     overflow: hidden;
 }
 
-.loading {
-    background-color: red;
-}
-
 *,
 *::before,
 *::after {
@@ -47,110 +43,27 @@ button:hover {
     overflow: hidden;
 }
 
-/* Work */
-
-/* .shape-mask {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-} */
-
-/* .shape-mask--hover {
-  opacity: 0.85;
-} */
-
-/* .shape-mask--active {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 1;
-} */
-
-/* .work__project-card--active {
-    transform: scale(1.02) rotate(var(--rotate));
-} */
-
-/* Scrollbars */
-
-/* .work__projects::-webkit-scrollbar,
-.work__sidebar::-webkit-scrollbar {
-  width: 5px;
-  height: 10px;
-}
-
-.work__projects::-webkit-scrollbar-track,
-.work__sidebar::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-radius: 5px;
-}
-
-.work__projects::-webkit-scrollbar-thumb,
-.work__sidebar::-webkit-scrollbar-thumb {
-  background: #c2c2c2;
-  border-radius: 5px;
-}
-
-.work__projects::-webkit-scrollbar-thumb:hover , 
-.work__sidebar::-webkit-scrollbar-thumb:hover {
-  background: #9d9d9d; 
-} */
-
-/* .hint .accordion__header {
-  cursor: pointer;
-}
-
-@keyframes easter-bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(8px);
-  }
-}
-
-.hint {
-  animation-timing-function: cubic-bezier(.34,1.56,.64,1);
-  animation: easter-bounce 1.1s cubic-bezier(.4,0,.2,1);
-} */
-
 /* Style Ups */
 
 @media (max-width: 1151px) {
-    /* .work__filter {
-    grid-template-columns: 1fr;
-  } */
-
-    .work__project-assets {
-        height: 150px;
-    }
+  .work__project-assets {
+      height: 150px;
+  }
 }
 
-/* 
-media-controller:not([mediahasplayed]) media-control-bar {
-  display: none;
-} */
-
-/* .react-player__preview {
-    border: 1px solid black;
-
+.scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: transparent;
 }
 
-.player-wrapper, video {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  position: relative;
-  background-color: #000; 
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: black;
+    border: solid 2px white;
+    border-radius: 0;
 }
 
-.player-wrapper,
-.react-player__preview,
-video {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;       
-  display: block;
-  object-fit: cover;    
-} */
+.scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 2px;
+}

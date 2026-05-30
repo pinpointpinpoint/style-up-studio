@@ -312,18 +312,16 @@ describe('work browsing session', () => {
             limit: 2,
         })
 
-        expect(appendLoadedProjects(state, [project({id: 'project-c', orderRank: 'c'})])).toEqual(
-            {
-                ...state,
-                visibleProjects: [
-                    project({id: 'project-a', orderRank: 'a'}),
-                    project({id: 'project-b', orderRank: 'b'}),
-                    project({id: 'project-c', orderRank: 'c'}),
-                ],
-                hasMore: false,
-                isLoading: false,
-            },
-        )
+        expect(appendLoadedProjects(state, [project({id: 'project-c', orderRank: 'c'})])).toEqual({
+            ...state,
+            visibleProjects: [
+                project({id: 'project-a', orderRank: 'a'}),
+                project({id: 'project-b', orderRank: 'b'}),
+                project({id: 'project-c', orderRank: 'c'}),
+            ],
+            hasMore: false,
+            isLoading: false,
+        })
     })
 
     it('creates a featured pagination request and applies the loaded page cache update', () => {
@@ -633,6 +631,44 @@ describe('work browsing session', () => {
         ).toEqual({
             storageKey: 'projectGalleryReturnUrl',
             returnUrl: '/?projectType=editorial',
+        })
+    })
+
+    it('closes a project detail route to the saved filtered gallery route', () => {
+        expect(
+            getProjectDetailCloseNavigation({
+                savedReturnUrl: '/?brand=brand-a',
+                canGoBackToSameOrigin: true,
+            }),
+        ).toEqual({
+            type: 'push',
+            href: '/?brand=brand-a',
+            clearSavedReturnUrl: true,
+        })
+    })
+
+    it('closes a direct project detail route through browser history when no gallery route is saved', () => {
+        expect(
+            getProjectDetailCloseNavigation({
+                savedReturnUrl: null,
+                canGoBackToSameOrigin: true,
+            }),
+        ).toEqual({
+            type: 'back',
+            clearSavedReturnUrl: false,
+        })
+    })
+
+    it('closes an externally opened project detail route to the Work gallery fallback', () => {
+        expect(
+            getProjectDetailCloseNavigation({
+                savedReturnUrl: null,
+                canGoBackToSameOrigin: false,
+            }),
+        ).toEqual({
+            type: 'push',
+            href: '/',
+            clearSavedReturnUrl: false,
         })
     })
 

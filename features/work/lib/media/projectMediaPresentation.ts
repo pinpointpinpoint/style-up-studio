@@ -1,5 +1,5 @@
-import { getExternalVideoMediaPresentation } from '@/features/video/lib/videoMedia'
-import type {Project, SanityAsset} from '@/types'
+import {getVideoMediaAsset, type VideoMediaAssetUse} from '@/features/video/lib/videoMedia'
+import type {Project} from '@/types'
 
 type ProjectImage = NonNullable<Project['coverImage']>
 type ProjectMediaItem = Project['media'][number]
@@ -36,7 +36,6 @@ export type ProjectDetailUploadedVideoMedia = {
     kind: 'uploadedVideo'
     key: string
     mediaIndex: number
-    asset: SanityAsset
     fileUrl: string
     poster: string | undefined
     title: string | undefined
@@ -46,7 +45,6 @@ export type ProjectDetailExternalVideoMedia = {
     kind: 'videoUrl'
     key: string
     mediaIndex: number
-    asset: SanityAsset
     url: string
     poster: string | undefined
     title: string | undefined
@@ -167,7 +165,13 @@ export function getProjectDetailImageMedia(
 }
 
 function getUploadedVideoPoster(item: ProjectUploadedVideo, imageUrl: ProjectImageUrlResolver) {
-    return item.thumbnail ? (imageUrl(item.thumbnail, 'video-poster') ?? undefined) : undefined
+    return getVideoMediaAsset({
+        sourceKind: 'uploadedVideo',
+        sourceUrl: item.fileUrl ?? '',
+        assetUse: 'poster',
+        sanityThumbnail: item.thumbnail,
+        sanityThumbnailUrl: imageUrl,
+    })
 }
 
 function getExternalVideoPoster(
@@ -176,11 +180,18 @@ function getExternalVideoPoster(
 ) {
     if (!item.url) return undefined
 
-    return getExternalVideoMediaPresentation({
-        url: item.url,
-        sanityPosterUrl: item.thumbnail ? options.imageUrl(item.thumbnail, 'video-poster') : null,
+    return getVideoMediaAsset({
+        sourceKind: 'videoUrl',
+        sourceUrl: item.url,
+        assetUse: 'poster',
+        sanityThumbnail: item.thumbnail,
+        sanityThumbnailUrl: options.imageUrl,
         providerPosterUrl: options.externalVideoPosterUrl,
-    }).poster
+    })
+}
+
+function getProjectInfoThumbnailAssetUse(thumbnailHeight: number): VideoMediaAssetUse {
+    return thumbnailHeight === 400 ? 'expandedProjectInfoThumbnail' : 'projectInfoThumbnail'
 }
 
 export function getProjectDetailMedia(
@@ -207,12 +218,6 @@ export function getProjectDetailMedia(
                     kind: 'uploadedVideo',
                     key: item._key ?? `uploaded-video-${mediaIndex}`,
                     mediaIndex,
-                    asset: {
-                        value: {
-                            fileUrl: item.fileUrl,
-                            poster,
-                        },
-                    },
                     fileUrl: item.fileUrl,
                     poster,
                     title: item.title ?? undefined,
@@ -228,12 +233,6 @@ export function getProjectDetailMedia(
                     kind: 'videoUrl',
                     key: item._key ?? `video-url-${mediaIndex}`,
                     mediaIndex,
-                    asset: {
-                        value: {
-                            url: item.url,
-                            poster,
-                        },
-                    },
                     url: item.url,
                     poster,
                     title: item.title ?? undefined,
@@ -283,7 +282,6 @@ export function getProjectThumbnails(
 ): ProjectThumbnail[] {
     const imageUrl = options.imageUrl
     const projectTitle = project.title ?? 'project'
-    const preset = `thumbnail-${options.thumbnailHeight}` as const
     const imageThumbnailsByIndex = new Map(
         getProjectImageThumbnails(project, options).map((item) => [item.mediaIndex, item]),
     )
@@ -299,7 +297,13 @@ export function getProjectThumbnails(
             if (item._type === 'uploadedVideo') {
                 if (!item.thumbnail) return null
 
-                const url = imageUrl(item.thumbnail, preset)
+                const url = getVideoMediaAsset({
+                    sourceKind: 'uploadedVideo',
+                    sourceUrl: item.fileUrl ?? '',
+                    assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
+                    sanityThumbnail: item.thumbnail,
+                    sanityThumbnailUrl: imageUrl,
+                })
                 if (!url) return null
 
                 return {
@@ -314,12 +318,15 @@ export function getProjectThumbnails(
             if (item._type === 'videoUrl') {
                 if (!item.url) return null
 
-                const url = getExternalVideoMediaPresentation({
-                    url: item.url,
-                    sanityThumbnailUrl: item.thumbnail ? imageUrl(item.thumbnail, preset) : null,
-                    providerThumbnailUrl: (videoUrl) =>
-                        options.externalVideoThumbnailUrl?.(videoUrl, preset),
-                }).thumbnail
+                const url = getVideoMediaAsset({
+                    sourceKind: 'videoUrl',
+                    sourceUrl: item.url,
+                    assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
+                    sanityThumbnail: item.thumbnail,
+                    sanityThumbnailUrl: imageUrl,
+                    providerThumbnailUrl: (videoUrl, providerPreset) =>
+                        options.externalVideoThumbnailUrl?.(videoUrl, providerPreset),
+                })
 
                 if (!url) return null
 

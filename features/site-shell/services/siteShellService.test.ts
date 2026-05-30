@@ -6,11 +6,11 @@ import {
     SANITY_STYLE_UPS_TAG,
 } from '../../../sanity/lib/cacheTags'
 import type {Project, ProjectsQueryInput} from '@/types'
-import {createGetSiteInitialData, type SiteInitialDataFetchArgs} from './getSiteInitialData'
+import {createSiteShellService, type SiteShellServiceFetchArgs} from './siteShellService'
 
-describe('get site initial data', () => {
+describe('site shell service', () => {
     it('loads the public site shell data and initial Work projects', async () => {
-        const fetchRequests: SiteInitialDataFetchArgs[] = []
+        const fetchRequests: SiteShellServiceFetchArgs[] = []
         const projectRequests: ProjectsQueryInput[] = []
         const project = {
             _id: 'project-1',
@@ -30,8 +30,8 @@ describe('get site initial data', () => {
             credits: [],
             orderRank: null,
         } satisfies Project
-        const getSiteInitialData = createGetSiteInitialData({
-            sanityFetch: async <T>(args: SiteInitialDataFetchArgs) => {
+        const siteShellService = createSiteShellService({
+            sanityFetch: async <T>(args: SiteShellServiceFetchArgs) => {
                 fetchRequests.push(args)
 
                 if (args.name === 'about') return {data: {bio: []} as T}
@@ -58,7 +58,7 @@ describe('get site initial data', () => {
             },
         })
 
-        await expect(getSiteInitialData()).resolves.toMatchObject({
+        await expect(siteShellService.getInitialData()).resolves.toMatchObject({
             about: {bio: []},
             contact: {email: 'hello@example.com'},
             sidebarFilters: {

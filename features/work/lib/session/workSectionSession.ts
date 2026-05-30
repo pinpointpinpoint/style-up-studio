@@ -1,6 +1,6 @@
 import type {Filter, Project, ProjectsQueryInput} from '@/types'
-import { getProjectCursor } from '../lib/projectFilters'
-import {createWorkFilterCatalog, type WorkFilterIndexInput} from '../lib/workFilterIndex'
+import {getProjectCursor} from '../projectFilters'
+import {createWorkFilterCatalog, type WorkFilterIndexInput} from '../workFilterIndex'
 
 export const PROJECT_GALLERY_RETURN_URL_KEY = 'projectGalleryReturnUrl'
 

@@ -1,33 +1,192 @@
 import {describe, expect, it} from 'vitest'
 import {
-    createExternalVideoThumbnailResolver,
     getExternalVideoMediaPresentation,
     getExternalVideoProvider,
     getExternalVideoThumbnailUrl,
     getExternalVideoPoster,
-    getVideoAssetSource,
+    getVideoMediaAsset,
+    getVideoMediaProviderPosterRequest,
+    getVideoMediaProviderThumbnailRequest,
     getVimeoOEmbedUrl,
     getYouTubePosterCandidates,
     normalizeVimeoThumbnailUrl,
 } from './videoMedia'
 
 describe('video media provider helpers', () => {
-    it('resolves the playable source for Sanity video assets', () => {
-        expect(getVideoAssetSource({value: {url: 'https://example.com/embed'}})).toBe(
-            'https://example.com/embed',
-        )
-        expect(getVideoAssetSource({value: {fileUrl: 'https://cdn.example.com/video.mp4'}})).toBe(
-            'https://cdn.example.com/video.mp4',
-        )
+    it('resolves uploaded video assets from the Sanity thumbnail only', () => {
+        const providerPosterUrls: string[] = []
+        const providerThumbnailUrls: string[] = []
+
         expect(
-            getVideoAssetSource({
-                value: {
-                    url: 'https://example.com/embed',
-                    fileUrl: 'https://cdn.example.com/video.mp4',
+            getVideoMediaAsset({
+                sourceKind: 'uploadedVideo',
+                sourceUrl: 'https://cdn.example.com/video.mp4',
+                assetUse: 'poster',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerPosterUrl: (url) => {
+                    providerPosterUrls.push(url)
+                    return `provider-poster:${url}`
+                },
+                providerThumbnailUrl: (url) => {
+                    providerThumbnailUrls.push(url)
+                    return `provider-thumbnail:${url}`
                 },
             }),
-        ).toBe('https://example.com/embed')
-        expect(getVideoAssetSource({value: {}})).toBe('')
+        ).toBe('sanity-thumbnail:video-poster')
+
+        expect(providerPosterUrls).toEqual([])
+        expect(providerThumbnailUrls).toEqual([])
+    })
+
+    it('resolves video URL posters from Sanity first, then provider fallback', () => {
+        const sourceUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        const providerPosterUrls: string[] = []
+
+        expect(
+            getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl,
+                assetUse: 'poster',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerPosterUrl: (url) => {
+                    providerPosterUrls.push(url)
+                    return `provider-poster:${url}`
+                },
+            }),
+        ).toBe('sanity-thumbnail:video-poster')
+        expect(providerPosterUrls).toEqual([])
+
+        expect(
+            getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl,
+                assetUse: 'poster',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerPosterUrl: (url) => {
+                    providerPosterUrls.push(url)
+                    return `provider-poster:${url}`
+                },
+            }),
+        ).toBe(`provider-poster:${sourceUrl}`)
+        expect(providerPosterUrls).toEqual([sourceUrl])
+    })
+
+    it('resolves video URL thumbnails with project info presets before provider fallback', () => {
+        const sourceUrl = 'https://vimeo.com/123456789'
+        const providerThumbnailRequests: Array<{url: string; preset: `thumbnail-${number}`}> = []
+
+        expect(
+            getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl,
+                assetUse: 'projectInfoThumbnail',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerThumbnailUrl: (url, preset) => {
+                    providerThumbnailRequests.push({url, preset})
+                    return `provider-thumbnail:${url}:${preset}`
+                },
+            }),
+        ).toBe('sanity-thumbnail:thumbnail-80')
+        expect(providerThumbnailRequests).toEqual([])
+
+        expect(
+            getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl,
+                assetUse: 'expandedProjectInfoThumbnail',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerThumbnailUrl: (url, preset) => {
+                    providerThumbnailRequests.push({url, preset})
+                    return `provider-thumbnail:${url}:${preset}`
+                },
+            }),
+        ).toBe(`provider-thumbnail:${sourceUrl}:thumbnail-400`)
+        expect(providerThumbnailRequests).toEqual([{url: sourceUrl, preset: 'thumbnail-400'}])
+    })
+
+    it('returns no asset when a video URL has no Sanity asset or provider fallback', () => {
+        expect(
+            getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl: 'https://example.com/video',
+                assetUse: 'projectInfoThumbnail',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+                providerThumbnailUrl: () => null,
+            }),
+        ).toBeUndefined()
+    })
+
+    it('requests provider thumbnails only for video URLs missing a Sanity thumbnail URL', () => {
+        expect(
+            getVideoMediaProviderThumbnailRequest({
+                sourceKind: 'uploadedVideo',
+                sourceUrl: 'https://cdn.example.com/video.mp4',
+                assetUse: 'projectInfoThumbnail',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+            }),
+        ).toBeNull()
+
+        expect(
+            getVideoMediaProviderThumbnailRequest({
+                sourceKind: 'videoUrl',
+                sourceUrl: 'https://vimeo.com/123456789',
+                assetUse: 'projectInfoThumbnail',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: () => null,
+            }),
+        ).toEqual({
+            sourceUrl: 'https://vimeo.com/123456789',
+            preset: 'thumbnail-80',
+            width: 80,
+        })
+
+        expect(
+            getVideoMediaProviderThumbnailRequest({
+                sourceKind: 'videoUrl',
+                sourceUrl: 'https://vimeo.com/123456789',
+                assetUse: 'expandedProjectInfoThumbnail',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+            }),
+        ).toBeNull()
+    })
+
+    it('requests provider posters only for video URLs missing a Sanity poster URL', () => {
+        expect(
+            getVideoMediaProviderPosterRequest({
+                sourceKind: 'uploadedVideo',
+                sourceUrl: 'https://cdn.example.com/video.mp4',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+            }),
+        ).toBeNull()
+
+        expect(
+            getVideoMediaProviderPosterRequest({
+                sourceKind: 'videoUrl',
+                sourceUrl: 'https://youtu.be/dQw4w9WgXcQ',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: () => null,
+            }),
+        ).toEqual({
+            sourceUrl: 'https://youtu.be/dQw4w9WgXcQ',
+        })
+
+        expect(
+            getVideoMediaProviderPosterRequest({
+                sourceKind: 'videoUrl',
+                sourceUrl: 'https://vimeo.com/123456789',
+                sanityThumbnail: 'sanity-thumbnail',
+                sanityThumbnailUrl: (thumbnail, preset) => `${thumbnail}:${preset}`,
+            }),
+        ).toBeNull()
     })
 
     it('parses YouTube and Vimeo URLs through one provider interface', () => {
@@ -57,9 +216,9 @@ describe('video media provider helpers', () => {
         expect(getVimeoOEmbedUrl('https://vimeo.com/123456789')).toBe(
             'https://vimeo.com/api/oembed.json?url=https://vimeo.com/123456789',
         )
-        expect(normalizeVimeoThumbnailUrl('https://i.vimeocdn.com/video/123_295x166.jpg', 1280)).toBe(
-            'https://i.vimeocdn.com/video/123_1280.jpg',
-        )
+        expect(
+            normalizeVimeoThumbnailUrl('https://i.vimeocdn.com/video/123_295x166.jpg', 1280),
+        ).toBe('https://i.vimeocdn.com/video/123_1280.jpg')
     })
 
     it('resolves external video posters through provider adapters without real network access', async () => {
@@ -70,9 +229,7 @@ describe('video media provider helpers', () => {
             },
         })
 
-        expect(youtubePoster).toBe(
-            'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-        )
+        expect(youtubePoster).toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg')
 
         const vimeoPoster = await getExternalVideoPoster('https://vimeo.com/123456789', {
             head: async () => ({ok: false}),
@@ -89,34 +246,6 @@ describe('video media provider helpers', () => {
         })
 
         expect(unsupportedPoster).toBeNull()
-    })
-
-    it('resolves external video thumbnails with Vimeo lookup cached behind the provider adapter', async () => {
-        const requestedUrls: string[] = []
-        const resolveThumbnail = createExternalVideoThumbnailResolver({
-            vimeoWidth: 295,
-            fetchJson: async (url) => {
-                requestedUrls.push(url)
-
-                return {
-                    thumbnail_url: 'https://i.vimeocdn.com/video/123_640x360.jpg',
-                }
-            },
-        })
-
-        await expect(resolveThumbnail('https://vimeo.com/123456789')).resolves.toBe(
-            'https://i.vimeocdn.com/video/123_295.jpg',
-        )
-        await expect(resolveThumbnail('https://vimeo.com/123456789')).resolves.toBe(
-            'https://i.vimeocdn.com/video/123_295.jpg',
-        )
-        expect(requestedUrls).toEqual([
-            'https://vimeo.com/api/oembed.json?url=https://vimeo.com/123456789',
-        ])
-
-        await expect(resolveThumbnail('https://youtu.be/dQw4w9WgXcQ')).resolves.toBe(
-            'https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg',
-        )
     })
 
     it('presents external video media with Sanity assets before provider fallbacks', () => {

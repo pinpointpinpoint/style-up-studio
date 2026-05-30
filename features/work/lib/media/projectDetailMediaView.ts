@@ -7,6 +7,7 @@ import {
 
 type ProjectDetailMediaViewOptions = {
     imageUrl: ProjectImageUrlResolver
+    externalVideoPosterUrl?: (url: string) => string | null | undefined
 }
 
 export type ProjectDetailMediaView = {

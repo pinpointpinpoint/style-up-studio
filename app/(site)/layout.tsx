@@ -3,13 +3,13 @@ import {Suspense} from 'react'
 import {sanityFetch} from '@/sanity/lib/fetch'
 import {getProjects} from './actions'
 import {
-    createGetSiteInitialData,
-    type SiteInitialDataFetchArgs,
-} from '@/features/site-shell/lib/getSiteInitialData'
+    createSiteShellService,
+    type SiteShellServiceFetchArgs,
+} from '@/features/site-shell/services/siteShellService'
 import {
-    createGetSiteMetadata,
-    type SiteMetadataFetchArgs,
-} from '@/features/site-shell/lib/getSiteMetadata'
+    createSiteMetadataService,
+    type SiteMetadataServiceFetchArgs,
+} from '@/features/site-shell/services/siteMetadataService'
 import type {Metadata, Viewport} from 'next'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import {Toaster} from 'sonner'
@@ -20,22 +20,22 @@ import EasterEgg from '@/features/site-shell/components/EasterEgg/EasterEgg'
 import SiteConsoleCredits from '@/features/site-shell/components/SiteConsoleCredits/SiteConsoleCredits'
 import type {StyleUpItem} from '@/features/style-ups/components/StyleUps/StyleUps'
 
-const getSiteInitialData = createGetSiteInitialData({
+const siteShellService = createSiteShellService({
     sanityFetch: ((args) => sanityFetch(args)) as <T>(
-        args: SiteInitialDataFetchArgs,
+        args: SiteShellServiceFetchArgs,
     ) => Promise<{data: T}>,
     getProjects,
 })
 
-const getSiteMetadata = createGetSiteMetadata({
+const siteMetadataService = createSiteMetadataService({
     sanityFetch: ((args) => sanityFetch(args)) as <T>(
-        args: SiteMetadataFetchArgs,
+        args: SiteMetadataServiceFetchArgs,
     ) => Promise<{data: T}>,
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
 })
 
 export async function generateMetadata(): Promise<Metadata> {
-    return getSiteMetadata()
+    return siteMetadataService.getMetadata()
 }
 
 export const viewport: Viewport = {
@@ -47,7 +47,7 @@ export const viewport: Viewport = {
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
     const {about, contact, sidebarFilters, styleUps, initialProjects, initialFilter} =
-        await getSiteInitialData()
+        await siteShellService.getInitialData()
 
     return (
         <>

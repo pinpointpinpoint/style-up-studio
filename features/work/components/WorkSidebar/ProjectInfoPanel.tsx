@@ -2,27 +2,22 @@
 
 import {PortableText} from 'next-sanity'
 import React, {ReactNode, useEffect, useMemo, useRef, useState} from 'react'
-import {createExternalVideoThumbnailResolver, getExternalVideoThumbnailUrl} from '@/features/video/lib/videoMedia'
+import {getVideoMediaProviderThumbnailRequest} from '@/features/video/lib/videoMedia'
+import {getExternalVideoThumbnail} from '@/features/video/services/externalVideoService'
 import {Project} from '@/types'
-import {urlForImage} from '@/sanity/lib/utils'
 import styles from './ProjectInfoPanel.module.css'
-import { getProjectSidebarMedia, getVisibleSidebarThumbnailCount } from '../../lib/media/projectSidebarMedia'
-import { getSanityProjectImageUrl } from '../../lib/media/sanityProjectImageUrl'
+import {getProjectSidebarMedia, getVisibleSidebarThumbnailCount} from '../../lib/media/projectSidebarMedia'
+import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
 
 const THUMBNAIL_WIDTH = 30
 const THUMBNAIL_GAP = 5
 const ASSETS_HORIZONTAL_PADDING = 60
 const COUNT_BADGE_WIDTH = 30
-const resolveExternalVideoThumbnail = createExternalVideoThumbnailResolver({
-    vimeoWidth: 295,
-    fetchJson: async (url) => {
-        const response = await fetch(url)
+const EMPTY_VIDEO_URL_THUMBNAILS: Record<string, string | null> = {}
 
-        if (!response.ok) return null
-
-        return response.json()
-    },
-})
+function getProjectInfoVideoThumbnailAssetUse(thumbnailImageHeight: number) {
+    return thumbnailImageHeight === 400 ? 'expandedProjectInfoThumbnail' : 'projectInfoThumbnail'
+}
 
 function getProjectYear(date?: string | null) {
     if (!date) return null
@@ -45,8 +40,14 @@ const ProjectInfoPanel = ({
     onAssetSelect?: (mediaIndex: number) => void
     activeAssetIndex?: number
 }) => {
-    const [videoUrlThumbnails, setVideoUrlThumbnails] = useState<Record<string, string | null>>({})
-    const [visibleThumbnailCount, setVisibleThumbnailCount] = useState<number | null>(null)
+    const [videoUrlThumbnailState, setVideoUrlThumbnailState] = useState<{
+        key: string
+        thumbnails: Record<string, string | null>
+    } | null>(null)
+    const [visibleThumbnailState, setVisibleThumbnailState] = useState<{
+        projectId: string
+        count: number
+    } | null>(null)
     const assetsWrapperRef = useRef<HTMLDivElement | null>(null)
     const measuringWrapperRef = useRef<HTMLDivElement | null>(null)
     const projectYear = getProjectYear(displayedProject?.date)
@@ -55,9 +56,20 @@ const ProjectInfoPanel = ({
     const shouldRevealDetails =
         expandDetails && Boolean(displayedProject) && (hasDescription || hasCredits)
     const thumbnailImageHeight = expandDetails ? 400 : 80
-    const resolvedVisibleThumbnailCount = expandDetails
-        ? undefined
-        : visibleThumbnailCount
+    const videoThumbnailStateKey = `${displayedProject?._id ?? ''}:${thumbnailImageHeight}`
+    const videoUrlThumbnails = useMemo(
+        () =>
+            videoUrlThumbnailState?.key === videoThumbnailStateKey
+                ? videoUrlThumbnailState.thumbnails
+                : EMPTY_VIDEO_URL_THUMBNAILS,
+        [videoThumbnailStateKey, videoUrlThumbnailState],
+    )
+    const resolvedVisibleThumbnailCount =
+        !expandDetails &&
+        visibleThumbnailState &&
+        visibleThumbnailState.projectId === displayedProject?._id
+            ? visibleThumbnailState.count
+            : undefined
     const sidebarMedia = useMemo(() => {
         if (!displayedProject) {
             return {
@@ -69,8 +81,7 @@ const ProjectInfoPanel = ({
 
         return getProjectSidebarMedia(displayedProject, {
             imageUrl: getSanityProjectImageUrl,
-            externalVideoThumbnailUrl: (url) =>
-                getExternalVideoThumbnailUrl(url) ?? videoUrlThumbnails[url],
+            externalVideoThumbnailUrl: (url) => videoUrlThumbnails[url],
             thumbnailHeight: thumbnailImageHeight,
             visibleThumbnailCount: resolvedVisibleThumbnailCount,
         })
@@ -78,19 +89,13 @@ const ProjectInfoPanel = ({
     const {thumbnails, visibleThumbnails, hiddenThumbnailCount} = sidebarMedia
 
     useEffect(() => {
-        setVisibleThumbnailCount(null)
-    }, [displayedProject?._id])
-
-    useEffect(() => {
-        if (expandDetails) {
-            setVisibleThumbnailCount(null)
-            return
-        }
+        if (expandDetails) return
 
         const wrapper = assetsWrapperRef.current
         const measuringWrapper = measuringWrapperRef.current
+        const projectId = displayedProject?._id
 
-        if (!wrapper || !measuringWrapper) return
+        if (!wrapper || !measuringWrapper || !projectId) return
 
         const updateVisibleCount = () => {
             const contentWidth = wrapper.clientWidth - ASSETS_HORIZONTAL_PADDING
@@ -99,14 +104,15 @@ const ProjectInfoPanel = ({
                 (thumbnail) => thumbnail.getBoundingClientRect().width || THUMBNAIL_WIDTH,
             )
 
-            setVisibleThumbnailCount(
-                getVisibleSidebarThumbnailCount({
+            setVisibleThumbnailState({
+                projectId,
+                count: getVisibleSidebarThumbnailCount({
                     availableWidth: contentWidth,
                     thumbnailWidths,
                     thumbnailGap: THUMBNAIL_GAP,
                     countBadgeWidth: COUNT_BADGE_WIDTH,
                 }),
-            )
+            })
         }
         const observer = new ResizeObserver(updateVisibleCount)
 
@@ -115,47 +121,57 @@ const ProjectInfoPanel = ({
         observer.observe(measuringWrapper)
 
         return () => observer.disconnect()
-    }, [expandDetails, thumbnails.length])
+    }, [displayedProject?._id, expandDetails, thumbnails.length])
 
     useEffect(() => {
         let cancelled = false
 
         async function resolveVideoThumbnails() {
-            const videoUrlItems = (displayedProject?.media ?? [])
-                .map((item) => ({item, url: item.url}))
-                .filter(({item}) => item._type === 'videoUrl' && item.url)
-                .filter(({item}) => !urlForImage(item.thumbnail)?.height(80).quality(75).url())
-                .filter(({item}) => !getExternalVideoThumbnailUrl(item.url ?? ''))
+            const providerThumbnailRequests = (displayedProject?.media ?? [])
+                .map((item) => {
+                    if (item._type !== 'videoUrl' || !item.url) return null
+
+                    return getVideoMediaProviderThumbnailRequest({
+                        sourceKind: 'videoUrl',
+                        sourceUrl: item.url,
+                        assetUse: getProjectInfoVideoThumbnailAssetUse(thumbnailImageHeight),
+                        sanityThumbnail: item.thumbnail,
+                        sanityThumbnailUrl: getSanityProjectImageUrl,
+                    })
+                })
+                .filter((request): request is NonNullable<typeof request> => Boolean(request))
 
             const nextThumbnails = await Promise.all(
-                videoUrlItems.map(async ({url}) => ({
-                    sourceUrl: url,
-                    thumbnailUrl: url ? await resolveExternalVideoThumbnail(url) : null,
+                providerThumbnailRequests.map(async ({sourceUrl, width}) => ({
+                    sourceUrl,
+                    thumbnailUrl: await getExternalVideoThumbnail(sourceUrl, {
+                        width,
+                    }),
                 })),
             )
 
             if (!cancelled) {
-                setVideoUrlThumbnails(
-                    Object.fromEntries(
+                setVideoUrlThumbnailState({
+                    key: videoThumbnailStateKey,
+                    thumbnails: Object.fromEntries(
                         nextThumbnails.map((thumbnail) => [
                             thumbnail.sourceUrl,
                             thumbnail.thumbnailUrl,
                         ]),
                     ),
-                )
+                })
             }
         }
 
-        setVideoUrlThumbnails({})
         resolveVideoThumbnails()
 
         return () => {
             cancelled = true
         }
-    }, [displayedProject])
+    }, [displayedProject, thumbnailImageHeight, videoThumbnailStateKey])
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} scrollbar`}>
             <div className={`${styles.heading} ${!displayedProject ? styles.headingEmpty : ''}`}>
                 <span>INFO</span>
                 {headerAction}
@@ -237,14 +253,19 @@ const ProjectInfoPanel = ({
                         ref={assetsWrapperRef}
                     >
                         {visibleThumbnails.map((thumbnail, idx) => {
+                            const isActiveAsset =
+                                expandDetails &&
+                                activeAssetIndex !== undefined &&
+                                thumbnail.mediaIndex === activeAssetIndex
                             const isInactiveAsset =
+                                expandDetails &&
                                 activeAssetIndex !== undefined &&
                                 thumbnail.mediaIndex !== activeAssetIndex
                             const assetImage = (
                                 <img
                                     src={thumbnail.url}
                                     alt={thumbnail.alt}
-                                    className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
+                                    className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
                                     height={expandDetails ? 80 : 30}
                                     loading={idx < 6 ? 'eager' : 'lazy'}
                                     decoding="async"

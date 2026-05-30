@@ -3,7 +3,7 @@
 This app follows a server-first read flow:
 
 ```text
-Sanity CMS -> Sanity fetch boundary -> feature read models -> Next routes/layouts
+Sanity CMS -> Sanity fetch boundary -> feature services -> Next routes/layouts
 -> client session hooks -> presentational components
 ```
 
@@ -25,10 +25,10 @@ flowchart TD
         Fetch["sanityFetch<br/>sanity/lib/fetch.ts"]
     end
 
-    subgraph ReadModels["Feature Read Models"]
-        SiteInitial["siteInitialData<br/>features/site-shell/lib"]
-        SiteMetadata["siteMetadataReadModel<br/>features/site-shell/lib"]
-        ProjectRead["projectReadModel<br/>features/work/lib"]
+    subgraph Services["Feature Services"]
+        SiteShell["siteShellService<br/>features/site-shell/services"]
+        SiteMetadata["siteMetadataService<br/>features/site-shell/services"]
+        ProjectService["projectService<br/>features/work/services"]
     end
 
     subgraph ServerApp["Next Server Layer"]
@@ -59,11 +59,11 @@ flowchart TD
     Schemas --> GeneratedTypes
     Queries --> Fetch
     Client --> Fetch
-    Fetch --> SiteInitial
+    Fetch --> SiteShell
     Fetch --> SiteMetadata
-    Fetch --> ProjectRead
-    ProjectRead --> SiteActions
-    SiteInitial --> SiteLayout
+    Fetch --> ProjectService
+    ProjectService --> SiteActions
+    SiteShell --> SiteLayout
     SiteMetadata --> SiteLayout
     SiteActions --> SiteLayout
     SiteActions --> ProjectRoute
@@ -84,45 +84,45 @@ flowchart TD
 
 ## Initial Site Render
 
-`app/(site)/layout.tsx` owns the first public-site data read. It creates read models, fetches global/site data, fetches the first work page, and passes everything into the client shell.
+`app/(site)/layout.tsx` owns the first public-site data read. It creates services, fetches global/site data, fetches the first work page, and passes everything into the client shell.
 
 ```mermaid
 sequenceDiagram
     participant Browser
     participant Layout as app/(site)/layout.tsx
-    participant SiteInitial as siteInitialData read model
+    participant SiteShell as siteShellService
     participant Actions as app/(site)/actions.ts
-    participant ProjectRead as projectReadModel
+    participant ProjectService as projectService
     participant Fetch as sanityFetch
     participant Sanity
     participant Accordion as SiteSectionsAccordion
     participant WorkBrowser
 
     Browser->>Layout: Request public route
-    Layout->>SiteInitial: getInitialData()
+    Layout->>SiteShell: getInitialData()
     par global content
-        SiteInitial->>Fetch: about/contact/sidebar/style-ups queries
+        SiteShell->>Fetch: about/contact/sidebar/style-ups queries
         Fetch->>Sanity: published CDN reads
         Sanity-->>Fetch: raw CMS data
-        Fetch-->>SiteInitial: typed data
+        Fetch-->>SiteShell: typed data
     and initial work projects
-        SiteInitial->>Actions: getProjects(default filter, page size)
-        Actions->>ProjectRead: getProjects(input)
-        ProjectRead->>Fetch: projectsQuery or featuredProjectsQuery
+        SiteShell->>Actions: getProjects(default filter, page size)
+        Actions->>ProjectService: getProjects(input)
+        ProjectService->>Fetch: projectsQuery or featuredProjectsQuery
         Fetch->>Sanity: published CDN read
         Sanity-->>Fetch: raw projects
-        Fetch-->>ProjectRead: query result
-        ProjectRead-->>Actions: normalized Project[]
-        Actions-->>SiteInitial: Project[]
+        Fetch-->>ProjectService: query result
+        ProjectService-->>Actions: normalized Project[]
+        Actions-->>SiteShell: Project[]
     end
-    SiteInitial-->>Layout: initial site data
+    SiteShell-->>Layout: initial site data
     Layout->>Accordion: props
     Accordion->>WorkBrowser: initialProjects, filters, route state
 ```
 
 ## Work Browsing
 
-The work browsing UI is client-side, but data refreshes still go through the server action and read model. The hook owns live browsing state; pure `features/work/lib/*` modules own deterministic calculations.
+The work browsing UI is client-side, but data refreshes still go through the server action and project service. The hook owns live browsing state; pure `features/work/lib/*` modules own deterministic calculations.
 
 ```mermaid
 flowchart TD
@@ -133,7 +133,7 @@ flowchart TD
     FilterIndex["features/work/lib/workFilterIndex.ts"]
     Router["next/navigation router"]
     Action["getProjects server action"]
-    ReadModel["projectReadModel.getProjects"]
+    ProjectService["projectService.getProjects"]
     Fetch["sanityFetch<br/>tags: public + projects"]
     Sanity[(Sanity CMS)]
     Cache["in-memory pages by filter<br/>Map filter key -> page"]
@@ -148,12 +148,12 @@ flowchart TD
     PureSession --> Cache
 
     SessionHook -->|"missing page or load more"| Action
-    Action --> ReadModel
-    ReadModel --> Fetch
+    Action --> ProjectService
+    ProjectService --> Fetch
     Fetch --> Sanity
     Sanity --> Fetch
-    Fetch --> ReadModel
-    ReadModel --> Action
+    Fetch --> ProjectService
+    ProjectService --> Action
     Action --> SessionHook
 
     SessionHook --> Cache
@@ -170,7 +170,7 @@ sequenceDiagram
     participant User
     participant Route as app/(site)/work/[slug]/page.tsx
     participant Action as getProjectBySlug
-    participant ReadModel as projectReadModel
+    participant ProjectService as projectService
     participant Fetch as sanityFetch
     participant Loader as WorkProjectRouteLoader
     participant Context as WorkProjectRouteSelectionProvider
@@ -179,10 +179,10 @@ sequenceDiagram
 
     User->>Route: Open /work/[slug]
     Route->>Action: getProjectBySlug(slug)
-    Action->>ReadModel: getProjectBySlug(slug)
-    ReadModel->>Fetch: projectBySlugQuery
-    Fetch-->>ReadModel: raw project or null
-    ReadModel-->>Action: normalized Project or null
+    Action->>ProjectService: getProjectBySlug(slug)
+    ProjectService->>Fetch: projectBySlugQuery
+    Fetch-->>ProjectService: raw project or null
+    ProjectService-->>Action: normalized Project or null
     Action-->>Route: selectedProject
 
     alt project not found
@@ -251,7 +251,7 @@ flowchart TD
 New data-backed features should usually follow this shape:
 
 1. Put GROQ in `sanity/lib/queries.ts`.
-2. Put fetch orchestration and normalization in the owning feature's `lib/` read model.
+2. Put fetch orchestration and normalization in the owning feature's service.
 3. Use a route, layout, or server action as the server boundary.
 4. Pass typed data into client components as props.
 5. Put complex interactive state in a hook and deterministic state transitions in a tested feature `lib/` module.

@@ -10,9 +10,8 @@ import styles from './WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
 import ProjectDetailView from '../ProjectDetailView/ProjectDetailView'
 import {useMouseMoved} from '@/features/work/hooks/useMouseInitiatedHover'
-import {useWorkProjectRouteSelection} from '../../controllers/WorkProjectRouteSelection'
 import {useWorkSectionSession} from '../../hooks/useWorkSectionSession'
-import {getWorkRouteSelectionView} from '@/features/work/lib/workRouteSelection'
+import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
 
 type SidebarFilters = SidebarFiltersQueryResult
@@ -21,7 +20,6 @@ interface WorkSectionProps {
     initialProjects: Project[] | null
     initialFilter: Filter
     sidebarFilters: SidebarFilters | null
-    activeWorkRoute?: string
     isProjectsLoading?: boolean
 }
 
@@ -29,27 +27,20 @@ export function WorkSection({
     initialProjects,
     initialFilter,
     sidebarFilters,
-    activeWorkRoute,
     isProjectsLoading = false,
 }: WorkSectionProps) {
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
     const hasMouseMoved = useMouseMoved()
-    const {routeProject, routeProjectNotFound, clearRouteProjectSelection} =
-        useWorkProjectRouteSelection()
+    const {
+        activeProject,
+        hasRouteProjectSelection,
+        isProjectDetail,
+        routeProjectNotFound: isRouteProjectNotFound,
+        clearRouteProjectSelection,
+    } = useSiteRouteSelection()
     const activeSidebarFilters = sidebarFilters
-    const routeSelectionView = getWorkRouteSelectionView({
-        pathname,
-        searchParams,
-        lastWorkRoute: activeWorkRoute ?? pathname,
-        projectRouteSelection: {
-            project: routeProject,
-            notFound: routeProjectNotFound,
-        },
-    })
-    const {activeProject, isProjectDetail, routeProjectNotFound: isRouteProjectNotFound} =
-        routeSelectionView
     const {
         visibleProjects,
         hasMore,
@@ -76,15 +67,13 @@ export function WorkSection({
     const displayedProject = hoveredProject ?? activeProject
 
     useEffect(() => {
-        if (isProjectDetail || (!routeProject && !routeProjectNotFound)) return
+        if (isProjectDetail || !hasRouteProjectSelection) return
 
-        clearRouteProjectSelection(routeSelectionView)
+        clearRouteProjectSelection()
     }, [
         clearRouteProjectSelection,
+        hasRouteProjectSelection,
         isProjectDetail,
-        routeProject,
-        routeProjectNotFound,
-        routeSelectionView,
     ])
 
     return (
@@ -120,9 +109,7 @@ export function WorkSection({
                     ) : isRouteProjectNotFound ? (
                         <div className={styles.projectLoading}>[PROJECT NOT FOUND]</div>
                     ) : (
-                        <div className={styles.projectLoading}>
-                            {isProjectDetail ? '[LOADING PROJECT...]' : null}
-                        </div>
+                        <div className={styles.projectLoading} aria-hidden="true" />
                     )}
                 </div>
             </div>

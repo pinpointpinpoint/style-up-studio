@@ -206,12 +206,6 @@ describe('getProjectDetailMedia', () => {
                 kind: 'uploadedVideo',
                 key: 'behind-scenes',
                 mediaIndex: 1,
-                asset: {
-                    value: {
-                        fileUrl: 'https://cdn.example.com/video.mp4',
-                        poster: 'video-thumbnail:video-poster',
-                    },
-                },
                 fileUrl: 'https://cdn.example.com/video.mp4',
                 poster: 'video-thumbnail:video-poster',
                 title: 'video.mp4',
@@ -234,12 +228,6 @@ describe('getProjectDetailMedia', () => {
                 kind: 'videoUrl',
                 key: 'campaign-film',
                 mediaIndex: 0,
-                asset: {
-                    value: {
-                        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                        poster: 'video-thumbnail:video-poster',
-                    },
-                },
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 poster: 'video-thumbnail:video-poster',
                 title: undefined,
@@ -263,12 +251,6 @@ describe('getProjectDetailMedia', () => {
                 kind: 'videoUrl',
                 key: 'campaign-film',
                 mediaIndex: 0,
-                asset: {
-                    value: {
-                        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                        poster: 'provider-poster:https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                    },
-                },
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 poster: 'provider-poster:https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 title: undefined,
@@ -387,6 +369,51 @@ describe('getProjectThumbnails', () => {
                 mediaIndex: 1,
                 url: 'provider:https://vimeo.com/123456789:thumbnail-80',
                 alt: 'Video link thumbnail 2 for Editorial Story',
+            },
+        ])
+    })
+
+    it('uses expanded project info thumbnails for expanded sidebar media', () => {
+        const thumbnails = getProjectThumbnails(
+            project({
+                media: [
+                    uploadedVideo({key: 'uploaded', thumbnailRef: 'uploaded-thumbnail'}),
+                    videoUrl({key: 'external', thumbnailRef: 'external-thumbnail'}),
+                    videoUrl({
+                        key: 'provider-thumbnail',
+                        thumbnailRef: null,
+                        url: 'https://vimeo.com/123456789',
+                    }),
+                ],
+            }),
+            {
+                imageUrl: (source, preset) => `${source.asset?._ref}:${preset}`,
+                externalVideoThumbnailUrl: (url, preset) => `provider:${url}:${preset}`,
+                thumbnailHeight: 400,
+            },
+        )
+
+        expect(thumbnails).toEqual([
+            {
+                kind: 'uploadedVideo',
+                key: 'uploaded',
+                mediaIndex: 0,
+                url: 'uploaded-thumbnail:thumbnail-400',
+                alt: 'Video thumbnail 1 for Editorial Story',
+            },
+            {
+                kind: 'videoUrl',
+                key: 'external',
+                mediaIndex: 1,
+                url: 'external-thumbnail:thumbnail-400',
+                alt: 'Video link thumbnail 2 for Editorial Story',
+            },
+            {
+                kind: 'videoUrl',
+                key: 'provider-thumbnail',
+                mediaIndex: 2,
+                url: 'provider:https://vimeo.com/123456789:thumbnail-400',
+                alt: 'Video link thumbnail 3 for Editorial Story',
             },
         ])
     })

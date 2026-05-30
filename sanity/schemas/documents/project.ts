@@ -287,9 +287,9 @@ export default defineType({
             },
             validation: (Rule) =>
                 Rule.custom((file, context) => {
-                    const {projectFormat} = context.document as {
-                        projectFormat?: 'photo' | 'video'
-                    }
+                    const projectFormat = (
+                        context.document as {projectFormat?: 'photo' | 'video'} | undefined
+                    )?.projectFormat
 
                     if (projectFormat === 'video' && !file?.asset?._ref) {
                         return 'Add a 3-5 second preview clip for video projects.'

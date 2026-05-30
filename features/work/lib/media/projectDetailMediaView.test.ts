@@ -91,12 +91,6 @@ describe('project detail media view', () => {
                     kind: 'uploadedVideo',
                     key: 'behind-scenes',
                     mediaIndex: 2,
-                    asset: {
-                        value: {
-                            fileUrl: 'https://cdn.example.com/video.mp4',
-                            poster: undefined,
-                        },
-                    },
                     fileUrl: 'https://cdn.example.com/video.mp4',
                     poster: undefined,
                     title: 'video.mp4',
@@ -106,13 +100,45 @@ describe('project detail media view', () => {
         })
     })
 
-    it('selects a renderable media item and returns its scroll target', () => {
+    it('includes provider poster fallback when the detail view supplies one', () => {
         const view = createProjectDetailMediaView(
             project({
                 media: [
-                    image('first-image', 'first-image'),
-                    uploadedVideo({key: 'behind-scenes'}),
+                    {
+                        _key: 'campaign-film',
+                        _type: 'videoUrl' as const,
+                        asset: null,
+                        crop: null,
+                        hotspot: null,
+                        title: null,
+                        fileUrl: null,
+                        url: 'https://vimeo.com/123456789',
+                        thumbnail: null,
+                    },
                 ],
+            }),
+            {
+                imageUrl: (source, preset) => `${source.asset?._ref}:${preset}`,
+                externalVideoPosterUrl: (url) => `provider-poster:${url}`,
+            },
+        )
+
+        expect(view.media).toEqual([
+            {
+                kind: 'videoUrl',
+                key: 'campaign-film',
+                mediaIndex: 0,
+                url: 'https://vimeo.com/123456789',
+                poster: 'provider-poster:https://vimeo.com/123456789',
+                title: undefined,
+            },
+        ])
+    })
+
+    it('selects a renderable media item and returns its scroll target', () => {
+        const view = createProjectDetailMediaView(
+            project({
+                media: [image('first-image', 'first-image'), uploadedVideo({key: 'behind-scenes'})],
             }),
             {
                 imageUrl: (source, preset) => `${source.asset?._ref}:${preset}`,

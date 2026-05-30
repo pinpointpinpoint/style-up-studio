@@ -72,14 +72,14 @@ flowchart LR
 
 ## Project Reads
 
-Project read logic lives in `features/work/lib/projectReadModel.ts`.
+Project read logic lives in `features/work/services/projectService.ts`.
 
 It exposes:
 
 - `getProjects`
 - `getProjectBySlug`
 
-The read model receives `sanityFetch` as a dependency from `app/(site)/actions.ts`. The read model adds `sanity:public` and `sanity:projects` cache tags to project reads.
+The service receives `sanityFetch` as a dependency from `app/(site)/actions.ts`. The service adds `sanity:public` and `sanity:projects` cache tags to project reads.
 
 ## Load More
 
@@ -95,7 +95,7 @@ flowchart TD
     Session[useWorkBrowsingSession.ts]
     Input[getLoadMoreProjectsInput]
     Action[getProjects Server Action]
-    ReadModel[projectReadModel.getProjects]
+    Service[projectService.getProjects]
     Fetch[sanityFetch<br/>tags: public + projects]
     Sanity[(Sanity CMS)]
     Append[appendLoadedProjects]
@@ -104,12 +104,12 @@ flowchart TD
     Button --> Session
     Session --> Input
     Input --> Action
-    Action --> ReadModel
-    ReadModel --> Fetch
+    Action --> Service
+    Service --> Fetch
     Fetch --> Sanity
     Sanity --> Fetch
-    Fetch --> ReadModel
-    ReadModel --> Action
+    Fetch --> Service
+    Service --> Action
     Action --> Append
     Append --> Gallery
 ```
@@ -137,7 +137,7 @@ flowchart TD
     Url[Update URL]
     Input[getRefreshProjectsInput]
     Action[getProjects Server Action]
-    ReadModel[projectReadModel.getProjects]
+    Service[projectService.getProjects]
     Fetch[sanityFetch<br/>tags: public + projects]
     Replace[Replace visible projects]
     Gallery[ProjectGallery]
@@ -146,10 +146,10 @@ flowchart TD
     Session --> Url
     Session --> Input
     Input --> Action
-    Action --> ReadModel
-    ReadModel --> Fetch
-    Fetch --> ReadModel
-    ReadModel --> Action
+    Action --> Service
+    Service --> Fetch
+    Fetch --> Service
+    Service --> Action
     Action --> Replace
     Replace --> Gallery
 ```
@@ -179,7 +179,7 @@ flowchart TD
     Link[User opens /work/slug]
     Route[work/[slug]/page.tsx]
     Action[getProjectBySlug]
-    ReadModel[projectReadModel.getProjectBySlug]
+    Service[projectService.getProjectBySlug]
     Fetch[sanityFetch<br/>tags: public + projects]
     Loader[WorkProjectRouteLoader]
     Context[WorkProjectRouteSelectionProvider]
@@ -189,10 +189,10 @@ flowchart TD
 
     Link --> Route
     Route --> Action
-    Action --> ReadModel
-    ReadModel --> Fetch
-    Fetch --> ReadModel
-    ReadModel --> Action
+    Action --> Service
+    Service --> Fetch
+    Fetch --> Service
+    Service --> Action
     Action --> Route
     Route --> Loader
     Loader --> Context

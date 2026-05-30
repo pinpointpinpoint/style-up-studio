@@ -2,7 +2,7 @@
 
 import {Filter} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
-import {Dispatch, SetStateAction, useEffect, useState} from 'react'
+import {Dispatch, SetStateAction, useState} from 'react'
 import styles from './WorkFilterMenu.module.css'
 import {createWorkFilterCatalog} from '@/features/work/lib/workFilterIndex'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
@@ -21,19 +21,10 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
 
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
-    useEffect(() => {
-        if (!['brand', 'personality'].includes(filter.type)) return
-
-        setOpenGroups((current) => ({
-            ...current,
-            [filter.type]: current[filter.type] ?? true,
-        }))
-    }, [filter.type])
-
     return (
         <div className={styles.menu}>
             <div className={styles.heading}>INDEX</div>
-            <div className={styles.scroller} data-sidebar-scroll-area>
+            <div className={`${styles.scroller} scrollbar`} data-sidebar-scroll-area>
                 <div className={styles.projectTypeList}>
                     {projectTypes.map((type) => {
                         const isActive =
@@ -75,10 +66,10 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                         )
                     })}
                 </div>
-                <div className={styles.collaboratorSection} data-sidebar-scroll-area>
+                <div className={`${styles.collaboratorSection} scrollbar`} data-sidebar-scroll-area>
                     {collaborators.map((c) => {
                         const isActiveGroup = filter.type === c.filterType
-                        const isOpen = openGroups[c.filterType] ?? isActiveGroup
+                        const isOpen = openGroups[c.filterType] ?? false
                         const activeItem =
                             'id' in filter && isActiveGroup
                                 ? c.options.find((item) => item.id === filter.id)
@@ -103,7 +94,7 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                                 >
                                     <span className={styles.filterLabel}>
                                         {isActiveGroup && !isOpen && (
-                                            <span className={styles.collapsedMarker}></span>
+                                            <span className={styles.activeMarker}></span>
                                         )}
                                         {c.title}
                                         {isActiveGroup && !isOpen && activeItem?.title && (
