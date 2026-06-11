@@ -1,5 +1,4 @@
 import {useEffect, useRef, type ReactNode} from 'react'
-import {AnimatePresence, motion, useReducedMotion} from 'motion/react'
 import styles from './Navbar.module.css'
 
 interface NavbarDrawerProps {
@@ -36,12 +35,6 @@ export function NavbarDrawer({
 }: NavbarDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
     const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
-    const prefersReducedMotion = useReducedMotion()
-    const initialX = direction === 'right' ? '100%' : '-100%'
-    const closedPosition = prefersReducedMotion ? {x: 0} : {x: initialX}
-    const transition = prefersReducedMotion
-        ? {duration: 0}
-        : {duration: 0.28, ease: [0.22, 1, 0.36, 1] as const}
 
     useEffect(() => {
         if (!isOpen) return
@@ -116,25 +109,19 @@ export function NavbarDrawer({
         }
     }, [isOpen, onClose])
 
+    if (!isOpen) return null
+
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    id={id}
-                    ref={drawerRef}
-                    aria-label={label}
-                    role="group"
-                    tabIndex={-1}
-                    initial={closedPosition}
-                    animate={{x: 0}}
-                    exit={closedPosition}
-                    transition={transition}
-                    className={styles.drawer}
-                    data-direction={direction}
-                >
-                    <div className={styles.drawerInner}>{children}</div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        <div
+            id={id}
+            ref={drawerRef}
+            aria-label={label}
+            role="group"
+            tabIndex={-1}
+            className={styles.drawer}
+            data-direction={direction}
+        >
+            <div className={styles.drawerInner}>{children}</div>
+        </div>
     )
 }
