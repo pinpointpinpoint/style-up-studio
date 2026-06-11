@@ -1,1 +1,0 @@
-<!-- Detailed documentation of endpoints, parameters, and response formats (if not auto-generated) -->

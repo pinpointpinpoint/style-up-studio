@@ -14,6 +14,7 @@ interface ProjectCardProps {
     index: number
     href: string
     onOpen?: () => void
+    onIntent?: () => void
     onHoverStart: (e: React.MouseEvent<HTMLAnchorElement>) => void
     onHoverMove: (e: React.MouseEvent<HTMLAnchorElement>) => void
     hasMouseMoved: boolean
@@ -28,6 +29,7 @@ const ProjectCard = ({
     index,
     href,
     onOpen,
+    onIntent,
     onHoverMove,
     onHoverStart,
 }: ProjectCardProps) => {
@@ -78,6 +80,7 @@ const ProjectCard = ({
     }, [isHovered, previewVideoUrl])
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        onIntent?.()
         setIsHovered(true)
         setActiveHoverIndex(0)
         if (!previewVideoUrl && !hasPreloadedHoverImagesRef.current) {
@@ -127,6 +130,8 @@ const ProjectCard = ({
             onMouseMove={onHoverMove}
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
+            onFocus={onIntent}
+            onTouchStart={onIntent}
         >
             {activeImage && (
                 <img

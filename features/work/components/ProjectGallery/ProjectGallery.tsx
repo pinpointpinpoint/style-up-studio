@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import styles from'./ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import { Project } from '@/types'
-import { motion } from 'motion/react'
-import { useIntro } from '@/contexts/IntroContext'
 
 type ProjectGalleryProps = {
   projects: Project[]
@@ -14,19 +12,10 @@ type ProjectGalleryProps = {
   onLoadMore: () => void
   getProjectHref: (project: Project) => string
   onProjectOpen?: () => void
+  onProjectIntent?: () => void
   onProjectHover?: (project: Project) => void
   onProjectLeave?: () => void
   hasMouseMoved?: boolean
-}
-
-function getStableDelay(id: string) {
-  let hash = 0
-
-  for (let i = 0; i < id.length; i += 1) {
-    hash = (hash * 31 + id.charCodeAt(i)) % 1000
-  }
-
-  return (hash / 1000) * 0.4
 }
 
 export default function ProjectGallery({
@@ -36,27 +25,12 @@ export default function ProjectGallery({
   onLoadMore,
   getProjectHref,
   onProjectOpen,
+  onProjectIntent,
   onProjectHover,
   onProjectLeave,
   hasMouseMoved = false
 }: ProjectGalleryProps) {
-  const introDone = useIntro()
-  const [hasPlayedIntro, setHasPlayedIntro] = useState(introDone)
-  // const shouldRunIntroAnimation = introDone && !hasPlayedIntro
-
   const galleryRef = useRef<HTMLDivElement | null>(null)
-
-  // useEffect(() => {
-  //   if (!shouldRunIntroAnimation) return
-
-  //   const animationTimer = setTimeout(() => {
-  //     setHasPlayedIntro(true)
-  //   }, 700)
-
-  //   return () => {
-  //     clearTimeout(animationTimer)
-  //   }
-  // }, [shouldRunIntroAnimation])
 
   useEffect(() => {
     const el = galleryRef.current
@@ -114,7 +88,7 @@ export default function ProjectGallery({
   if (projects.length < 1) {
     return (
       <div className={styles.projectGallery}>
-        No projects
+        {isLoading ? '[LOADING...]' : 'No projects'}
       </div>
     )
   }
@@ -127,28 +101,21 @@ export default function ProjectGallery({
       onMouseLeave={onLeave}
     >
         {projects?.map((project, idx) => (
-        <motion.div
+        <div
           key={project._id}
           data-project-gallery-item
-          initial={hasPlayedIntro ? false : { opacity: 0 }}
-          animate={introDone ? { opacity: 1 } : { opacity: 0 }}
-          transition={{
-            // duration: shouldRunIntroAnimation ? 0.2 : 0,
-            ease: 'easeOut',
-            // delay: shouldRunIntroAnimation ? getStableDelay(project._id) : 0,
-            delay: getStableDelay(project._id),
-          }}
         >
           <ProjectCard
             project={project}
             index={idx}
             href={getProjectHref(project)}
             onOpen={onProjectOpen}
+            onIntent={onProjectIntent}
             onHoverStart={onEnter(project)}
             onHoverMove={() => {}}
             hasMouseMoved={hasMouseMoved}
           />
-        </motion.div>
+        </div>
         ))}
         {hasMore && (
         <button 

@@ -1,10 +1,10 @@
 'use client'
 
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import VideoPlayer from '@/features/video/components/VideoPlayer/VideoPlayer'
+import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {getExternalVideoPoster} from '@/features/video/services/externalVideoService'
 import {getVideoMediaProviderPosterRequest} from '@/features/video/lib/videoMedia'
 import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
+import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
 import type {Project} from '@/types'
 import styles from './ProjectDetailView.module.css'
 import {
@@ -13,6 +13,8 @@ import {
     selectProjectDetailMedia,
 } from '../../lib/media/projectDetailMediaView'
 import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
+
+const DeferredVideoPlayer = lazy(() => import('@/features/video/components/VideoPlayer/VideoPlayer'))
 
 type ProjectDetailViewProps = {
     project: Project
@@ -34,6 +36,17 @@ function ProjectImage({src, alt, eager}: ProjectImageProps) {
             loading={eager ? 'eager' : 'lazy'}
             decoding="async"
         />
+    )
+}
+
+function VideoPlayerLoading({poster, title}: {poster?: string; title?: string}) {
+    return (
+        <div className={styles.videoLoading}>
+            {poster ? <img src={poster} alt="" className={styles.videoLoadingPoster} /> : null}
+            <span className={styles.videoLoadingMessage}>
+                <DelayedLoadingMessage>{`[LOADING ${title ?? 'VIDEO'}...]`}</DelayedLoadingMessage>
+            </span>
+        </div>
     )
 }
 
@@ -190,12 +203,21 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                                         mediaFrameRefs.current[item.mediaIndex] = element
                                     }}
                                 >
-                                    <VideoPlayer
-                                        key={item.fileUrl}
-                                        src={item.fileUrl}
-                                        poster={item.poster}
-                                        title={item.title}
-                                    />
+                                    <Suspense
+                                        fallback={
+                                            <VideoPlayerLoading
+                                                poster={item.poster}
+                                                title={item.title}
+                                            />
+                                        }
+                                    >
+                                        <DeferredVideoPlayer
+                                            key={item.fileUrl}
+                                            src={item.fileUrl}
+                                            poster={item.poster}
+                                            title={item.title}
+                                        />
+                                    </Suspense>
                                 </div>
                             )
                         }
@@ -208,12 +230,18 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                                     mediaFrameRefs.current[item.mediaIndex] = element
                                 }}
                             >
-                                <VideoPlayer
-                                    key={item.url}
-                                    src={item.url}
-                                    poster={item.poster}
-                                    title={item.title}
-                                />
+                                <Suspense
+                                    fallback={
+                                        <VideoPlayerLoading poster={item.poster} title={item.title} />
+                                    }
+                                >
+                                    <DeferredVideoPlayer
+                                        key={item.url}
+                                        src={item.url}
+                                        poster={item.poster}
+                                        title={item.title}
+                                    />
+                                </Suspense>
                             </div>
                         )
                     })}

@@ -13,6 +13,7 @@ type SiteSectionPanelProps = {
   arrowDirection?: ArrowDirection
   children?: ReactNode
   onNavigate: (event: MouseEvent<HTMLAnchorElement>) => void
+  onIntent?: () => void
 }
 
 export default function SiteSectionPanel({
@@ -24,6 +25,7 @@ export default function SiteSectionPanel({
   arrowDirection,
   children,
   onNavigate,
+  onIntent,
 }: SiteSectionPanelProps) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -41,6 +43,9 @@ export default function SiteSectionPanel({
         href={route}
         className={styles.header}
         onClick={onNavigate}
+        onFocus={onIntent}
+        onMouseEnter={onIntent}
+        onTouchStart={onIntent}
         aria-current={current ? "page" : undefined}
       >
         <span>{title}</span>

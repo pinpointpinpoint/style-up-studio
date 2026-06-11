@@ -57,6 +57,26 @@
   overflow: hidden;
 }
 
+.deferredSectionShell {
+  border-top: 1px solid black;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.deferredSectionMain {
+  align-items: center;
+  display: flex;
+  flex: 2;
+  justify-content: center;
+}
+
+.deferredSectionSidebar {
+  border-left: 1px solid black;
+  flex: 1 0 0;
+  max-width: 350px;
+}
+
 .accordion .item.hint .header {
   cursor: pointer;
 }

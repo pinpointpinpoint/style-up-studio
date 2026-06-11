@@ -1,27 +1,48 @@
-.loader {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  background-color: white;
-  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
-  will-change: opacity, transform;
+.intro {
+    align-items: center;
+    animation: intro-exit 700ms step-end forwards;
+    background-color: white;
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    pointer-events: none;
+    position: fixed;
+    z-index: 9999;
 }
 
-.loader video {
-  height: 60%;
-  width: auto;
+.logo {
+    animation: logo-exit 700ms ease-out forwards;
+    height: auto;
+    max-width: 900px;
+    width: min(76vw, 900px);
 }
 
-.loaderVisible {
-  opacity: 1;
-  transform: scale(1);
+@keyframes intro-exit {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
-.loaderHidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(1.02);
+@keyframes logo-exit {
+    0%,
+    48% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .intro,
+    .logo {
+        animation-duration: 1ms;
+    }
 }

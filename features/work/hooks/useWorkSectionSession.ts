@@ -9,7 +9,7 @@ import {
     applyWorkBrowsingRequestEnd,
     applyWorkBrowsingRefreshResult,
     type CachedProjectPage,
-    createWorkSectionSessionState,
+    createWorkSectionRouteSessionState,
     getProjectDetailCloseNavigation,
     getProjectGalleryOpenNavigation,
     getProjectHref,
@@ -17,6 +17,7 @@ import {
     getWorkBrowsingFilterKey,
     PROJECT_GALLERY_RETURN_URL_KEY,
 } from '@/features/work/lib/session/workSectionSession'
+import {createWorkFilterCatalog} from '@/features/work/lib/workFilterIndex'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 
 type SearchParamsLike = {
@@ -66,15 +67,19 @@ export function useWorkSectionSession({
     router,
     pageSize,
 }: WorkSectionSessionOptions) {
-    const [session, setSession] = useState(() =>
-        createWorkSectionSessionState({
+    const [session, setSession] = useState(() => {
+        const routeFilter = isWorkSectionPathname(pathname)
+            ? createWorkFilterCatalog(sidebarFilters).parseFilter(searchParams)
+            : initialFilter
+
+        return createWorkSectionRouteSessionState({
             initialProjects,
             initialFilter,
+            routeFilter,
             isProjectsLoading,
             pageSize,
-        }),
-    )
-    const hasSkippedInitialFetchRef = useRef(false)
+        })
+    })
     const inFlightRefreshFilterKeyRef = useRef<string | null>(null)
     const sessionRef = useRef(session)
     const projectPagesByFilterRef = useRef(
@@ -115,11 +120,6 @@ export function useWorkSectionSession({
     }, [pathname, searchParams, sidebarFilters])
 
     useEffect(() => {
-        if (!hasSkippedInitialFetchRef.current) {
-            hasSkippedInitialFetchRef.current = true
-            return
-        }
-
         const request = getWorkBrowsingRefreshRequest({
             state: sessionRef.current,
             cachedProjectPages: projectPagesByFilterRef.current,

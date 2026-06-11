@@ -1,5 +1,6 @@
 'use client'
 
+import '@vidstack/react/player/styles/base.css'
 import {createContext, useCallback, useContext, useEffect, useState} from 'react'
 import {
     MediaPlayer,

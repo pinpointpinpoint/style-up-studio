@@ -9,6 +9,7 @@ import {
     applyWorkBrowsingRefreshResult,
     applyWorkFilterRoute,
     createWorkSectionSessionState,
+    createWorkSectionRouteSessionState,
     applyWorkFilterChange,
     getProjectDetailCloseNavigation,
     getProjectGalleryOpenNavigation,
@@ -105,6 +106,46 @@ function cachedProjectPages(filterKey: string, visibleProjects: Project[], hasMo
 }
 
 describe('work browsing session', () => {
+    it('does not show initial featured projects while a routed filter loads', () => {
+        expect(
+            createWorkSectionRouteSessionState({
+                initialProjects: [project({id: 'featured-project'})],
+                initialFilter: FEATURED_FILTER,
+                routeFilter: BRAND_A_FILTER,
+                isProjectsLoading: false,
+                pageSize: 2,
+            }),
+        ).toEqual({
+            filter: BRAND_A_FILTER,
+            visibleProjects: [],
+            hasMore: false,
+            isLoading: true,
+            hoveredProject: null,
+            pageSize: 2,
+        })
+    })
+
+    it('uses initial projects when they match the routed filter', () => {
+        const initialProjects = [project({id: 'featured-project'})]
+
+        expect(
+            createWorkSectionRouteSessionState({
+                initialProjects,
+                initialFilter: FEATURED_FILTER,
+                routeFilter: FEATURED_FILTER,
+                isProjectsLoading: false,
+                pageSize: 2,
+            }),
+        ).toEqual({
+            filter: FEATURED_FILTER,
+            visibleProjects: initialProjects,
+            hasMore: false,
+            isLoading: false,
+            hoveredProject: null,
+            pageSize: 2,
+        })
+    })
+
     it('applies a cached filter change and returns the navigation href', () => {
         const featuredProject = project({id: 'featured-project'})
         const brandProject = project({id: 'brand-project'})
@@ -454,7 +495,7 @@ describe('work browsing session', () => {
         })
     })
 
-    it('creates a refresh request only when the active filter page is missing from cache', () => {
+    it('skips the cached initial page but requests the first uncached filter selection', () => {
         const state = createWorkSectionSessionState({
             initialProjects: [project({id: 'project-a'})],
             initialFilter: BRAND_A_FILTER,

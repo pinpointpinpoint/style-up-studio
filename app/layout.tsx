@@ -1,5 +1,4 @@
 import './globals.css'
-import "@vidstack/react/player/styles/base.css";
 import {Geist} from 'next/font/google'
 import type { Metadata } from 'next';
 

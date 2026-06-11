@@ -97,6 +97,30 @@ export function createWorkSectionSessionState({
     }
 }
 
+export function createWorkSectionRouteSessionState({
+    initialProjects,
+    initialFilter,
+    routeFilter,
+    isProjectsLoading,
+    pageSize,
+}: {
+    initialProjects: Project[] | null
+    initialFilter: Filter
+    routeFilter: Filter
+    isProjectsLoading: boolean
+    pageSize: number
+}): WorkSectionSessionState {
+    const hasMatchingInitialProjects =
+        getWorkBrowsingFilterKey(initialFilter) === getWorkBrowsingFilterKey(routeFilter)
+
+    return createWorkSectionSessionState({
+        initialProjects: hasMatchingInitialProjects ? initialProjects : null,
+        initialFilter: routeFilter,
+        isProjectsLoading: isProjectsLoading || !hasMatchingInitialProjects,
+        pageSize,
+    })
+}
+
 export function getWorkBrowsingFilterKey(filter: Filter) {
     return JSON.stringify(filter)
 }

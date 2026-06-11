@@ -43,3 +43,35 @@
     justify-content: center;
     width: 100%;
 }
+
+.projectDetailLoading {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.projectDetailLoadingMedia {
+    align-items: center;
+    display: flex;
+    flex: 2;
+    justify-content: center;
+    min-width: 0;
+}
+
+.projectDetailLoadingSidebar {
+    border-left: 1px solid black;
+    flex: 1 0 0;
+    height: 100%;
+    max-width: 350px;
+    min-width: 350px;
+    padding: 20px 30px;
+}
+
+.projectDetailLoadingClose {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: var(--font-sm);
+    padding: 0;
+}

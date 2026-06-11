@@ -1,47 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import {useState} from 'react'
 import styles from './IntroGate.module.css'
-import { IntroContext } from '@/contexts/IntroContext'
 
 export default function IntroGate({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  const [showSplash, setShowSplash] = useState(true)
-  const [visible, setVisible] = useState(true)
-  const [introDone, setIntroDone] = useState(false)
+    const [showIntro, setShowIntro] = useState(true)
 
-  useEffect(() => {
-    const holdTimer = setTimeout(() => {
-      setVisible(false)
-    }, 1200)
-
-    const removeTimer = setTimeout(() => {
-      setShowSplash(false)
-      setIntroDone(true)
-    }, 1400)
-
-    return () => {
-      clearTimeout(holdTimer)
-      clearTimeout(removeTimer)
-    }
-  }, [])
-
-  return (
-    <IntroContext.Provider value={introDone}>
-      {children}
-
-      {showSplash && (
-        <div
-          className={`${styles.loader} ${
-            visible ? styles.loaderVisible : styles.loaderHidden
-          }`}
-        >
-          <video src="/loader.mp4" autoPlay muted playsInline className={styles.video} />
-        </div>
-      )}
-    </IntroContext.Provider>
-  )
+    return (
+        <>
+            {children}
+            {showIntro && (
+                <div
+                    className={styles.intro}
+                    aria-hidden="true"
+                    onAnimationEnd={() => setShowIntro(false)}
+                >
+                    <img className={styles.logo} src="/final_logo.svg" alt="" />
+                </div>
+            )}
+        </>
+    )
 }

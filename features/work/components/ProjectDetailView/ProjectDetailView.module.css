@@ -79,3 +79,26 @@
   max-height: 100%;
   object-fit: contain;
 }
+
+.videoLoading {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.videoLoadingPoster {
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.videoLoadingMessage {
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

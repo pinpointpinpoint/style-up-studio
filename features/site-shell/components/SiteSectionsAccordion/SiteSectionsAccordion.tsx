@@ -2,13 +2,14 @@
 
 import SiteSectionPanel from "./SiteSectionPanel";
 import { useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
-import { StyleUps, type StyleUpItem } from "@/features/style-ups/components/StyleUps/StyleUps";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import type { StyleUpItem } from "@/features/style-ups/components/StyleUps/StyleUps";
 import { WorkSection } from "@/features/work/components/WorkSection/WorkSection";
 import {
   SiteRouteSelectionProvider,
   useSiteRouteSelection,
 } from "@/features/site-shell/routing/SiteRouteSelectionProvider";
+import DelayedLoadingMessage from "@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage";
 import type { Filter, Project } from "@/types";
 import type { SidebarFiltersQueryResult } from "@/sanity.types";
 import styles from "./SiteSectionsAccordion.module.css";
@@ -17,6 +18,11 @@ const CLOSED_HEIGHT = 'var(--header-height)';
 const OPEN_HEIGHT = `calc(100% - var(--header-height))`;
 const WORK_HOME_ROUTE = "/";
 const STYLE_UPS_ROUTE = "/style-ups";
+const loadStyleUps = () =>
+  import("@/features/style-ups/components/StyleUps/StyleUps").then(({ StyleUps }) => ({
+    default: StyleUps,
+  }));
+const DeferredStyleUps = lazy(loadStyleUps);
 
 type SiteSectionsAccordionProps = {
   children?: ReactNode
@@ -63,6 +69,13 @@ function SiteSectionsAccordionView({
   } = useSiteRouteSelection();
   const workHeight = activeSection === "work" ? OPEN_HEIGHT : CLOSED_HEIGHT;
   const styleUpsHeight = activeSection === "style-ups" ? OPEN_HEIGHT : CLOSED_HEIGHT;
+  const [hasMountedStyleUps, setHasMountedStyleUps] = useState(activeSection === "style-ups");
+  const shouldMountStyleUps = hasMountedStyleUps || activeSection === "style-ups";
+  const handleStyleUpsNavigation = handleSectionNavigation("style-ups");
+  const prepareStyleUps = () => {
+    setHasMountedStyleUps(true);
+    void loadStyleUps();
+  };
 
   useEffect(() => {
     router.prefetch(WORK_HOME_ROUTE);
@@ -93,9 +106,26 @@ function SiteSectionsAccordionView({
         current={routeSection === "style-ups"}
         height={styleUpsHeight}
         arrowDirection={activeSection === "work" ? "up" : undefined}
-        onNavigate={handleSectionNavigation("style-ups")}
+        onNavigate={(event) => {
+          prepareStyleUps();
+          handleStyleUpsNavigation(event);
+        }}
+        onIntent={prepareStyleUps}
       >
-        <StyleUps styleUps={styleUps} />
+        {shouldMountStyleUps && (
+          <Suspense
+            fallback={
+              <div className={styles.deferredSectionShell}>
+                <div className={styles.deferredSectionMain}>
+                  <DelayedLoadingMessage />
+                </div>
+                <aside className={styles.deferredSectionSidebar} />
+              </div>
+            }
+          >
+            <DeferredStyleUps styleUps={styleUps} />
+          </Suspense>
+        )}
       </SiteSectionPanel>
       <div className={styles.routeProbe} hidden aria-hidden="true">
         {children}

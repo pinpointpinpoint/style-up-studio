@@ -1,18 +1,20 @@
 'use client'
 
-import {useEffect} from 'react'
+import {lazy, Suspense, useEffect} from 'react'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {WorkSidebar} from '../WorkSidebar/WorkSidebar'
 import {Filter, Project} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
-import '@vidstack/react/player/styles/base.css'
 import styles from './WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
-import ProjectDetailView from '../ProjectDetailView/ProjectDetailView'
 import {useMouseMoved} from '@/features/work/hooks/useMouseInitiatedHover'
 import {useWorkSectionSession} from '../../hooks/useWorkSectionSession'
 import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
+import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
+
+const loadProjectDetailView = () => import('../ProjectDetailView/ProjectDetailView')
+const DeferredProjectDetailView = lazy(loadProjectDetailView)
 
 type SidebarFilters = SidebarFiltersQueryResult
 
@@ -91,6 +93,9 @@ export function WorkSection({
                         onLoadMore={loadMore}
                         getProjectHref={getProjectHref}
                         onProjectOpen={handleProjectOpen}
+                        onProjectIntent={() => {
+                            void loadProjectDetailView()
+                        }}
                         onProjectHover={setHoveredProject}
                         onProjectLeave={() => setHoveredProject(null)}
                         hasMouseMoved={hasMouseMoved}
@@ -102,10 +107,32 @@ export function WorkSection({
                     inert={!isProjectDetail ? true : undefined}
                 >
                     {activeProject ? (
-                        <ProjectDetailView
-                            project={activeProject}
-                            onClose={handleProjectDetailClose}
-                        />
+                        <Suspense
+                            fallback={
+                                <section
+                                    className={styles.projectDetailLoading}
+                                    aria-label={`${activeProject.title ?? 'Project'} details`}
+                                >
+                                    <div className={styles.projectDetailLoadingMedia}>
+                                        <DelayedLoadingMessage />
+                                    </div>
+                                    <aside className={styles.projectDetailLoadingSidebar}>
+                                        <button
+                                            type="button"
+                                            className={styles.projectDetailLoadingClose}
+                                            onClick={handleProjectDetailClose}
+                                        >
+                                            [CLOSE]
+                                        </button>
+                                    </aside>
+                                </section>
+                            }
+                        >
+                            <DeferredProjectDetailView
+                                project={activeProject}
+                                onClose={handleProjectDetailClose}
+                            />
+                        </Suspense>
                     ) : isRouteProjectNotFound ? (
                         <div className={styles.projectLoading}>[PROJECT NOT FOUND]</div>
                     ) : (
