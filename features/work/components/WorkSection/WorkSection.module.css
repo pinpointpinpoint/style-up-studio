@@ -66,12 +66,3 @@
     min-width: 350px;
     padding: 20px 30px;
 }
-
-.projectDetailLoadingClose {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    font-size: var(--font-sm);
-    padding: 0;
-}

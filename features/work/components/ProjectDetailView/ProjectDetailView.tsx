@@ -14,11 +14,12 @@ import {
 } from '../../lib/media/projectDetailMediaView'
 import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
 
-const DeferredVideoPlayer = lazy(() => import('@/features/video/components/VideoPlayer/VideoPlayer'))
+const DeferredVideoPlayer = lazy(
+    () => import('@/features/video/components/VideoPlayer/VideoPlayer'),
+)
 
 type ProjectDetailViewProps = {
     project: Project
-    onClose?: () => void
 }
 
 type ProjectImageProps = {
@@ -50,7 +51,7 @@ function VideoPlayerLoading({poster, title}: {poster?: string; title?: string}) 
     )
 }
 
-export default function ProjectDetailView({project, onClose}: ProjectDetailViewProps) {
+export default function ProjectDetailView({project}: ProjectDetailViewProps) {
     const mediaPaneRef = useRef<HTMLDivElement | null>(null)
     const mediaFrameRefs = useRef<Record<number, HTMLDivElement | null>>({})
     const [selectedMedia, setSelectedMedia] = useState<{
@@ -232,7 +233,10 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                             >
                                 <Suspense
                                     fallback={
-                                        <VideoPlayerLoading poster={item.poster} title={item.title} />
+                                        <VideoPlayerLoading
+                                            poster={item.poster}
+                                            title={item.title}
+                                        />
                                     }
                                 >
                                     <DeferredVideoPlayer
@@ -253,13 +257,6 @@ export default function ProjectDetailView({project, onClose}: ProjectDetailViewP
                     expandDetails
                     onAssetSelect={handleAssetSelect}
                     activeAssetIndex={activeMediaIndex}
-                    headerAction={
-                        onClose ? (
-                            <button type="button" className={styles.closeButton} onClick={onClose}>
-                                [CLOSE]
-                            </button>
-                        ) : undefined
-                    }
                 />
             </aside>
         </section>

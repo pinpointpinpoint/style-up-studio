@@ -41,6 +41,7 @@ export function WorkSection({
         isProjectDetail,
         routeProjectNotFound: isRouteProjectNotFound,
         clearRouteProjectSelection,
+        setProjectDetailCloseAction,
     } = useSiteRouteSelection()
     const activeSidebarFilters = sidebarFilters
     const {
@@ -72,11 +73,17 @@ export function WorkSection({
         if (isProjectDetail || !hasRouteProjectSelection) return
 
         clearRouteProjectSelection()
-    }, [
-        clearRouteProjectSelection,
-        hasRouteProjectSelection,
-        isProjectDetail,
-    ])
+    }, [clearRouteProjectSelection, hasRouteProjectSelection, isProjectDetail])
+
+    useEffect(() => {
+        if (!isProjectDetail) return
+
+        setProjectDetailCloseAction(handleProjectDetailClose)
+
+        return () => {
+            setProjectDetailCloseAction(null)
+        }
+    }, [handleProjectDetailClose, isProjectDetail, setProjectDetailCloseAction])
 
     return (
         <div className={styles.workSection}>
@@ -116,22 +123,11 @@ export function WorkSection({
                                     <div className={styles.projectDetailLoadingMedia}>
                                         <DelayedLoadingMessage />
                                     </div>
-                                    <aside className={styles.projectDetailLoadingSidebar}>
-                                        <button
-                                            type="button"
-                                            className={styles.projectDetailLoadingClose}
-                                            onClick={handleProjectDetailClose}
-                                        >
-                                            [CLOSE]
-                                        </button>
-                                    </aside>
+                                    <aside className={styles.projectDetailLoadingSidebar} />
                                 </section>
                             }
                         >
-                            <DeferredProjectDetailView
-                                project={activeProject}
-                                onClose={handleProjectDetailClose}
-                            />
+                            <DeferredProjectDetailView project={activeProject} />
                         </Suspense>
                     ) : isRouteProjectNotFound ? (
                         <div className={styles.projectLoading}>[PROJECT NOT FOUND]</div>

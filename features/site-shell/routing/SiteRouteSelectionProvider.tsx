@@ -18,11 +18,11 @@ import {
     type SiteSection,
 } from './siteRouteSelection'
 
-type SiteRouteSelectionContextValue = ReturnType<
-    typeof getSiteRouteSelectionView<Project>
-> & {
+type SiteRouteSelectionContextValue = ReturnType<typeof getSiteRouteSelectionView<Project>> & {
     applyRouteProject: (project: Project | null, notFound: boolean) => void
     clearRouteProjectSelection: () => void
+    projectDetailCloseAction: (() => void) | null
+    setProjectDetailCloseAction: (action: (() => void) | null) => void
     handleSectionNavigation: (
         section: SiteSection,
     ) => (event: MouseEvent<HTMLAnchorElement>) => void
@@ -41,6 +41,9 @@ export function SiteRouteSelectionProvider({children}: {children: ReactNode}) {
             notFound: false,
         },
     })
+    const [projectDetailCloseAction, setProjectDetailCloseActionState] = useState<
+        (() => void) | null
+    >(null)
     const view = getSiteRouteSelectionView({
         state,
         pathname,
@@ -49,37 +52,43 @@ export function SiteRouteSelectionProvider({children}: {children: ReactNode}) {
 
     const applyRouteProject = useCallback(
         (project: Project | null, notFound: boolean) => {
-            setState((currentState) =>
-                applySiteRouteSelectionEvent({
-                    state: currentState,
-                    event: {
-                        type: 'routeProjectLoaded',
-                        project,
-                        notFound,
-                        pathname,
-                        searchParams,
-                    },
-                }).state,
+            setState(
+                (currentState) =>
+                    applySiteRouteSelectionEvent({
+                        state: currentState,
+                        event: {
+                            type: 'routeProjectLoaded',
+                            project,
+                            notFound,
+                            pathname,
+                            searchParams,
+                        },
+                    }).state,
             )
         },
         [pathname, searchParams],
     )
 
     const clearRouteProjectSelection = useCallback(() => {
-        setState((currentState) =>
-            applySiteRouteSelectionEvent({
-                state: currentState,
-                event: {
-                    type: 'inactiveProjectRouteCleared',
-                    view: getSiteRouteSelectionView({
-                        state: currentState,
-                        pathname,
-                        searchParams,
-                    }),
-                },
-            }).state,
+        setState(
+            (currentState) =>
+                applySiteRouteSelectionEvent({
+                    state: currentState,
+                    event: {
+                        type: 'inactiveProjectRouteCleared',
+                        view: getSiteRouteSelectionView({
+                            state: currentState,
+                            pathname,
+                            searchParams,
+                        }),
+                    },
+                }).state,
         )
     }, [pathname, searchParams])
+
+    const setProjectDetailCloseAction = useCallback((action: (() => void) | null) => {
+        setProjectDetailCloseActionState(() => action)
+    }, [])
 
     const handleSectionNavigation = useCallback(
         (section: SiteSection) => (event: MouseEvent<HTMLAnchorElement>) => {
@@ -93,16 +102,17 @@ export function SiteRouteSelectionProvider({children}: {children: ReactNode}) {
                 return
             }
 
-            setState((currentState) =>
-                applySiteRouteSelectionEvent({
-                    state: currentState,
-                    event: {
-                        type: 'sectionNavigationStarted',
-                        section,
-                        pathname,
-                        searchParams,
-                    },
-                }).state,
+            setState(
+                (currentState) =>
+                    applySiteRouteSelectionEvent({
+                        state: currentState,
+                        event: {
+                            type: 'sectionNavigationStarted',
+                            section,
+                            pathname,
+                            searchParams,
+                        },
+                    }).state,
             )
         },
         [pathname, searchParams],
@@ -113,9 +123,18 @@ export function SiteRouteSelectionProvider({children}: {children: ReactNode}) {
             ...view,
             applyRouteProject,
             clearRouteProjectSelection,
+            projectDetailCloseAction,
+            setProjectDetailCloseAction,
             handleSectionNavigation,
         }),
-        [applyRouteProject, clearRouteProjectSelection, handleSectionNavigation, view],
+        [
+            applyRouteProject,
+            clearRouteProjectSelection,
+            handleSectionNavigation,
+            projectDetailCloseAction,
+            setProjectDetailCloseAction,
+            view,
+        ],
     )
 
     return (

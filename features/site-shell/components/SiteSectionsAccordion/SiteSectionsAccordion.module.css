@@ -1,96 +1,142 @@
 .accordion {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
 }
 
 .section {
-  background: white;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+    background: white;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
-  width: 100%;
-  background: white;
-  color: black;
-  padding: 0px 30px;
-  text-align: left;
-  border-top: 1px solid black;
-  font-size: 16px;
-  height: var(--header-height);
-  min-height: var(--header-height);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    width: 100%;
+    background: white;
+    color: black;
+    padding: 0px 30px;
+    text-align: left;
+    border-top: 1px solid black;
+    font-size: 16px;
+    height: var(--header-height);
+    min-height: var(--header-height);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
 }
 
 .open .header {
-  background: rgb(0, 0, 0);
-  color: white;
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
+    background: rgb(0, 0, 0);
+    color: white;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.headerAction {
+    align-items: center;
+    color: inherit;
+    display: inline-flex;
+    height: 100%;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.headerActionFull {
+    justify-content: space-between;
+    margin: 0 -30px;
+    padding: 0 30px;
+    width: calc(100% + 60px);
 }
 
 .headerArrow {
-  display: inline-flex;
-  flex: 0 0 auto;
+    display: inline-flex;
+    flex: 0 0 auto;
 }
 
-.headerArrow img {
-  display: block;
-  height: 12px;
-  width: 12px;
+.headerLabel {
+    align-items: center;
+    display: flex;
+    min-width: 0;
+}
+
+.headerContent {
+    align-items: center;
+    display: flex;
+    min-width: 0;
+}
+
+.projectHeaderArrow {
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin-right: 10px;
+}
+
+.projectHeaderContext {
+    align-items: center;
+    display: flex;
+    min-width: 0;
+}
+
+.projectHeaderSeparator {
+    flex: 0 0 auto;
+    margin: 0 0.35em;
+}
+
+.projectHeaderTitle {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .panel {
-  flex: 0 0 calc(100vh - var(--header-height) * 3);
-  min-height: 0;
-  display: flex;
-  overflow: hidden;
+    flex: 0 0 calc(100vh - var(--header-height) * 3);
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
 }
 
 .deferredSectionShell {
-  border-top: 1px solid black;
-  display: flex;
-  height: 100%;
-  width: 100%;
+    border-top: 1px solid black;
+    display: flex;
+    height: 100%;
+    width: 100%;
 }
 
 .deferredSectionMain {
-  align-items: center;
-  display: flex;
-  flex: 2;
-  justify-content: center;
+    align-items: center;
+    display: flex;
+    flex: 2;
+    justify-content: center;
 }
 
 .deferredSectionSidebar {
-  border-left: 1px solid black;
-  flex: 1 0 0;
-  max-width: 350px;
+    border-left: 1px solid black;
+    flex: 1 0 0;
+    max-width: 350px;
 }
 
 .accordion .item.hint .header {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 @keyframes easter-bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(8px);
-  }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(8px);
+    }
 }
 
 .hint {
-  animation-timing-function: cubic-bezier(.34,1.56,.64,1);
-  animation: easter-bounce 1.1s cubic-bezier(.4,0,.2,1);
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: easter-bounce 1.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
