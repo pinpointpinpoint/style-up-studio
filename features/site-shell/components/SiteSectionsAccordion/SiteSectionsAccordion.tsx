@@ -78,8 +78,11 @@ function SiteSectionsAccordionView({
     const [hasMountedStyleUps, setHasMountedStyleUps] = useState(activeSection === 'style-ups')
     const shouldMountStyleUps = hasMountedStyleUps || activeSection === 'style-ups'
     const handleStyleUpsNavigation = handleSectionNavigation('style-ups')
-    const projectHeaderTitle =
-        activeProject?.title || (routeProjectNotFound ? 'PROJECT NOT FOUND' : 'PROJECT')
+    const projectHeaderTitle = activeProject
+        ? activeProject.title || 'UNTITLED PROJECT'
+        : routeProjectNotFound
+          ? 'PROJECT NOT FOUND'
+          : null
     const handleWorkNavigation = (event: MouseEvent<HTMLAnchorElement>) => {
         if (
             !isActiveProjectDetail ||
@@ -123,7 +126,7 @@ function SiteSectionsAccordionView({
                     ) : undefined
                 }
                 contextContent={
-                    isProjectDetail ? (
+                    isProjectDetail && projectHeaderTitle ? (
                         <span className={styles.projectHeaderContext}>
                             <span className={styles.projectHeaderSeparator}>/</span>
                             <span className={styles.projectHeaderTitle}>{projectHeaderTitle}</span>

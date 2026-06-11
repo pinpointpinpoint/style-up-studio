@@ -1,145 +1,140 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import {useEffect, useRef, type ReactNode} from 'react'
+import {AnimatePresence, motion, useReducedMotion} from 'motion/react'
 import styles from './Navbar.module.css'
 
 interface NavbarDrawerProps {
-  id: string
-  label: string
-  isOpen: boolean
-  onClose: () => void
-  children: ReactNode
-  direction?: 'left' | 'right'
+    id: string
+    label: string
+    isOpen: boolean
+    onClose: () => void
+    children: ReactNode
+    direction?: 'left' | 'right'
 }
 
 const FOCUSABLE_SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[tabindex]:not([tabindex^="-"])',
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex^="-"])',
 ].join(', ')
 
 function getFocusableElements(container: HTMLElement) {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-  ).filter((element) => !element.hasAttribute('disabled'))
+    return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (element) => !element.hasAttribute('disabled'),
+    )
 }
 
 export function NavbarDrawer({
-  id,
-  label,
-  isOpen,
-  onClose,
-  children,
-  direction = 'left',
+    id,
+    label,
+    isOpen,
+    onClose,
+    children,
+    direction = 'left',
 }: NavbarDrawerProps) {
-  const drawerRef = useRef<HTMLDivElement>(null)
-  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
-  const prefersReducedMotion = useReducedMotion()
-  const initialX = direction === 'right' ? '100%' : '-100%'
-  const closedPosition = prefersReducedMotion ? { x: 0 } : { x: initialX }
-  const transition = prefersReducedMotion
-    ? { duration: 0 }
-    : { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const }
+    const drawerRef = useRef<HTMLDivElement>(null)
+    const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
+    const prefersReducedMotion = useReducedMotion()
+    const initialX = direction === 'right' ? '100%' : '-100%'
+    const closedPosition = prefersReducedMotion ? {x: 0} : {x: initialX}
+    const transition = prefersReducedMotion
+        ? {duration: 0}
+        : {duration: 0.28, ease: [0.22, 1, 0.36, 1] as const}
 
-  useEffect(() => {
-    if (!isOpen) return
+    useEffect(() => {
+        if (!isOpen) return
 
-    previouslyFocusedElementRef.current = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null
-    const drawerElement = drawerRef.current
+        previouslyFocusedElementRef.current =
+            document.activeElement instanceof HTMLElement ? document.activeElement : null
+        const drawerElement = drawerRef.current
 
-    if (!drawerElement) return
+        if (!drawerElement) return
 
-    const focusableElements = getFocusableElements(drawerElement)
+        const focusableElements = getFocusableElements(drawerElement)
 
-    focusableElements[0]?.focus({ preventScroll: true }) ??
-      drawerElement.focus({ preventScroll: true })
+        focusableElements[0]?.focus({preventScroll: true}) ??
+            drawerElement.focus({preventScroll: true})
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-        return
-      }
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose()
+                return
+            }
 
-      if (e.key !== 'Tab') return
+            if (e.key !== 'Tab') return
 
-      const currentFocusableElements = getFocusableElements(drawerElement)
+            const currentFocusableElements = getFocusableElements(drawerElement)
 
-      if (currentFocusableElements.length === 0) {
-        e.preventDefault()
-        drawerElement.focus({ preventScroll: true })
-        return
-      }
+            if (currentFocusableElements.length === 0) {
+                e.preventDefault()
+                drawerElement.focus({preventScroll: true})
+                return
+            }
 
-      const firstElement = currentFocusableElements[0]
-      const lastElement = currentFocusableElements[currentFocusableElements.length - 1]
-      const activeElement = document.activeElement
+            const firstElement = currentFocusableElements[0]
+            const lastElement = currentFocusableElements[currentFocusableElements.length - 1]
+            const activeElement = document.activeElement
 
-      if (e.shiftKey) {
-        if (activeElement === firstElement || activeElement === drawerElement) {
-          e.preventDefault()
-          lastElement.focus({ preventScroll: true })
+            if (e.shiftKey) {
+                if (activeElement === firstElement || activeElement === drawerElement) {
+                    e.preventDefault()
+                    lastElement.focus({preventScroll: true})
+                }
+
+                return
+            }
+
+            if (activeElement === lastElement) {
+                e.preventDefault()
+                firstElement.focus({preventScroll: true})
+            }
         }
 
-        return
-      }
+        window.addEventListener('keydown', handleKeyDown)
 
-      if (activeElement === lastElement) {
-        e.preventDefault()
-        firstElement.focus({ preventScroll: true })
-      }
-    }
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown)
+            previouslyFocusedElementRef.current?.focus({preventScroll: true})
+        }
+    }, [onClose, isOpen])
 
-    window.addEventListener('keydown', handleKeyDown)
+    useEffect(() => {
+        if (!isOpen) return
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      previouslyFocusedElementRef.current?.focus({ preventScroll: true })
-    }
-  }, [onClose, isOpen])
+        const handlePointerDown = (e: PointerEvent) => {
+            if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+                onClose()
+            }
+        }
 
-  useEffect(() => {
-    if (!isOpen) return
+        document.addEventListener('pointerdown', handlePointerDown)
 
-    const handlePointerDown = (e: PointerEvent) => {
-      if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown)
+        }
+    }, [isOpen, onClose])
 
-    document.addEventListener('pointerdown', handlePointerDown)
-
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown)
-    }
-  }, [isOpen, onClose])
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          id={id}
-          ref={drawerRef}
-          aria-label={label}
-          role="group"
-          tabIndex={-1}
-          initial={closedPosition}
-          animate={{ x: 0 }}
-          exit={closedPosition}
-          transition={transition}
-          className={styles.drawer}
-          data-direction={direction}
-          style={{
-            left: direction === 'left' ? 0 : 'auto',
-            right: direction === 'right' ? 0 : 'auto',
-          }}
-        >
-          <div className={styles.drawerInner}>{children}</div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    id={id}
+                    ref={drawerRef}
+                    aria-label={label}
+                    role="group"
+                    tabIndex={-1}
+                    initial={closedPosition}
+                    animate={{x: 0}}
+                    exit={closedPosition}
+                    transition={transition}
+                    className={styles.drawer}
+                    data-direction={direction}
+                >
+                    <div className={styles.drawerInner}>{children}</div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    )
 }

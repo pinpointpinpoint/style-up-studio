@@ -1,149 +1,152 @@
 .header {
-  height: var(--header-height);
-  width: 100%;
-  position: relative;
+    height: var(--header-height);
+    width: 100%;
+    position: relative;
 }
 
 .nav {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  height: var(--header-height);
-  padding: 0 30px;
-  width: 100%;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    height: var(--header-height);
+    padding: 0 30px;
+    width: 100%;
 }
 
 .logo {
-  display: block;
-  height: 18px;
-  width: auto;
+    display: block;
+    height: 18px;
+    width: auto;
 }
 
 .navItem {
-  align-items: center;
-  display: flex;
+    align-items: center;
+    display: flex;
 }
 
 .navItem button {
-  display: flex;
-  align-items: center;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font-size: var(--font-md);
-  gap: 6px;
-  padding: 0;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: var(--font-md);
+    gap: 6px;
+    padding: 0;
 }
 
 .drawer {
-  align-items: center;
-  background-color: white;
-  display: inline-flex;
-  min-height: var(--header-height);
-  padding: 0;
-  position: absolute;
-  top: 0;
-  z-index: 30;
-}
-
-.drawer[data-direction="left"] {
-  border-right: 1px solid black;
-}
-
-.drawer[data-direction="right"] {
-  border-left: 1px solid black;
+    align-items: center;
+    background-color: white;
+    display: flex;
+    left: 0;
+    min-height: var(--header-height);
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    z-index: 30;
 }
 
 .drawerInner {
-  align-items: center;
-  display: inline-flex;
-  gap: 15px;
-  height: var(--header-height);
-  justify-content: flex-start;
-  padding: 0 30px;
-  width: fit-content;
+    align-items: center;
+    display: flex;
+    gap: 15px;
+    height: var(--header-height);
+    justify-content: space-between;
+    padding: 0 30px;
+    width: 100%;
+}
+
+.drawer[data-direction='left'] .drawerInner > button {
+    margin-left: auto;
+}
+
+.drawer[data-direction='right'] .contactLinks {
+    margin-left: auto;
 }
 
 .drawerInner:focus {
-  outline: none;
+    outline: none;
 }
 
 .aboutSummary {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .aboutImage {
-  position: relative;
-  display: flex;
-  align-items: center;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .aboutImageThumb {
-  animation: thumbnailFadeIn 140ms ease-out;
-  aspect-ratio: 2 / 3;
-  display: block;
-  height: 25px;
-  object-fit: cover;
-  width: auto;
+    animation: thumbnailFadeIn 140ms ease-out;
+    aspect-ratio: 2 / 3;
+    display: block;
+    height: 25px;
+    object-fit: cover;
+    width: auto;
 }
 
 .aboutImageFull {
-  border: 1px solid black;
-  height: 400px;
-  left: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  top: var(--header-height);
-  width: auto;
-  z-index: 40;
+    border: 1px solid black;
+    height: 400px;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: var(--header-height);
+    width: auto;
+    z-index: 40;
 }
 
 .aboutImage:hover .aboutImageFull {
-  opacity: 1;
+    opacity: 1;
 }
 
 .bio {
-  align-items: center;
-  display: flex;
-  font-size: var(--font-sm);
-  margin: 0;
-  overflow: hidden;
-  min-width: 0;
-  padding: 0;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    align-items: center;
+    display: flex;
+    font-size: var(--font-sm);
+    margin: 0;
+    overflow: hidden;
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .contactLinks {
-  align-items: center;
-  display: flex;
-  font-size: var(--font-sm);
-  line-height: 1;
-  text-align: right;
+    align-items: center;
+    display: flex;
+    font-size: var(--font-sm);
+    line-height: 1;
+    text-align: right;
 }
 
 .contactLinkList {
-  display: flex;
-  gap: 15px;
+    display: flex;
+    gap: 15px;
 }
 
 .contactLinkList a {
-  white-space: nowrap;
-  color: black;
-  text-decoration: none;
-  text-transform: uppercase;
+    white-space: nowrap;
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
 }
 
 @keyframes thumbnailFadeIn {
-  from {
-    opacity: 0;
-  }
+    from {
+        opacity: 0;
+    }
 
-  to {
-    opacity: 1;
-  }
+    to {
+        opacity: 1;
+    }
 }
