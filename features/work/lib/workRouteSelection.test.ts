@@ -18,7 +18,7 @@ describe('work route selection', () => {
             slug: 'editorial-story',
         }
         const state = {
-            lastWorkRoute: '/work/editorial-story?brand=brand-a',
+            lastWorkRoute: '/work/editorial-story?source=gallery',
             projectRouteSelection: {
                 project: selectedProject,
                 notFound: false,
@@ -39,8 +39,8 @@ describe('work route selection', () => {
             view: {
                 routeSection: 'style-ups',
                 currentRoute: '/style-ups?sort=latest',
-                visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-                nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+                visibleWorkRoute: '/work/editorial-story?source=gallery',
+                nextLastWorkRoute: '/work/editorial-story?source=gallery',
                 selectedProjectSlug: 'editorial-story',
                 activeProject: selectedProject,
                 isProjectDetail: true,
@@ -69,13 +69,13 @@ describe('work route selection', () => {
                     type: 'sectionNavigationStarted',
                     section: 'style-ups',
                     pathname: '/work/editorial-story',
-                    searchParams: new URLSearchParams('brand=brand-a'),
+                    searchParams: new URLSearchParams('source=gallery'),
                 },
             }),
         ).toEqual({
             state: {
                 ...state,
-                lastWorkRoute: '/work/editorial-story?brand=brand-a',
+                lastWorkRoute: '/work/editorial-story?source=gallery',
             },
             optimisticSection: {
                 section: 'style-ups',
@@ -83,9 +83,9 @@ describe('work route selection', () => {
             },
             view: {
                 routeSection: 'work',
-                currentRoute: '/work/editorial-story?brand=brand-a',
-                visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-                nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+                currentRoute: '/work/editorial-story?source=gallery',
+                visibleWorkRoute: '/work/editorial-story?source=gallery',
+                nextLastWorkRoute: '/work/editorial-story?source=gallery',
                 selectedProjectSlug: 'editorial-story',
                 activeProject: selectedProject,
                 isProjectDetail: true,
@@ -196,7 +196,7 @@ describe('work route selection', () => {
             getWorkRouteSelectionView({
                 pathname: '/style-ups',
                 searchParams: new URLSearchParams('sort=latest'),
-                lastWorkRoute: '/work/editorial-story?brand=brand-a',
+                lastWorkRoute: '/work/editorial-story?source=gallery',
                 projectRouteSelection: {
                     project: selectedProject,
                     notFound: false,
@@ -205,8 +205,8 @@ describe('work route selection', () => {
         ).toEqual({
             routeSection: 'style-ups',
             currentRoute: '/style-ups?sort=latest',
-            visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-            nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+            visibleWorkRoute: '/work/editorial-story?source=gallery',
+            nextLastWorkRoute: '/work/editorial-story?source=gallery',
             selectedProjectSlug: 'editorial-story',
             activeProject: selectedProject,
             isProjectDetail: true,
@@ -223,7 +223,7 @@ describe('work route selection', () => {
         expect(
             getWorkRouteSelectionView({
                 pathname: '/work/editorial-story',
-                searchParams: new URLSearchParams('brand=brand-a'),
+                searchParams: new URLSearchParams('source=gallery'),
                 lastWorkRoute: '/',
                 projectRouteSelection: {
                     project: selectedProject,
@@ -232,9 +232,9 @@ describe('work route selection', () => {
             }),
         ).toEqual({
             routeSection: 'work',
-            currentRoute: '/work/editorial-story?brand=brand-a',
-            visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-            nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+            currentRoute: '/work/editorial-story?source=gallery',
+            visibleWorkRoute: '/work/editorial-story?source=gallery',
+            nextLastWorkRoute: '/work/editorial-story?source=gallery',
             selectedProjectSlug: 'editorial-story',
             activeProject: selectedProject,
             isProjectDetail: true,
@@ -297,32 +297,37 @@ describe('work route selection', () => {
         const routeSelection = getSiteSectionRouteSelection({
             pathname: '/style-ups',
             searchParams: new URLSearchParams('sort=latest'),
-            lastWorkRoute: '/work/editorial-story?brand=brand-a',
+            lastWorkRoute: '/work/editorial-story?source=gallery',
         })
 
         expect(routeSelection).toEqual({
             routeSection: 'style-ups',
             currentRoute: '/style-ups?sort=latest',
-            visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-            nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+            visibleWorkRoute: '/work/editorial-story?source=gallery',
+            nextLastWorkRoute: '/work/editorial-story?source=gallery',
         })
         expect(getProjectSlugFromWorkRoute(routeSelection.visibleWorkRoute)).toBe('editorial-story')
         expect(getProjectSlugFromWorkRoute('/')).toBeNull()
+        expect(getProjectSlugFromWorkRoute('/work/all')).toBeNull()
+        expect(getProjectSlugFromWorkRoute('/work/type/editorial')).toBeNull()
+        expect(getProjectSlugFromWorkRoute('/work/brand/brand-a')).toBeNull()
+        expect(getProjectSlugFromWorkRoute('/work/personality/stylist')).toBeNull()
 
         const selectedProject = {
             _id: 'project-1',
             slug: 'editorial-story',
         }
-        const selected: ProjectRouteSelection<typeof selectedProject> = applyWorkProjectRouteSelection(
-            {
-                project: null,
-                notFound: false,
-            },
-            {
-                project: selectedProject,
-                notFound: false,
-            },
-        )
+        const selected: ProjectRouteSelection<typeof selectedProject> =
+            applyWorkProjectRouteSelection(
+                {
+                    project: null,
+                    notFound: false,
+                },
+                {
+                    project: selectedProject,
+                    notFound: false,
+                },
+            )
 
         expect(getWorkProjectRouteView('/work/editorial-story', selected)).toEqual({
             selectedProjectSlug: 'editorial-story',

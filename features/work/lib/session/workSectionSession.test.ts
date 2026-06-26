@@ -7,15 +7,13 @@ import {
     applyWorkBrowsingPaginationStart,
     applyWorkBrowsingRequestEnd,
     applyWorkBrowsingRefreshResult,
-    applyWorkFilterRoute,
+    applyWorkIndexRoute,
     createWorkSectionSessionState,
     createWorkSectionRouteSessionState,
-    applyWorkFilterChange,
     getProjectDetailCloseNavigation,
     getProjectGalleryOpenNavigation,
     getProjectGalleryReturnUrl,
     getProjectHref,
-    getWorkFilterNavigationHref,
     getLoadMoreProjectsInput,
     getWorkBrowsingRefreshRequest,
     getWorkBrowsingPaginationRequest,
@@ -146,44 +144,14 @@ describe('work browsing session', () => {
         })
     })
 
-    it('applies a cached filter change and returns the navigation href', () => {
-        const featuredProject = project({id: 'featured-project'})
-        const brandProject = project({id: 'brand-project'})
-        const state = createFeaturedState({hoveredProject: featuredProject})
-
-        expect(
-            applyWorkFilterChange({
-                state,
-                nextFilter: BRAND_A_FILTER,
-                cachedProjectPages: cachedProjectPages(BRAND_A_FILTER_KEY, [brandProject]),
-                sidebarFilters: brandSidebarFilters(),
-                searchParams: new URLSearchParams('view=all&page=2'),
-                pathname: '/',
-            }),
-        ).toEqual({
-            state: {
-                ...state,
-                filter: {type: 'brand', id: 'brand-a'},
-                visibleProjects: [brandProject],
-                hasMore: false,
-                hoveredProject: null,
-                isLoading: false,
-            },
-            href: '/?page=2&brand=brand-a',
-            filterKey: BRAND_A_FILTER_KEY,
-            didUseCachedProjectPage: true,
-        })
-    })
-
     it('applies an uncached gallery route filter while preserving the current projects', () => {
         const featuredProject = project({id: 'featured-project'})
         const state = createFeaturedState({hoveredProject: featuredProject})
 
         expect(
-            applyWorkFilterRoute({
+            applyWorkIndexRoute({
                 state,
-                pathname: '/',
-                searchParams: new URLSearchParams('brand=brand-a'),
+                pathname: '/work/brand/brand-a',
                 sidebarFilters: brandSidebarFilters(),
                 cachedProjectPages: new Map(),
             }),
@@ -195,42 +163,6 @@ describe('work browsing session', () => {
             },
             filterKey: BRAND_A_FILTER_KEY,
             didChangeFilter: true,
-            didUseCachedProjectPage: false,
-        })
-    })
-
-    it('applies an uncached filter change through one browsing event result', () => {
-        const featuredProject = project({id: 'featured-project'})
-        const state = createFeaturedState({hoveredProject: featuredProject})
-
-        expect(
-            applyWorkBrowsingEvent({
-                state,
-                event: {
-                    type: 'filterChange',
-                    nextFilter: BRAND_A_FILTER,
-                },
-                cachedProjectPages: new Map(),
-                sidebarFilters: brandSidebarFilters(),
-                searchParams: new URLSearchParams('view=all&page=2'),
-                pathname: '/',
-            }),
-        ).toEqual({
-            state: {
-                ...state,
-                filter: {type: 'brand', id: 'brand-a'},
-                hoveredProject: null,
-                isLoading: true,
-            },
-            navigation: {
-                href: '/?page=2&brand=brand-a',
-            },
-            request: {
-                filter: {type: 'brand', id: 'brand-a'},
-                cursor: null,
-                limit: 2,
-            },
-            filterKey: BRAND_A_FILTER_KEY,
             didUseCachedProjectPage: false,
         })
     })
@@ -247,8 +179,7 @@ describe('work browsing session', () => {
                 },
                 cachedProjectPages: new Map(),
                 sidebarFilters: brandSidebarFilters(),
-                searchParams: new URLSearchParams('brand=brand-a'),
-                pathname: '/',
+                pathname: '/work/brand/brand-a',
             }),
         ).toEqual({
             state: {
@@ -268,7 +199,7 @@ describe('work browsing session', () => {
         })
     })
 
-    it('applies a cached filter change through one browsing event result', () => {
+    it('applies a cached route filter through one browsing event result', () => {
         const featuredProject = project({id: 'featured-project'})
         const brandProject = project({id: 'brand-project'})
         const state = createFeaturedState({hoveredProject: featuredProject})
@@ -277,13 +208,11 @@ describe('work browsing session', () => {
             applyWorkBrowsingEvent({
                 state,
                 event: {
-                    type: 'filterChange',
-                    nextFilter: BRAND_A_FILTER,
+                    type: 'routeFilter',
                 },
                 cachedProjectPages: cachedProjectPages(BRAND_A_FILTER_KEY, [brandProject]),
                 sidebarFilters: brandSidebarFilters(),
-                searchParams: new URLSearchParams('view=all&page=2'),
-                pathname: '/',
+                pathname: '/work/brand/brand-a',
             }),
         ).toEqual({
             state: {
@@ -294,11 +223,9 @@ describe('work browsing session', () => {
                 hoveredProject: null,
                 isLoading: false,
             },
-            navigation: {
-                href: '/?page=2&brand=brand-a',
-            },
             request: null,
             filterKey: BRAND_A_FILTER_KEY,
+            didChangeFilter: true,
             didUseCachedProjectPage: true,
         })
     })
@@ -307,10 +234,9 @@ describe('work browsing session', () => {
         const state = createFeaturedState()
 
         expect(
-            applyWorkFilterRoute({
+            applyWorkIndexRoute({
                 state,
                 pathname: '/',
-                searchParams: new URLSearchParams(),
                 sidebarFilters: {
                     featuredCount: 1,
                     allCount: 1,
@@ -433,7 +359,6 @@ describe('work browsing session', () => {
                 },
                 cachedProjectPages: new Map(),
                 sidebarFilters: null,
-                searchParams: new URLSearchParams(),
                 pathname: '/',
             }),
         ).toEqual({
@@ -607,39 +532,17 @@ describe('work browsing session', () => {
     })
 
     it('creates filter navigation URLs and project detail return navigation', () => {
-        const sidebarFilters = {
-            featuredCount: 1,
-            allCount: 3,
-            projectTypes: [
-                {_id: 'editorial', title: 'Editorial', slug: 'editorial', referenceCount: 2},
-            ],
-            personalities: [],
-            brands: [{_id: 'brand-a', title: 'Brand A', slug: 'brand-a', referenceCount: 1}],
-            settings: {
-                showPersonalities: true,
-                showBrands: true,
-            },
-        }
-
-        expect(
-            getWorkFilterNavigationHref({
-                filter: BRAND_A_FILTER,
-                sidebarFilters,
-                searchParams: new URLSearchParams('view=all&page=2'),
-                pathname: '/',
-            }),
-        ).toBe('/?page=2&brand=brand-a')
-        expect(getProjectGalleryReturnUrl('/', new URLSearchParams('projectType=editorial'))).toBe(
-            '/?projectType=editorial',
+        expect(getProjectGalleryReturnUrl('/work/type/editorial', new URLSearchParams())).toBe(
+            '/work/type/editorial',
         )
         expect(
             getProjectDetailCloseNavigation({
-                savedReturnUrl: '/?view=all',
+                savedReturnUrl: '/work/all',
                 canGoBackToSameOrigin: true,
             }),
         ).toEqual({
             type: 'push',
-            href: '/?view=all',
+            href: '/work/all',
             clearSavedReturnUrl: true,
         })
         expect(
@@ -666,24 +569,24 @@ describe('work browsing session', () => {
     it('creates the gallery return navigation for project open', () => {
         expect(
             getProjectGalleryOpenNavigation({
-                pathname: '/',
-                searchParams: new URLSearchParams('projectType=editorial'),
+                pathname: '/work/type/editorial',
+                searchParams: new URLSearchParams(),
             }),
         ).toEqual({
             storageKey: 'projectGalleryReturnUrl',
-            returnUrl: '/?projectType=editorial',
+            returnUrl: '/work/type/editorial',
         })
     })
 
     it('closes a project detail route to the saved filtered gallery route', () => {
         expect(
             getProjectDetailCloseNavigation({
-                savedReturnUrl: '/?brand=brand-a',
+                savedReturnUrl: '/work/brand/brand-a',
                 canGoBackToSameOrigin: true,
             }),
         ).toEqual({
             type: 'push',
-            href: '/?brand=brand-a',
+            href: '/work/brand/brand-a',
             clearSavedReturnUrl: true,
         })
     })

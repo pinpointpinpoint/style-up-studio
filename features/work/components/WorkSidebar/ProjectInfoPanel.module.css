@@ -7,10 +7,10 @@
     flex-direction: column;
     overflow: auto;
     background-color: white;
-  }
+}
 
 .title {
-    padding: 0px 30px;
+    padding: 0 var(--space-xl);
     border-bottom: solid 1px black;
     font-size: var(--font-sm);
     min-height: 30px;
@@ -19,8 +19,8 @@
 }
 
 .titleEmpty {
-  font-style: italic;
-  color: var(--dimmed);
+    font-style: italic;
+    color: var(--dimmed);
 }
 
 .body {
@@ -28,225 +28,223 @@
 }
 
 .revealedDetails {
-  border-bottom: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
 .metaRow {
-  border-bottom: 1px solid black;
-  display: grid;
-  font-size: var(--font-sm);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    border-bottom: 1px solid black;
+    display: grid;
+    font-size: var(--font-sm);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .metaRow span {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  padding: 3px 30px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 3px var(--space-xl);
 }
 
 .metaRow span + span {
-  border-left: 1px solid black;
+    border-left: 1px solid black;
 }
 
 .description,
 .credits {
-  padding: 10px 30px 10px;
+    padding: var(--space-sm) var(--space-xl) var(--space-sm);
 }
 
 .description + .credits {
-  border-top: 1px solid black;
+    border-top: 1px solid black;
 }
 
 .description h3,
 .credits h3 {
-  font-size: var(--font-sm);
-  font-weight: inherit;
-  margin: 0 0 12px;
-  text-transform: uppercase;
+    font-size: var(--font-sm);
+    font-weight: inherit;
+    margin: 0 0 12px;
+    text-transform: uppercase;
 }
 
 .portableText {
-  font-size: var(--font-sm);
+    font-size: var(--font-sm);
 }
 
 .portableText p {
-  margin: 0 0 1em;
-  text-align: justify;
+    margin: 0 0 1em;
+    text-align: justify;
 }
 
 .portableText p:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .credits ul {
-  display: grid;
-  gap: 6px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+    display: grid;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .credits li {
-  font-size: var(--font-sm);
-  gap: 12px;
-  display: flex;
-  justify-content: space-between;
+    font-size: var(--font-sm);
+    gap: 12px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .credits a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .credits li > * {
-  min-width: 0;
-  overflow-wrap: anywhere;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .assets {
-    padding: 0 30px 30px 30px;
-    gap: 15px;
+    padding: 0 var(--space-xl) var(--space-xl) var(--space-xl);
+    gap: var(--space-md);
     display: flex;
 }
 
 .controls {
     display: flex;
     justify-content: space-between;
-    padding: 10px 30px 5px 30px;
+    padding: var(--space-sm) var(--space-xl) var(--space-xs) var(--space-xl);
 }
 
-.credits details>summary,
-.description details>summary {
-  -webkit-user-select: none; 
-  -ms-user-select: none;     
-  user-select: none;  
+.credits details > summary,
+.description details > summary {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .assetsWrapper {
-  height: 50px;
-  width: 100%;
-  display: flex;
-  gap: 5px;
-  overflow: hidden;
-  padding: 10px 30px 10px 30px;
-  scrollbar-width: none;
+    height: 50px;
+    width: 100%;
+    display: flex;
+    gap: var(--space-xs);
+    overflow: hidden;
+    padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-xl);
+    scrollbar-width: none;
 }
 
 .assetsWrapperExpanded {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  height: auto;
-  gap: 20px;
-  overflow: visible;
-  padding: 20px 30px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    height: auto;
+    gap: var(--space-lg);
+    overflow: visible;
+    padding: var(--space-lg) var(--space-xl);
 }
 
 .assetsMeasurer {
-  display: flex;
-  gap: 5px;
-  height: 0;
-  left: -9999px;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-  position: absolute;
+    display: flex;
+    gap: var(--space-xs);
+    height: 0;
+    left: -9999px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
 }
 
 .assetsMeasurerHidden {
-  display: none;
+    display: none;
 }
 
 .asset {
-  height: 30px;
-  width: auto;
-  object-fit: cover;
-  transition: filter 0.12s ease-out;
+    height: 30px;
+    width: auto;
+    object-fit: cover;
+    transition: filter 0.12s ease-out;
 }
 
 .assetButton {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  break-inside: avoid;
-  cursor: pointer;
-  display: block;
-  margin: 0;
-  padding: 0;
-  
+    appearance: none;
+    background: transparent;
+    border: 0;
+    break-inside: avoid;
+    cursor: pointer;
+    display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .assetsWrapperExpanded .assetButton {
-  align-self: start;
-  width: 100%;
+    align-self: start;
+    width: 100%;
 }
 
 .assetButton:focus-visible {
-  outline: var(--focus);
-  outline-offset: 2px;
+    outline: var(--focus);
+    outline-offset: 2px;
 }
 
 .assetButton .asset {
-  display: block;
-  
+    display: block;
 }
 
 .assetInactive {
-  filter: opacity(50%);
+    filter: opacity(50%);
 }
 
 .assetExpanded {
-  box-sizing: border-box;
-  height: auto;
-  object-position: top center;
-  width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    object-position: top center;
+    width: 100%;
 }
 
 .assetActive {
-  border-color: black;
+    border-color: black;
 }
 
 .assetCount {
-  align-items: center;
-  border: 1px solid black;
-  display: flex;
-  flex: 0 0 30px;
-  font-size: var(--font-sm);
-  height: 30px;
-  justify-content: center;
-  line-height: 1;
-  width: 30px;
+    align-items: center;
+    border: 1px solid black;
+    display: flex;
+    flex: 0 0 30px;
+    font-size: var(--font-sm);
+    height: 30px;
+    justify-content: center;
+    line-height: 1;
+    width: 30px;
 }
 
 .assetEmpty {
-  border: 1px solid var(--dimmed);
-  flex: 0 0 22px;
-  height: 30px;
-  position: relative;
-  width: 22px;
+    border: 1px solid var(--dimmed);
+    flex: 0 0 22px;
+    height: 30px;
+    position: relative;
+    width: 22px;
 }
 
 .assetEmpty::before,
 .assetEmpty::after {
-  background: var(--dimmed);
-  content: "";
-  height: 1px;
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  width: 35px;
+    background: var(--dimmed);
+    content: '';
+    height: 1px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    width: 35px;
 }
 
 .assetEmpty::before {
-  transform: translate(-50%, -50%) rotate(53deg);
+    transform: translate(-50%, -50%) rotate(53deg);
 }
 
 .assetEmpty::after {
-  transform: translate(-50%, -50%) rotate(-53deg);
+    transform: translate(-50%, -50%) rotate(-53deg);
 }
 
 .assetsWrapper::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .heading {
@@ -255,7 +253,7 @@
     font-size: 16px;
     gap: 12px;
     justify-content: space-between;
-    padding: 10px 30px;
+    padding: var(--space-sm) var(--space-xl);
     font-weight: 600;
     font-size: var(--font-sm);
     position: sticky;

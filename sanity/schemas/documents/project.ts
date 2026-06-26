@@ -4,6 +4,7 @@ import {orderRankField} from '@sanity/orderable-document-list'
 
 const MAX_VIDEO_FILE_SIZE_MB = 250
 const MAX_VIDEO_FILE_SIZE_BYTES = MAX_VIDEO_FILE_SIZE_MB * 1024 * 1024
+const RESERVED_PROJECT_SLUGS = ['all', 'type', 'brand', 'personality']
 
 export default defineType({
     name: 'project',
@@ -75,7 +76,16 @@ export default defineType({
             validation: (rule) =>
                 rule
                     .required()
-                    .error('Slug is required for the project URL. Click "Generate" if empty.'),
+                    .error('Slug is required for the project URL. Click "Generate" if empty.')
+                    .custom((slug) => {
+                        const currentSlug = slug?.current?.toLowerCase()
+
+                        if (currentSlug && RESERVED_PROJECT_SLUGS.includes(currentSlug)) {
+                            return `"${currentSlug}" is reserved for Work navigation. Choose a different project slug.`
+                        }
+
+                        return true
+                    }),
             fieldset: 'basic',
         }),
         defineField({

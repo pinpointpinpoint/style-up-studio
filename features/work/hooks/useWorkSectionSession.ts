@@ -1,6 +1,6 @@
 'use client'
 
-import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import type {Filter, Project} from '@/types'
 import {getProjects} from '@/app/(site)/actions'
 import {
@@ -17,7 +17,7 @@ import {
     getWorkBrowsingFilterKey,
     PROJECT_GALLERY_RETURN_URL_KEY,
 } from '@/features/work/lib/session/workSectionSession'
-import {createWorkFilterCatalog} from '@/features/work/lib/workFilterIndex'
+import {createWorkIndexCatalog} from '@/features/work/lib/workIndex'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 
 type SearchParamsLike = {
@@ -42,7 +42,17 @@ type WorkSectionSessionOptions = {
 }
 
 function isWorkSectionPathname(pathname: string) {
-    return pathname === '/'
+    return pathname === '/' || pathname === '/work' || pathname.startsWith('/work/')
+}
+
+function isWorkBrowsingPathname(pathname: string) {
+    if (pathname === '/' || pathname === '/work') return true
+    return (
+        pathname === '/work/all' ||
+        pathname.startsWith('/work/type/') ||
+        pathname.startsWith('/work/brand/') ||
+        pathname.startsWith('/work/personality/')
+    )
 }
 
 function canGoBackToSameOrigin() {
@@ -69,7 +79,7 @@ export function useWorkSectionSession({
 }: WorkSectionSessionOptions) {
     const [session, setSession] = useState(() => {
         const routeFilter = isWorkSectionPathname(pathname)
-            ? createWorkFilterCatalog(sidebarFilters).parseFilter(searchParams)
+            ? createWorkIndexCatalog(sidebarFilters).parsePath(pathname)
             : initialFilter
 
         return createWorkSectionRouteSessionState({
@@ -101,7 +111,7 @@ export function useWorkSectionSession({
     }, [session])
 
     useEffect(() => {
-        if (!isWorkSectionPathname(pathname)) return
+        if (!isWorkBrowsingPathname(pathname)) return
 
         setSession((currentSession) => {
             const result = applyWorkBrowsingEvent({
@@ -110,7 +120,6 @@ export function useWorkSectionSession({
                     type: 'routeFilter',
                 },
                 pathname,
-                searchParams,
                 sidebarFilters,
                 cachedProjectPages: projectPagesByFilterRef.current,
             })
@@ -175,27 +184,6 @@ export function useWorkSectionSession({
         }
     }, [activeFilterKey])
 
-    const handleFilterChange: Dispatch<SetStateAction<Filter>> = useCallback(
-        (value) => {
-            const nextFilter = typeof value === 'function' ? value(session.filter) : value
-            const result = applyWorkBrowsingEvent({
-                state: session,
-                event: {
-                    type: 'filterChange',
-                    nextFilter,
-                },
-                cachedProjectPages: projectPagesByFilterRef.current,
-                sidebarFilters,
-                searchParams,
-                pathname,
-            })
-
-            setSession(result.state)
-            router.push(result.navigation.href, {scroll: false})
-        },
-        [pathname, router, searchParams, session, sidebarFilters],
-    )
-
     const handleLoadMore = useCallback(async () => {
         const result = applyWorkBrowsingEvent({
             state: session,
@@ -204,7 +192,6 @@ export function useWorkSectionSession({
             },
             cachedProjectPages: projectPagesByFilterRef.current,
             sidebarFilters,
-            searchParams,
             pathname,
         })
         const request = result.request
@@ -229,7 +216,7 @@ export function useWorkSectionSession({
         } finally {
             setSession((currentSession) => applyWorkBrowsingRequestEnd(currentSession))
         }
-    }, [pathname, searchParams, session, sidebarFilters])
+    }, [pathname, session, sidebarFilters])
 
     const handleProjectOpen = useCallback(() => {
         const navigation = getProjectGalleryOpenNavigation({pathname, searchParams})
@@ -266,7 +253,6 @@ export function useWorkSectionSession({
         isLoading: session.isLoading,
         hoveredProject: session.hoveredProject,
         filter: session.filter,
-        setFilter: handleFilterChange,
         loadMore: handleLoadMore,
         getProjectHref,
         handleProjectOpen,

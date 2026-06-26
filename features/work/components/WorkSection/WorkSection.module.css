@@ -64,5 +64,5 @@
     height: 100%;
     max-width: 350px;
     min-width: 350px;
-    padding: 20px 30px;
+    padding: var(--space-lg) var(--space-xl);
 }

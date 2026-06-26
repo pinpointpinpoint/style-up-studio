@@ -70,9 +70,7 @@ export function getCurrentRoute(pathname: string, searchParams: SearchParamsLike
 }
 
 export function getWorkRouteSection(pathname: string): WorkRouteSection {
-    return pathname === '/style-ups' || pathname.startsWith('/style-ups/')
-        ? 'style-ups'
-        : 'work'
+    return pathname === '/style-ups' || pathname.startsWith('/style-ups/') ? 'style-ups' : 'work'
 }
 
 export function getSiteSectionRouteSelection({
@@ -99,8 +97,18 @@ export function getSiteSectionRouteSelection({
 export function getProjectSlugFromWorkRoute(workRoute: string) {
     const pathname = workRoute.split('?')[0]?.split('#')[0] ?? workRoute
     const match = pathname.match(/^\/work\/([^/?#]+)/)
+    const firstSegment = match?.[1] ? decodeURIComponent(match[1]) : null
 
-    return match?.[1] ? decodeURIComponent(match[1]) : null
+    if (
+        firstSegment === 'all' ||
+        firstSegment === 'type' ||
+        firstSegment === 'brand' ||
+        firstSegment === 'personality'
+    ) {
+        return null
+    }
+
+    return firstSegment
 }
 
 export function applyWorkProjectRouteSelection<ProjectLike extends RouteProjectLike>(
@@ -179,30 +187,22 @@ export function getWorkRouteSelectionView<ProjectLike extends RouteProjectLike>(
     }
 }
 
-export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
-    args: {
-        state: WorkRouteSelectionState<ProjectLike>
-        event: WorkRouteChangedEvent
-    },
-): WorkRouteSelectionEventResult<ProjectLike>
-export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
-    args: {
-        state: WorkRouteSelectionState<ProjectLike>
-        event: WorkSectionNavigationStartedEvent
-    },
-): WorkSectionNavigationStartedResult<ProjectLike>
-export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
-    args: {
-        state: WorkRouteSelectionState<ProjectLike>
-        event: WorkRouteProjectLoadedEvent<ProjectLike>
-    },
-): WorkRouteSelectionEventResult<ProjectLike>
-export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(
-    args: {
-        state: WorkRouteSelectionState<ProjectLike>
-        event: WorkInactiveProjectRouteClearedEvent<ProjectLike>
-    },
-): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(args: {
+    state: WorkRouteSelectionState<ProjectLike>
+    event: WorkRouteChangedEvent
+}): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(args: {
+    state: WorkRouteSelectionState<ProjectLike>
+    event: WorkSectionNavigationStartedEvent
+}): WorkSectionNavigationStartedResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(args: {
+    state: WorkRouteSelectionState<ProjectLike>
+    event: WorkRouteProjectLoadedEvent<ProjectLike>
+}): WorkRouteSelectionEventResult<ProjectLike>
+export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>(args: {
+    state: WorkRouteSelectionState<ProjectLike>
+    event: WorkInactiveProjectRouteClearedEvent<ProjectLike>
+}): WorkRouteSelectionEventResult<ProjectLike>
 export function applyWorkRouteSelectionEvent<ProjectLike extends RouteProjectLike>({
     state,
     event,

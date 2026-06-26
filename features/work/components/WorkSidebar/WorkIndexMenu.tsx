@@ -1,25 +1,27 @@
 'use client'
 
+import Link from 'next/link'
 import {Filter} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
-import {Dispatch, SetStateAction, useState} from 'react'
-import styles from './WorkFilterMenu.module.css'
-import {createWorkFilterCatalog} from '@/features/work/lib/workFilterIndex'
+import {useState} from 'react'
+import styles from './WorkIndexMenu.module.css'
+import {createWorkIndexCatalog} from '@/features/work/lib/workIndex'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
 
 const FEATURED_ACTIVE_IMAGE_SRC = '/featured.svg'
 
-type WorkFilterMenuProps = {
+type WorkIndexMenuProps = {
     sidebarFilters: SidebarFiltersQueryResult | null
     filter: Filter
-    setFilter: Dispatch<SetStateAction<Filter>>
 }
 
-export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: WorkFilterMenuProps) {
-    const filterCatalog = createWorkFilterCatalog(sidebarFilters)
-    const {projectTypes, collaborators} = filterCatalog.filters
+export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuProps) {
+    const indexCatalog = createWorkIndexCatalog(sidebarFilters)
+    const {projectTypes, collaborators} = indexCatalog.filters
 
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+
+    const getNextFilter = (nextFilter: Filter) => indexCatalog.toggleFilter(filter, nextFilter)
 
     return (
         <div className={styles.menu}>
@@ -36,15 +38,10 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                                 filter.id === type.filter.id)
 
                         return (
-                            <button
+                            <Link
                                 key={type.id}
                                 className={styles.projectTypeButton}
-                                type="button"
-                                onClick={() =>
-                                    setFilter((prev) =>
-                                        filterCatalog.toggleFilter(prev, type.filter),
-                                    )
-                                }
+                                href={indexCatalog.getHref(getNextFilter(type.filter))}
                             >
                                 <span className={styles.filterLabel}>
                                     {filter.type === 'featured' &&
@@ -62,7 +59,7 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                                     {type.title}
                                 </span>
                                 <span className={styles.filterCount}>({type.count})</span>
-                            </button>
+                            </Link>
                         )
                     })}
                 </div>
@@ -89,9 +86,7 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                                     }))
                                 }}
                             >
-                                <summary
-                                    className={styles.collaboratorSummary}
-                                >
+                                <summary className={styles.collaboratorSummary}>
                                     <span className={styles.filterLabel}>
                                         {isActiveGroup && !isOpen && (
                                             <span className={styles.activeMarker}></span>
@@ -108,15 +103,10 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
 
                                 <div className={styles.collaboratorOptions}>
                                     {c.options.map((i) => (
-                                        <button
+                                        <Link
                                             className={styles.collaboratorOption}
                                             key={i.id}
-                                            type="button"
-                                            onClick={() =>
-                                                setFilter((prev) =>
-                                                    filterCatalog.toggleFilter(prev, i.filter),
-                                                )
-                                            }
+                                            href={indexCatalog.getHref(getNextFilter(i.filter))}
                                         >
                                             <span className={styles.filterLabel}>
                                                 {'id' in filter &&
@@ -131,7 +121,7 @@ export default function WorkFilterMenu({sidebarFilters, filter, setFilter}: Work
                                                 {i.title}
                                             </span>
                                             <span className={styles.filterCount}>({i.count})</span>
-                                        </button>
+                                        </Link>
                                     ))}
                                 </div>
                             </details>

@@ -1,71 +1,71 @@
 .page {
-  align-items: stretch;
-  background: white;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+    align-items: stretch;
+    background: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .header {
-  align-items: center;
-  border-bottom: 1px solid black;
-  display: flex;
-  justify-content: space-between;
-  min-height: var(--header-height);
-  padding: 0 20px;
+    align-items: center;
+    border-bottom: 1px solid black;
+    display: flex;
+    justify-content: space-between;
+    min-height: var(--header-height);
+    padding: 0 var(--space-lg);
 }
 
 .logo {
-  display: block;
-  height: 18px;
-  width: auto;
+    display: block;
+    height: 18px;
+    width: auto;
 }
 
 .content {
-  align-items: center;
-  display: flex;
-  flex: 1;
-  justify-content: center;
-  padding: 30px;
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    padding: var(--space-xl);
 }
 
 .panel {
-  border: 1px solid black;
-  max-width: min(420px, calc(100vw - 60px));
-  width: 420px;
+    border: 1px solid black;
+    max-width: min(420px, calc(100vw - 60px));
+    width: 420px;
 }
 
 .title {
-  border-bottom: 1px solid black;
-  font-size: var(--font-md);
-  font-weight: inherit;
-  margin: 0;
-  padding: 8px 12px;
+    border-bottom: 1px solid black;
+    font-size: var(--font-md);
+    font-weight: inherit;
+    margin: 0;
+    padding: 8px 12px;
 }
 
 .copy {
-  font-size: var(--font-sm);
-  line-height: 1.35;
-  margin: 0;
-  padding: 18px 12px 24px;
+    font-size: var(--font-sm);
+    line-height: 1.35;
+    margin: 0;
+    padding: 18px 12px 24px;
 }
 
 .actions {
-  border-top: 1px solid black;
-  display: flex;
+    border-top: 1px solid black;
+    display: flex;
 }
 
 .link {
-  color: inherit;
-  flex: 1;
-  font-size: var(--font-sm);
-  padding: 8px 12px;
-  text-align: center;
-  text-decoration: none;
+    color: inherit;
+    flex: 1;
+    font-size: var(--font-sm);
+    padding: 8px 12px;
+    text-align: center;
+    text-decoration: none;
 }
 
 .link:hover {
-  background: black;
-  color: white;
+    background: black;
+    color: white;
 }

@@ -28,12 +28,12 @@ describe('site route selection', () => {
                     project: selectedProject,
                     notFound: false,
                     pathname: '/work/editorial-story',
-                    searchParams: new URLSearchParams('brand=brand-a'),
+                    searchParams: new URLSearchParams('source=gallery'),
                 },
             }),
         ).toEqual({
             state: {
-                lastWorkRoute: '/work/editorial-story?brand=brand-a',
+                lastWorkRoute: '/work/editorial-story?source=gallery',
                 optimisticSection: null,
                 projectRouteSelection: {
                     project: selectedProject,
@@ -43,15 +43,15 @@ describe('site route selection', () => {
             view: {
                 activeProject: selectedProject,
                 activeSection: 'work',
-                currentRoute: '/work/editorial-story?brand=brand-a',
+                currentRoute: '/work/editorial-story?source=gallery',
                 hasRouteProjectSelection: true,
                 isProjectDetail: true,
-                nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+                nextLastWorkRoute: '/work/editorial-story?source=gallery',
                 routeProjectNotFound: false,
                 routeSection: 'work',
                 selectedProjectSlug: 'editorial-story',
-                visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-                workRoute: '/work/editorial-story?brand=brand-a',
+                visibleWorkRoute: '/work/editorial-story?source=gallery',
+                workRoute: '/work/editorial-story?source=gallery',
             },
         })
     })
@@ -108,7 +108,7 @@ describe('site route selection', () => {
             slug: 'editorial-story',
         }
         const state: SiteRouteSelectionState<typeof selectedProject> = {
-            lastWorkRoute: '/work/editorial-story?brand=brand-a',
+            lastWorkRoute: '/work/editorial-story?source=gallery',
             optimisticSection: null,
             projectRouteSelection: {
                 project: selectedProject,
@@ -128,12 +128,12 @@ describe('site route selection', () => {
             currentRoute: '/style-ups?sort=latest',
             hasRouteProjectSelection: true,
             isProjectDetail: true,
-            nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+            nextLastWorkRoute: '/work/editorial-story?source=gallery',
             routeProjectNotFound: false,
             routeSection: 'style-ups',
             selectedProjectSlug: 'editorial-story',
-            visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-            workRoute: '/work/editorial-story?brand=brand-a',
+            visibleWorkRoute: '/work/editorial-story?source=gallery',
+            workRoute: '/work/editorial-story?source=gallery',
         })
     })
 
@@ -152,8 +152,8 @@ describe('site route selection', () => {
             event: {
                 type: 'sectionNavigationStarted',
                 section: 'style-ups',
-                pathname: '/',
-                searchParams: new URLSearchParams('brand=brand-a'),
+                pathname: '/work/brand/brand-a',
+                searchParams: new URLSearchParams(),
             },
         })
 
@@ -166,8 +166,8 @@ describe('site route selection', () => {
         ).toMatchObject({
             activeSection: 'style-ups',
             routeSection: 'style-ups',
-            visibleWorkRoute: '/?brand=brand-a',
-            workRoute: '/?brand=brand-a',
+            visibleWorkRoute: '/work/brand/brand-a',
+            workRoute: '/work/brand/brand-a',
         })
 
         expect(
@@ -183,8 +183,8 @@ describe('site route selection', () => {
         ).toMatchObject({
             activeSection: 'work',
             routeSection: 'style-ups',
-            visibleWorkRoute: '/?brand=brand-a',
-            workRoute: '/?brand=brand-a',
+            visibleWorkRoute: '/work/brand/brand-a',
+            workRoute: '/work/brand/brand-a',
         })
     })
 
@@ -209,12 +209,12 @@ describe('site route selection', () => {
                     type: 'sectionNavigationStarted',
                     section: 'style-ups',
                     pathname: '/work/editorial-story',
-                    searchParams: new URLSearchParams('brand=brand-a'),
+                    searchParams: new URLSearchParams('source=gallery'),
                 },
             }),
         ).toEqual({
             state: {
-                lastWorkRoute: '/work/editorial-story?brand=brand-a',
+                lastWorkRoute: '/work/editorial-story?source=gallery',
                 optimisticSection: {
                     section: 'style-ups',
                     pathname: '/work/editorial-story',
@@ -227,15 +227,15 @@ describe('site route selection', () => {
             view: {
                 activeProject: selectedProject,
                 activeSection: 'style-ups',
-                currentRoute: '/work/editorial-story?brand=brand-a',
+                currentRoute: '/work/editorial-story?source=gallery',
                 hasRouteProjectSelection: true,
                 isProjectDetail: true,
-                nextLastWorkRoute: '/work/editorial-story?brand=brand-a',
+                nextLastWorkRoute: '/work/editorial-story?source=gallery',
                 routeProjectNotFound: false,
                 routeSection: 'work',
                 selectedProjectSlug: 'editorial-story',
-                visibleWorkRoute: '/work/editorial-story?brand=brand-a',
-                workRoute: '/work/editorial-story?brand=brand-a',
+                visibleWorkRoute: '/work/editorial-story?source=gallery',
+                workRoute: '/work/editorial-story?source=gallery',
             },
         })
     })

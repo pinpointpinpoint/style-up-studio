@@ -1,6 +1,6 @@
 import type {Filter, Project, ProjectsQueryInput} from '@/types'
 import {getProjectCursor} from '../projectFilters'
-import {createWorkFilterCatalog, type WorkFilterIndexInput} from '../workFilterIndex'
+import {createWorkIndexCatalog, type WorkIndexInput} from '../workIndex'
 
 export const PROJECT_GALLERY_RETURN_URL_KEY = 'projectGalleryReturnUrl'
 
@@ -18,11 +18,6 @@ export type CachedProjectPage = {
     hasMore: boolean
 }
 
-export type WorkBrowsingFilterChangeEvent = {
-    type: 'filterChange'
-    nextFilter: Filter
-}
-
 export type WorkBrowsingLoadMoreEvent = {
     type: 'loadMore'
 }
@@ -31,28 +26,14 @@ export type WorkBrowsingRouteFilterEvent = {
     type: 'routeFilter'
 }
 
-export type WorkBrowsingEvent =
-    | WorkBrowsingFilterChangeEvent
-    | WorkBrowsingLoadMoreEvent
-    | WorkBrowsingRouteFilterEvent
+export type WorkBrowsingEvent = WorkBrowsingLoadMoreEvent | WorkBrowsingRouteFilterEvent
 
 type WorkBrowsingEventBaseArgs<Event extends WorkBrowsingEvent> = {
     state: WorkSectionSessionState
     event: Event
     cachedProjectPages: ReadonlyMap<string, CachedProjectPage>
-    sidebarFilters: WorkFilterIndexInput
-    searchParams: SearchParamsLike
+    sidebarFilters: WorkIndexInput
     pathname: string
-}
-
-type WorkBrowsingFilterChangeResult = {
-    state: WorkSectionSessionState
-    navigation: {
-        href: string
-    }
-    request: ProjectsQueryInput | null
-    filterKey: string
-    didUseCachedProjectPage: boolean
 }
 
 type WorkBrowsingLoadMoreResult = {
@@ -69,10 +50,7 @@ type WorkBrowsingRouteFilterResult = {
     didUseCachedProjectPage: boolean
 }
 
-type WorkBrowsingEventResult =
-    | WorkBrowsingFilterChangeResult
-    | WorkBrowsingLoadMoreResult
-    | WorkBrowsingRouteFilterResult
+type WorkBrowsingEventResult = WorkBrowsingLoadMoreResult | WorkBrowsingRouteFilterResult
 
 export function createWorkSectionSessionState({
     initialProjects,
@@ -125,58 +103,18 @@ export function getWorkBrowsingFilterKey(filter: Filter) {
     return JSON.stringify(filter)
 }
 
-export function applyWorkFilterChange({
-    state,
-    nextFilter,
-    cachedProjectPages,
-    sidebarFilters,
-    searchParams,
-    pathname,
-}: {
-    state: WorkSectionSessionState
-    nextFilter: Filter
-    cachedProjectPages: ReadonlyMap<string, CachedProjectPage>
-    sidebarFilters: WorkFilterIndexInput
-    searchParams: SearchParamsLike
-    pathname: string
-}) {
-    const filterKey = getWorkBrowsingFilterKey(nextFilter)
-    const cachedProjectPage = cachedProjectPages.get(filterKey)
-
-    return {
-        state: {
-            ...state,
-            filter: nextFilter,
-            visibleProjects: cachedProjectPage?.visibleProjects ?? state.visibleProjects,
-            hasMore: cachedProjectPage?.hasMore ?? state.hasMore,
-            hoveredProject: null,
-            isLoading: cachedProjectPage ? false : state.isLoading,
-        },
-        href: getWorkFilterNavigationHref({
-            filter: nextFilter,
-            sidebarFilters,
-            searchParams,
-            pathname,
-        }),
-        filterKey,
-        didUseCachedProjectPage: Boolean(cachedProjectPage),
-    }
-}
-
-export function applyWorkFilterRoute({
+export function applyWorkIndexRoute({
     state,
     pathname,
-    searchParams,
     sidebarFilters,
     cachedProjectPages,
 }: {
     state: WorkSectionSessionState
     pathname: string
-    searchParams: SearchParamsLike
-    sidebarFilters: WorkFilterIndexInput
+    sidebarFilters: WorkIndexInput
     cachedProjectPages: ReadonlyMap<string, CachedProjectPage>
 }) {
-    const nextFilter = createWorkFilterCatalog(sidebarFilters).parseFilter(searchParams)
+    const nextFilter = createWorkIndexCatalog(sidebarFilters).parsePath(pathname)
     const filterKey = getWorkBrowsingFilterKey(nextFilter)
 
     if (getWorkBrowsingFilterKey(state.filter) === filterKey) {
@@ -188,26 +126,24 @@ export function applyWorkFilterRoute({
         }
     }
 
-    const result = applyWorkFilterChange({
-        state,
-        nextFilter,
-        cachedProjectPages,
-        sidebarFilters,
-        searchParams,
-        pathname,
-    })
+    const cachedProjectPage = cachedProjectPages.get(filterKey)
+    const nextState = {
+        ...state,
+        filter: nextFilter,
+        visibleProjects: cachedProjectPage?.visibleProjects ?? state.visibleProjects,
+        hasMore: cachedProjectPage?.hasMore ?? state.hasMore,
+        hoveredProject: null,
+        isLoading: cachedProjectPage ? false : state.isLoading,
+    }
 
     return {
-        state: result.state,
-        filterKey: result.filterKey,
+        state: nextState,
+        filterKey,
         didChangeFilter: true,
-        didUseCachedProjectPage: result.didUseCachedProjectPage,
+        didUseCachedProjectPage: Boolean(cachedProjectPage),
     }
 }
 
-export function applyWorkBrowsingEvent(
-    args: WorkBrowsingEventBaseArgs<WorkBrowsingFilterChangeEvent>,
-): WorkBrowsingFilterChangeResult
 export function applyWorkBrowsingEvent(
     args: WorkBrowsingEventBaseArgs<WorkBrowsingLoadMoreEvent>,
 ): WorkBrowsingLoadMoreResult
@@ -219,7 +155,6 @@ export function applyWorkBrowsingEvent({
     event,
     cachedProjectPages,
     sidebarFilters,
-    searchParams,
     pathname,
 }: WorkBrowsingEventBaseArgs<WorkBrowsingEvent>): WorkBrowsingEventResult {
     if (event.type === 'loadMore') {
@@ -240,56 +175,28 @@ export function applyWorkBrowsingEvent({
         }
     }
 
-    if (event.type === 'routeFilter') {
-        const result = applyWorkFilterRoute({
-            state,
-            pathname,
-            searchParams,
-            sidebarFilters,
-            cachedProjectPages,
-        })
-        const nextState =
-            result.didChangeFilter && !result.didUseCachedProjectPage
-                ? {
-                      ...result.state,
-                      isLoading: true,
-                  }
-                : result.state
-
-        return {
-            state: nextState,
-            request:
-                result.didChangeFilter && !result.didUseCachedProjectPage
-                    ? getRefreshProjectsInput(nextState)
-                    : null,
-            filterKey: result.filterKey,
-            didChangeFilter: result.didChangeFilter,
-            didUseCachedProjectPage: result.didUseCachedProjectPage,
-        }
-    }
-
-    const result = applyWorkFilterChange({
+    const result = applyWorkIndexRoute({
         state,
-        nextFilter: event.nextFilter,
-        cachedProjectPages,
-        sidebarFilters,
-        searchParams,
         pathname,
+        sidebarFilters,
+        cachedProjectPages,
     })
-    const nextState = result.didUseCachedProjectPage
-        ? result.state
-        : {
-              ...result.state,
-              isLoading: true,
-          }
+    const nextState =
+        result.didChangeFilter && !result.didUseCachedProjectPage
+            ? {
+                  ...result.state,
+                  isLoading: true,
+              }
+            : result.state
 
     return {
         state: nextState,
-        navigation: {
-            href: result.href,
-        },
-        request: result.didUseCachedProjectPage ? null : getRefreshProjectsInput(nextState),
+        request:
+            result.didChangeFilter && !result.didUseCachedProjectPage
+                ? getRefreshProjectsInput(nextState)
+                : null,
         filterKey: result.filterKey,
+        didChangeFilter: result.didChangeFilter,
         didUseCachedProjectPage: result.didUseCachedProjectPage,
     }
 }
@@ -437,26 +344,6 @@ type SearchParamsLike =
           get(name: string): string | null
           toString(): string
       }
-
-export function getWorkFilterNavigationHref({
-    filter,
-    sidebarFilters,
-    searchParams,
-    pathname,
-}: {
-    filter: Filter
-    sidebarFilters: WorkFilterIndexInput
-    searchParams: SearchParamsLike
-    pathname: string
-}) {
-    const nextParams = createWorkFilterCatalog(sidebarFilters).writeFilterToParams(
-        filter,
-        searchParams,
-    )
-    const queryString = nextParams.toString()
-
-    return queryString ? `${pathname}?${queryString}` : pathname
-}
 
 export function getProjectGalleryReturnUrl(pathname: string, searchParams: SearchParamsLike) {
     const queryString = searchParams.toString()

@@ -3,6 +3,7 @@ import {
     bringStyleUpToFront,
     createStyleUpCanvasSession,
     endStyleUpDrag,
+    getStyleUpDragOffsetBounds,
     getStyleUpCanvasHeight,
     moveStyleUpDrag,
     startStyleUpDrag,
@@ -93,6 +94,10 @@ describe('style up canvas session', () => {
                 startClientY: 200,
                 startX: 12,
                 startY: -4,
+                minX: Number.NEGATIVE_INFINITY,
+                maxX: Number.POSITIVE_INFINITY,
+                minY: Number.NEGATIVE_INFINITY,
+                maxY: Number.POSITIVE_INFINITY,
             },
         })
     })
@@ -138,6 +143,103 @@ describe('style up canvas session', () => {
                     y: -14,
                 },
             },
+        })
+    })
+
+    it('clamps dragged style ups inside the canvas bounds', () => {
+        const session = startStyleUpDrag(
+            {
+                ...createStyleUpCanvasSession({
+                    styleUps: [{_id: 'style-up-a'}],
+                    random: () => 0.5,
+                }),
+                layouts: {
+                    'style-up-a': {
+                        left: 50,
+                        top: 50,
+                        width: 20,
+                        x: 0,
+                        y: 0,
+                    },
+                },
+            },
+            {
+                id: 'style-up-a',
+                clientX: 100,
+                clientY: 200,
+                bounds: {
+                    canvasWidth: 1000,
+                    canvasHeight: 800,
+                    cardWidth: 200,
+                    cardHeight: 160,
+                },
+            },
+        )
+
+        expect(moveStyleUpDrag(session, {clientX: 700, clientY: -300})).toEqual({
+            ...session,
+            layouts: {
+                ...session.layouts,
+                'style-up-a': {
+                    ...session.layouts['style-up-a'],
+                    x: 400,
+                    y: -320,
+                },
+            },
+        })
+    })
+
+    it('calculates drag offset bounds from card and canvas dimensions', () => {
+        expect(
+            getStyleUpDragOffsetBounds(
+                {
+                    left: 25,
+                    top: 75,
+                    width: 20,
+                    x: 0,
+                    y: 0,
+                },
+                {
+                    canvasWidth: 1000,
+                    canvasHeight: 800,
+                    cardWidth: 200,
+                    cardHeight: 160,
+                },
+            ),
+        ).toEqual({
+            minX: -150,
+            maxX: 650,
+            minY: -520,
+            maxY: 120,
+        })
+    })
+
+    it('allows drag bounds to extend beyond the canvas origin', () => {
+        expect(
+            getStyleUpDragOffsetBounds(
+                {
+                    left: 50,
+                    top: 50,
+                    width: 20,
+                    x: 0,
+                    y: 0,
+                },
+                {
+                    canvasWidth: 1000,
+                    canvasHeight: 800,
+                    cardWidth: 200,
+                    cardHeight: 160,
+                    boundaryLeft: -30,
+                    boundaryTop: -30,
+                    boundaryRight: 1030,
+                    boundaryBottom: 830,
+                },
+            ),
+        ).toEqual({
+            minX: -430,
+            maxX: 430,
+            minY: -350,
+            maxY: 350,
         })
     })
 

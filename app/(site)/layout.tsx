@@ -18,7 +18,6 @@ import SiteSectionsAccordion from '@/features/site-shell/components/SiteSections
 import Navbar from '@/features/site-shell/components/Navbar/Navbar'
 import EasterEgg from '@/features/site-shell/components/EasterEgg/EasterEgg'
 import SiteConsoleCredits from '@/features/site-shell/components/SiteConsoleCredits/SiteConsoleCredits'
-import type {StyleUpItem} from '@/features/style-ups/components/StyleUps/StyleUps'
 
 const siteShellService = createSiteShellService({
     sanityFetch: ((args) => sanityFetch(args)) as <T>(
@@ -39,14 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
-  ],
+    themeColor: [
+        {media: '(prefers-color-scheme: light)', color: '#ffffff'},
+        {media: '(prefers-color-scheme: dark)', color: '#000000'},
+    ],
 }
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
-    const {about, contact, sidebarFilters, styleUps, initialProjects, initialFilter} =
+    const {about, contact, sidebarFilters, initialProjects, initialFilter} =
         await siteShellService.getInitialData()
 
     return (
@@ -59,7 +58,6 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
                             initialProjects={initialProjects}
                             initialFilter={initialFilter}
                             sidebarFilters={sidebarFilters}
-                            styleUps={styleUps as StyleUpItem[]}
                         >
                             {children}
                         </SiteSectionsAccordion>

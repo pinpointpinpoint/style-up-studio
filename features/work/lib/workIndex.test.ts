@@ -1,15 +1,15 @@
 import {describe, expect, it} from 'vitest'
 import {
-    buildWorkFilterIndex,
-    createWorkFilterCatalog,
-    parseWorkFilter,
-    toggleWorkFilter,
-    writeWorkFilterToParams,
-} from './workFilterIndex'
+    buildWorkIndex,
+    createWorkIndexCatalog,
+    getWorkIndexHref,
+    parseWorkIndexPath,
+    toggleWorkIndex,
+} from './workIndex'
 
-describe('createWorkFilterCatalog', () => {
-    it('exposes visible Work filter groups from the sidebar filter payload', () => {
-        const catalog = createWorkFilterCatalog({
+describe('createWorkIndexCatalog', () => {
+    it('exposes visible Work index groups from the sidebar filter payload', () => {
+        const catalog = createWorkIndexCatalog({
             featuredCount: 2,
             allCount: 4,
             projectTypes: [
@@ -18,9 +18,7 @@ describe('createWorkFilterCatalog', () => {
                 {_id: 'missing-title', title: '', slug: 'missing-title', referenceCount: 1},
                 {_id: 'missing-slug', title: 'Missing slug', slug: null, referenceCount: 1},
             ],
-            personalities: [
-                {_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1},
-            ],
+            personalities: [{_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1}],
             brands: [{_id: 'brand-a', title: 'Brand A', slug: 'brand-a', referenceCount: 2}],
             settings: {
                 showPersonalities: true,
@@ -80,16 +78,14 @@ describe('createWorkFilterCatalog', () => {
         })
     })
 
-    it('uses one enabled-filter policy for visible groups and URL parsing', () => {
-        const catalog = createWorkFilterCatalog({
+    it('uses one enabled-filter policy for visible groups and route parsing', () => {
+        const catalog = createWorkIndexCatalog({
             featuredCount: 1,
             allCount: 3,
             projectTypes: [
                 {_id: 'editorial', title: 'Editorial', slug: 'editorial', referenceCount: 2},
             ],
-            personalities: [
-                {_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1},
-            ],
+            personalities: [{_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1}],
             brands: [{_id: 'brand-a', title: 'Brand A', slug: 'brand-a', referenceCount: 1}],
             settings: {
                 showPersonalities: false,
@@ -98,53 +94,26 @@ describe('createWorkFilterCatalog', () => {
         })
 
         expect(catalog.filters.collaborators).toEqual([])
-        expect(catalog.parseFilter(new URLSearchParams('brand=brand-a'))).toEqual({
+        expect(catalog.parsePath('/work/brand/brand-a')).toEqual({
             type: 'featured',
         })
-        expect(catalog.parseFilter(new URLSearchParams('personality=stylist'))).toEqual({
+        expect(catalog.parsePath('/work/personality/stylist')).toEqual({
             type: 'featured',
         })
-        expect(catalog.parseFilter(new URLSearchParams('projectType=editorial'))).toEqual({
+        expect(catalog.parsePath('/work/type/editorial')).toEqual({
             type: 'projectType',
             id: 'editorial',
         })
     })
 
-    it('does not write disabled collaborator filters into URL params', () => {
-        const catalog = createWorkFilterCatalog({
-            featuredCount: 1,
-            allCount: 3,
-            projectTypes: [],
-            personalities: [
-                {_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1},
-            ],
-            brands: [{_id: 'brand-a', title: 'Brand A', slug: 'brand-a', referenceCount: 1}],
-            settings: {
-                showPersonalities: false,
-                showBrands: false,
-            },
-        })
-
-        expect(
-            catalog
-                .writeFilterToParams(
-                    {type: 'brand', id: 'brand-a'},
-                    new URLSearchParams('brand=brand-a&personality=stylist&page=2'),
-                )
-                .toString(),
-        ).toBe('page=2')
-    })
-
-    it('serializes and toggles filters through the catalog', () => {
-        const catalog = createWorkFilterCatalog({
+    it('creates route hrefs and toggles filters through the catalog', () => {
+        const catalog = createWorkIndexCatalog({
             featuredCount: 1,
             allCount: 3,
             projectTypes: [
                 {_id: 'editorial', title: 'Editorial', slug: 'editorial', referenceCount: 2},
             ],
-            personalities: [
-                {_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1},
-            ],
+            personalities: [{_id: 'stylist', title: 'Stylist', slug: 'stylist', referenceCount: 1}],
             brands: [{_id: 'brand-a', title: 'Brand A', slug: 'brand-a', referenceCount: 1}],
             settings: {
                 showPersonalities: true,
@@ -152,14 +121,12 @@ describe('createWorkFilterCatalog', () => {
             },
         })
 
-        expect(
-            catalog
-                .writeFilterToParams(
-                    {type: 'personality', id: 'stylist'},
-                    new URLSearchParams('brand=brand-a&page=2'),
-                )
-                .toString(),
-        ).toBe('page=2&personality=stylist')
+        expect(catalog.getHref({type: 'featured'})).toBe('/')
+        expect(catalog.getHref({type: 'all'})).toBe('/work/all')
+        expect(catalog.getHref({type: 'projectType', id: 'editorial'})).toBe('/work/type/editorial')
+        expect(catalog.getHref({type: 'personality', id: 'stylist'})).toBe(
+            '/work/personality/stylist',
+        )
 
         expect(
             catalog.toggleFilter(
@@ -170,9 +137,9 @@ describe('createWorkFilterCatalog', () => {
     })
 })
 
-describe('buildWorkFilterIndex', () => {
+describe('buildWorkIndex', () => {
     it('builds visible project filters with featured and all before project types', () => {
-        const index = buildWorkFilterIndex({
+        const index = buildWorkIndex({
             featuredCount: 2,
             allCount: 4,
             projectTypes: [
@@ -211,7 +178,7 @@ describe('buildWorkFilterIndex', () => {
     })
 
     it('builds collaborator groups only when enabled and containing visible options', () => {
-        const index = buildWorkFilterIndex({
+        const index = buildWorkIndex({
             featuredCount: 0,
             allCount: 0,
             projectTypes: [],
@@ -248,26 +215,26 @@ describe('buildWorkFilterIndex', () => {
     })
 })
 
-describe('toggleWorkFilter', () => {
+describe('toggleWorkIndex', () => {
     it('selects a filter and resets to featured when selecting the active specific filter', () => {
-        expect(
-            toggleWorkFilter({type: 'featured'}, {type: 'projectType', id: 'editorial'}),
-        ).toEqual({type: 'projectType', id: 'editorial'})
+        expect(toggleWorkIndex({type: 'featured'}, {type: 'projectType', id: 'editorial'})).toEqual(
+            {type: 'projectType', id: 'editorial'},
+        )
 
         expect(
-            toggleWorkFilter(
+            toggleWorkIndex(
                 {type: 'projectType', id: 'editorial'},
                 {type: 'projectType', id: 'editorial'},
             ),
         ).toEqual({type: 'featured'})
 
-        expect(toggleWorkFilter({type: 'projectType', id: 'editorial'}, {type: 'all'})).toEqual({
+        expect(toggleWorkIndex({type: 'projectType', id: 'editorial'}, {type: 'all'})).toEqual({
             type: 'all',
         })
     })
 })
 
-describe('work filter URL params', () => {
+describe('work index routes', () => {
     const sidebarFilters = {
         featuredCount: 1,
         allCount: 3,
@@ -282,35 +249,38 @@ describe('work filter URL params', () => {
         },
     }
 
-    it('parses URL params using brand, personality, view, then project type priority', () => {
-        expect(parseWorkFilter(new URLSearchParams('brand=brand-a'), sidebarFilters)).toEqual({
-            type: 'brand',
-            id: 'brand-a',
-        })
-        expect(parseWorkFilter(new URLSearchParams('personality=stylist'), sidebarFilters)).toEqual(
-            {
-                type: 'personality',
-                id: 'stylist',
-            },
-        )
-        expect(parseWorkFilter(new URLSearchParams('view=all'), sidebarFilters)).toEqual({
-            type: 'all',
-        })
-        expect(
-            parseWorkFilter(new URLSearchParams('projectType=editorial'), sidebarFilters),
-        ).toEqual({
+    it('parses page-like Work collection paths', () => {
+        expect(parseWorkIndexPath('/', sidebarFilters)).toEqual({type: 'featured'})
+        expect(parseWorkIndexPath('/work/all', sidebarFilters)).toEqual({type: 'all'})
+        expect(parseWorkIndexPath('/work/type/editorial', sidebarFilters)).toEqual({
             type: 'projectType',
             id: 'editorial',
         })
+        expect(parseWorkIndexPath('/work/brand/brand-a', sidebarFilters)).toEqual({
+            type: 'brand',
+            id: 'brand-a',
+        })
+        expect(parseWorkIndexPath('/work/personality/stylist', sidebarFilters)).toEqual({
+            type: 'personality',
+            id: 'stylist',
+        })
+        expect(parseWorkIndexPath('/work/unknown-project', sidebarFilters)).toEqual({
+            type: 'featured',
+        })
     })
 
-    it('serializes one active filter and removes stale filter params', () => {
-        const params = writeWorkFilterToParams(
-            {type: 'brand', id: 'brand-a'},
-            sidebarFilters,
-            new URLSearchParams('view=all&projectType=editorial&page=2'),
+    it('creates page-like Work collection hrefs', () => {
+        expect(getWorkIndexHref({type: 'featured'}, sidebarFilters)).toBe('/')
+        expect(getWorkIndexHref({type: 'all'}, sidebarFilters)).toBe('/work/all')
+        expect(getWorkIndexHref({type: 'projectType', id: 'editorial'}, sidebarFilters)).toBe(
+            '/work/type/editorial',
         )
-
-        expect(params.toString()).toBe('page=2&brand=brand-a')
+        expect(getWorkIndexHref({type: 'brand', id: 'brand-a'}, sidebarFilters)).toBe(
+            '/work/brand/brand-a',
+        )
+        expect(getWorkIndexHref({type: 'personality', id: 'stylist'}, sidebarFilters)).toBe(
+            '/work/personality/stylist',
+        )
+        expect(getWorkIndexHref({type: 'brand', id: 'missing'}, sidebarFilters)).toBe('/')
     })
 })

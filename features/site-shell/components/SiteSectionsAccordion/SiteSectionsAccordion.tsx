@@ -2,7 +2,17 @@
 
 import SiteSectionPanel from './SiteSectionPanel'
 import {useRouter} from 'next/navigation'
-import {lazy, Suspense, useEffect, useState, type MouseEvent, type ReactNode} from 'react'
+import {
+    lazy,
+    Suspense,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type MouseEvent,
+    type ReactNode,
+} from 'react'
+import {getStyleUps} from '@/app/(site)/actions'
 import type {StyleUpItem} from '@/features/style-ups/components/StyleUps/StyleUps'
 import {WorkSection} from '@/features/work/components/WorkSection/WorkSection'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
@@ -30,7 +40,6 @@ type SiteSectionsAccordionProps = {
     initialProjects: Project[] | null
     initialFilter: Filter
     sidebarFilters: SidebarFiltersQueryResult | null
-    styleUps: StyleUpItem[] | null
 }
 
 export default function SiteSectionsAccordion({
@@ -38,7 +47,6 @@ export default function SiteSectionsAccordion({
     initialProjects,
     initialFilter,
     sidebarFilters,
-    styleUps,
 }: SiteSectionsAccordionProps) {
     return (
         <SiteRouteSelectionProvider>
@@ -46,7 +54,6 @@ export default function SiteSectionsAccordion({
                 initialProjects={initialProjects}
                 initialFilter={initialFilter}
                 sidebarFilters={sidebarFilters}
-                styleUps={styleUps}
             >
                 {children}
             </SiteSectionsAccordionView>
@@ -59,7 +66,6 @@ function SiteSectionsAccordionView({
     initialProjects,
     initialFilter,
     sidebarFilters,
-    styleUps,
 }: SiteSectionsAccordionProps) {
     const router = useRouter()
     const {
@@ -75,8 +81,11 @@ function SiteSectionsAccordionView({
     const workHeight = activeSection === 'work' ? OPEN_HEIGHT : CLOSED_HEIGHT
     const styleUpsHeight = activeSection === 'style-ups' ? OPEN_HEIGHT : CLOSED_HEIGHT
     const isActiveProjectDetail = activeSection === 'work' && isProjectDetail
-    const [hasMountedStyleUps, setHasMountedStyleUps] = useState(activeSection === 'style-ups')
-    const shouldMountStyleUps = hasMountedStyleUps || activeSection === 'style-ups'
+    const [styleUps, setStyleUps] = useState<StyleUpItem[] | null>(null)
+    const [isStyleUpsLoading, setIsStyleUpsLoading] = useState(false)
+    const styleUpsRequestRef = useRef<Promise<void> | null>(null)
+    const shouldMountStyleUps =
+        activeSection === 'style-ups' || isStyleUpsLoading || styleUps !== null
     const handleStyleUpsNavigation = handleSectionNavigation('style-ups')
     const projectHeaderTitle = activeProject
         ? activeProject.title || 'UNTITLED PROJECT'
@@ -101,15 +110,45 @@ function SiteSectionsAccordionView({
         event.preventDefault()
         projectDetailCloseAction()
     }
-    const prepareStyleUps = () => {
-        setHasMountedStyleUps(true)
+    const requestStyleUps = useCallback(() => {
         void loadStyleUps()
-    }
+
+        if (styleUps || styleUpsRequestRef.current) return
+
+        setIsStyleUpsLoading(true)
+        styleUpsRequestRef.current = getStyleUps()
+            .then((nextStyleUps) => {
+                setStyleUps(nextStyleUps as StyleUpItem[])
+            })
+            .catch(() => {
+                setStyleUps([])
+            })
+            .finally(() => {
+                styleUpsRequestRef.current = null
+                setIsStyleUpsLoading(false)
+            })
+    }, [styleUps])
 
     useEffect(() => {
         router.prefetch(WORK_HOME_ROUTE)
         router.prefetch(STYLE_UPS_ROUTE)
     }, [router])
+
+    useEffect(() => {
+        if (activeSection !== 'style-ups') return
+
+        let didCancel = false
+
+        void Promise.resolve().then(() => {
+            if (didCancel) return
+
+            requestStyleUps()
+        })
+
+        return () => {
+            didCancel = true
+        }
+    }, [activeSection, requestStyleUps])
 
     return (
         <div className={styles.accordion}>
@@ -157,18 +196,22 @@ function SiteSectionsAccordionView({
                 fullHeaderAction
                 height={styleUpsHeight}
                 arrowDirection={activeSection === 'work' ? 'up' : undefined}
-                onNavigate={(event) => {
-                    prepareStyleUps()
-                    handleStyleUpsNavigation(event)
-                }}
-                onIntent={prepareStyleUps}
+                onNavigate={handleStyleUpsNavigation}
             >
-                {shouldMountStyleUps && (
+                {shouldMountStyleUps && styleUps === null && (
+                    <div className={styles.deferredSectionShell}>
+                        <div className={styles.deferredSectionMain}>
+                            <DelayedLoadingMessage delay={0} />
+                        </div>
+                        <aside className={styles.deferredSectionSidebar} />
+                    </div>
+                )}
+                {shouldMountStyleUps && styleUps !== null && (
                     <Suspense
                         fallback={
                             <div className={styles.deferredSectionShell}>
                                 <div className={styles.deferredSectionMain}>
-                                    <DelayedLoadingMessage />
+                                    <DelayedLoadingMessage delay={0} />
                                 </div>
                                 <aside className={styles.deferredSectionSidebar} />
                             </div>

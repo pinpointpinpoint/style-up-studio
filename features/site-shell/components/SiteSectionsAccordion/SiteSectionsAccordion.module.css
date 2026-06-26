@@ -20,7 +20,7 @@
     width: 100%;
     background: white;
     color: black;
-    padding: 0px 30px;
+    padding: 0 var(--space-xl);
     text-align: left;
     border-top: 1px solid black;
     font-size: 16px;
@@ -49,9 +49,9 @@
 
 .headerActionFull {
     justify-content: space-between;
-    margin: 0 -30px;
-    padding: 0 30px;
-    width: calc(100% + 60px);
+    margin: 0 calc(-1 * var(--space-xl));
+    padding: 0 var(--space-xl);
+    width: calc(100% + var(--space-xl) * 2);
 }
 
 .headerArrow {
@@ -74,7 +74,7 @@
 .projectHeaderArrow {
     display: inline-flex;
     flex: 0 0 auto;
-    margin-right: 10px;
+    margin-right: var(--space-sm);
 }
 
 .projectHeaderContext {

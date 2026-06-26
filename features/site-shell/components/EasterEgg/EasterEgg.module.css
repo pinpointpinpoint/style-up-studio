@@ -1,81 +1,81 @@
 .triggerWrap {
-  height: 1px;
-  left: 0;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  transform: translate(-50%, -50%);
-  width: 1px;
-  z-index: 80;
+    height: 1px;
+    left: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    z-index: 80;
 }
 
 .trigger {
-  background: white;
-  border: 1px solid black;
-  color: black;
-  font-size: var(--font-sm);
-  line-height: 1;
-  padding: 5px 8px;
-  pointer-events: auto;
-  position: absolute;
-  transform: translate(-50%, -50%) rotate(-7deg);
+    background: white;
+    border: 1px solid black;
+    color: black;
+    font-size: var(--font-sm);
+    line-height: 1;
+    padding: var(--space-xs) 8px;
+    pointer-events: auto;
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(-7deg);
 }
 
 .trigger:hover {
-  background: black;
-  color: white;
+    background: black;
+    color: white;
 }
 
 .backdrop {
-  inset: 0;
-  pointer-events: none;
-  position: fixed;
-  z-index: 90;
+    inset: 0;
+    pointer-events: none;
+    position: fixed;
+    z-index: 90;
 }
 
 .modal {
-  background: white;
-  border: 1px solid black;
-  box-shadow: 8px 8px 0 black;
-  left: 50%;
-  max-width: min(360px, calc(100vw - 40px));
-  pointer-events: auto;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-3deg);
-  width: 360px;
+    background: white;
+    border: 1px solid black;
+    box-shadow: 8px 8px 0 black;
+    left: 50%;
+    max-width: min(360px, calc(100vw - 40px));
+    pointer-events: auto;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-3deg);
+    width: 360px;
 }
 
 .header {
-  align-items: center;
-  border-bottom: 1px solid black;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid black;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
 }
 
 .header h2 {
-  font-size: var(--font-sm);
-  font-weight: inherit;
-  margin: 0;
-  padding: 5px 10px;
+    font-size: var(--font-sm);
+    font-weight: inherit;
+    margin: 0;
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .header button {
-  border-left: 1px solid black;
-  font-size: var(--font-sm);
-  height: 100%;
-  padding: 5px 10px;
+    border-left: 1px solid black;
+    font-size: var(--font-sm);
+    height: 100%;
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .header button:hover {
-  background: black;
-  color: white;
+    background: black;
+    color: white;
 }
 
 .modal p {
-  font-size: var(--font-sm);
-  line-height: 1.35;
-  margin: 0;
-  padding: 18px 20px 22px;
+    font-size: var(--font-sm);
+    line-height: 1.35;
+    margin: 0;
+    padding: 18px var(--space-lg) 22px;
 }

@@ -1,26 +1,20 @@
-'use client';
+'use client'
 
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { Project } from '@/types';
-import type { SidebarFiltersQueryResult } from '@/sanity.types'
-import WorkFilterMenu from './WorkFilterMenu';
-import ProjectInfoPanel from './ProjectInfoPanel';
-import { Filter } from '@/types';
-import styles from "./WorkSidebar.module.css";
+import {useEffect, useRef, useState} from 'react'
+import {Project} from '@/types'
+import type {SidebarFiltersQueryResult} from '@/sanity.types'
+import WorkIndexMenu from './WorkIndexMenu'
+import ProjectInfoPanel from './ProjectInfoPanel'
+import {Filter} from '@/types'
+import styles from './WorkSidebar.module.css'
 
 type WorkSidebarProps = {
     displayedProject: Project | null
     sidebarFilters: SidebarFiltersQueryResult | null
     filter: Filter
-    setFilter: Dispatch<SetStateAction<Filter>>
 }
 
-export function WorkSidebar({
-    displayedProject,
-    sidebarFilters,
-    filter,
-    setFilter,
-}: WorkSidebarProps) {
+export function WorkSidebar({displayedProject, sidebarFilters, filter}: WorkSidebarProps) {
     const filterSectionRef = useRef<HTMLDivElement | null>(null)
     const [hasFilterOverflow, setHasFilterOverflow] = useState(false)
 
@@ -71,22 +65,13 @@ export function WorkSidebar({
 
     return (
         <aside className={styles.container}>
-            <div
-                ref={filterSectionRef}
-                className={styles.filterSection}
-            >
-                <WorkFilterMenu
-                    sidebarFilters={sidebarFilters}
-                    filter={filter}
-                    setFilter={setFilter}
-                />
+            <div ref={filterSectionRef} className={styles.filterSection}>
+                <WorkIndexMenu sidebarFilters={sidebarFilters} filter={filter} />
             </div>
             <div
                 className={`${styles.detailsSection} ${hasFilterOverflow ? styles.detailsSectionOverflow : ''}`}
             >
-                <ProjectInfoPanel
-                    displayedProject={displayedProject}
-                />
+                <ProjectInfoPanel displayedProject={displayedProject} />
             </div>
         </aside>
     )

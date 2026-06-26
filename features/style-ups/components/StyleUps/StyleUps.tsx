@@ -2,7 +2,7 @@
 
 import {urlFor} from '@/sanity/lib/utils'
 import type {SanityImageSource} from '@sanity/image-url/lib/types/types'
-import {type PointerEvent as ReactPointerEvent, useMemo, useState} from 'react'
+import {type PointerEvent as ReactPointerEvent, useMemo, useRef, useState} from 'react'
 import {
     bringStyleUpToFront,
     createStyleUpCanvasSession,
@@ -24,6 +24,8 @@ type StyleUpsProps = {
 }
 
 export function StyleUps({styleUps}: StyleUpsProps) {
+    const styleUpsRef = useRef<HTMLDivElement | null>(null)
+    const canvasRef = useRef<HTMLDivElement | null>(null)
     const [session, setSession] = useState(() => createStyleUpCanvasSession({styleUps}))
     const sessionStyleUpIds = Object.keys(session.layouts)
     const hasCurrentSession =
@@ -47,8 +49,14 @@ export function StyleUps({styleUps}: StyleUpsProps) {
     const handlePointerDown =
         (styleUp: StyleUpItem) => (event: ReactPointerEvent<HTMLDivElement>) => {
             const layout = getLayout(styleUp)
+            const styleUpsElement = styleUpsRef.current
+            const canvasElement = canvasRef.current
 
-            if (!layout) return
+            if (!layout || !styleUpsElement || !canvasElement) return
+
+            const styleUpsRect = styleUpsElement.getBoundingClientRect()
+            const canvasRect = canvasElement.getBoundingClientRect()
+            const cardRect = event.currentTarget.getBoundingClientRect()
 
             setSession((currentSession) =>
                 startStyleUpDrag(
@@ -60,6 +68,16 @@ export function StyleUps({styleUps}: StyleUpsProps) {
                         id: styleUp._id,
                         clientX: event.clientX,
                         clientY: event.clientY,
+                        bounds: {
+                            canvasWidth: canvasRect.width,
+                            canvasHeight: canvasRect.height,
+                            cardWidth: cardRect.width,
+                            cardHeight: cardRect.height,
+                            boundaryLeft: styleUpsRect.left - canvasRect.left,
+                            boundaryTop: styleUpsRect.top - canvasRect.top,
+                            boundaryRight: styleUpsRect.right - canvasRect.left,
+                            boundaryBottom: styleUpsRect.bottom - canvasRect.top,
+                        },
                     },
                 ),
             )
@@ -85,8 +103,8 @@ export function StyleUps({styleUps}: StyleUpsProps) {
 
     return (
         <div className={styles.main}>
-            <div className={styles.styleUps}>
-                <div className={styles.canvas} style={{minHeight: canvasHeight}}>
+            <div ref={styleUpsRef} className={styles.styleUps}>
+                <div ref={canvasRef} className={styles.canvas} style={{minHeight: canvasHeight}}>
                     {hasRandomLayouts &&
                         styleUps.map((su, index) => {
                             const layout = getLayout(su)

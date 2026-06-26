@@ -16,6 +16,10 @@ export type StyleUpDragState = {
     startClientY: number
     startX: number
     startY: number
+    minX: number
+    maxX: number
+    minY: number
+    maxY: number
 }
 
 export type StyleUpCanvasSession = {
@@ -106,15 +110,19 @@ export function startStyleUpDrag(
         id,
         clientX,
         clientY,
+        bounds,
     }: {
         id: string
         clientX: number
         clientY: number
+        bounds?: StyleUpDragBounds
     },
 ): StyleUpCanvasSession {
     const layout = session.layouts[id]
 
     if (!layout) return session
+
+    const dragBounds = bounds ? getStyleUpDragOffsetBounds(layout, bounds) : null
 
     return {
         ...session,
@@ -124,6 +132,10 @@ export function startStyleUpDrag(
             startClientY: clientY,
             startX: layout.x,
             startY: layout.y,
+            minX: dragBounds?.minX ?? Number.NEGATIVE_INFINITY,
+            maxX: dragBounds?.maxX ?? Number.POSITIVE_INFINITY,
+            minY: dragBounds?.minY ?? Number.NEGATIVE_INFINITY,
+            maxY: dragBounds?.maxY ?? Number.POSITIVE_INFINITY,
         },
     }
 }
@@ -152,10 +164,47 @@ export function moveStyleUpDrag(
             ...session.layouts,
             [drag.id]: {
                 ...layout,
-                x: drag.startX + clientX - drag.startClientX,
-                y: drag.startY + clientY - drag.startClientY,
+                x: clamp(drag.startX + clientX - drag.startClientX, drag.minX, drag.maxX),
+                y: clamp(drag.startY + clientY - drag.startClientY, drag.minY, drag.maxY),
             },
         },
+    }
+}
+
+export type StyleUpDragBounds = {
+    canvasWidth: number
+    canvasHeight: number
+    cardWidth: number
+    cardHeight: number
+    boundaryLeft?: number
+    boundaryTop?: number
+    boundaryRight?: number
+    boundaryBottom?: number
+}
+
+export function getStyleUpDragOffsetBounds(
+    layout: StyleUpLayout,
+    {
+        canvasWidth,
+        canvasHeight,
+        cardWidth,
+        cardHeight,
+        boundaryLeft = 0,
+        boundaryTop = 0,
+        boundaryRight = canvasWidth,
+        boundaryBottom = canvasHeight,
+    }: StyleUpDragBounds,
+) {
+    const centerX = (layout.left / 100) * canvasWidth
+    const centerY = (layout.top / 100) * canvasHeight
+    const halfCardWidth = cardWidth / 2
+    const halfCardHeight = cardHeight / 2
+
+    return {
+        minX: boundaryLeft + halfCardWidth - centerX,
+        maxX: boundaryRight - halfCardWidth - centerX,
+        minY: boundaryTop + halfCardHeight - centerY,
+        maxY: boundaryBottom - halfCardHeight - centerY,
     }
 }
 

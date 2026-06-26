@@ -3,7 +3,6 @@ import {
     SANITY_PROJECTS_TAG,
     SANITY_PUBLIC_TAG,
     SANITY_SITE_SHELL_TAG,
-    SANITY_STYLE_UPS_TAG,
 } from '../../../sanity/lib/cacheTags'
 import type {Project, ProjectsQueryInput} from '@/types'
 import {createSiteShellService, type SiteShellServiceFetchArgs} from './siteShellService'
@@ -48,7 +47,6 @@ describe('site shell service', () => {
                         } as T,
                     }
                 }
-                if (args.name === 'styleUps') return {data: [{_id: 'style-up-1'}] as T}
 
                 throw new Error(`Unexpected read: ${args.name}`)
             },
@@ -65,7 +63,6 @@ describe('site shell service', () => {
                 featuredCount: 1,
                 allCount: 1,
             },
-            styleUps: [{_id: 'style-up-1'}],
             initialProjects: [project],
             initialFilter: {type: 'featured'},
         })
@@ -73,7 +70,6 @@ describe('site shell service', () => {
             'about',
             'contact',
             'sidebarFilters',
-            'styleUps',
         ])
         expect(fetchRequests.map((request) => ({name: request.name, tags: request.tags}))).toEqual([
             {
@@ -87,10 +83,6 @@ describe('site shell service', () => {
             {
                 name: 'sidebarFilters',
                 tags: [SANITY_PUBLIC_TAG, SANITY_SITE_SHELL_TAG, SANITY_PROJECTS_TAG],
-            },
-            {
-                name: 'styleUps',
-                tags: [SANITY_PUBLIC_TAG, SANITY_STYLE_UPS_TAG],
             },
         ])
         expect(projectRequests).toEqual([{filter: {type: 'featured'}, limit: 19}])

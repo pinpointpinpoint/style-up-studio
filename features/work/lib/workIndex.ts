@@ -12,7 +12,7 @@ type SidebarFilterSettings = {
     showBrands?: boolean | null
 }
 
-export type WorkFilterIndexInput = {
+export type WorkIndexInput = {
     featuredCount?: number | null
     allCount?: number | null
     projectTypes: SidebarFilterItem[]
@@ -21,26 +21,7 @@ export type WorkFilterIndexInput = {
     settings?: SidebarFilterSettings | null
 } | null
 
-const PARAM_KEYS = {
-    view: 'view',
-    projectType: 'projectType',
-    brand: 'brand',
-    personality: 'personality',
-} as const
-
-type SearchParamValue = string | string[] | undefined
-type SearchParamsInput =
-    | URLSearchParams
-    | ReadonlyURLSearchParams
-    | Record<string, SearchParamValue>
-    | undefined
-
-type ReadonlyURLSearchParams = {
-    get(name: string): string | null
-    toString(): string
-}
-
-export type WorkFilterOption = {
+export type WorkIndexOption = {
     id: string
     title: string
     count: number
@@ -51,29 +32,26 @@ export type WorkCollaboratorFilterGroup = {
     id: string
     title: string
     filterType: 'brand' | 'personality'
-    options: WorkFilterOption[]
+    options: WorkIndexOption[]
 }
 
-export type WorkFilterIndex = {
-    projectTypes: WorkFilterOption[]
+export type WorkIndex = {
+    projectTypes: WorkIndexOption[]
     collaborators: WorkCollaboratorFilterGroup[]
 }
 
-export type WorkFilterCatalog = {
-    filters: WorkFilterIndex
-    parseFilter(searchParams: SearchParamsInput): Filter
-    writeFilterToParams(
-        filter: Filter,
-        params?: URLSearchParams | ReadonlyURLSearchParams,
-    ): URLSearchParams
+export type WorkIndexCatalog = {
+    filters: WorkIndex
+    parsePath(pathname: string): Filter
+    getHref(filter: Filter): string
     toggleFilter(currentFilter: Filter, nextFilter: Filter): Filter
 }
 
-function isVisibleOption(option: WorkFilterOption) {
+function isVisibleOption(option: WorkIndexOption) {
     return Boolean(option.title && option.count > 0)
 }
 
-function toProjectTypeOption(item: SidebarFilterItem): WorkFilterOption {
+function toProjectTypeOption(item: SidebarFilterItem): WorkIndexOption {
     return {
         id: item._id,
         title: item.title ?? '',
@@ -85,7 +63,7 @@ function toProjectTypeOption(item: SidebarFilterItem): WorkFilterOption {
 function toCollaboratorOption(
     type: 'brand' | 'personality',
     item: SidebarFilterItem,
-): WorkFilterOption {
+): WorkIndexOption {
     return {
         id: item._id,
         title: item.title ?? '',
@@ -101,17 +79,6 @@ function toVisibleCollaboratorOptions(type: 'brand' | 'personality', items: Side
         .filter(isVisibleOption)
 }
 
-function readParam(searchParams: SearchParamsInput, key: string) {
-    if (!searchParams) return undefined
-
-    if ('get' in searchParams && typeof searchParams.get === 'function') {
-        return searchParams.get(key) ?? undefined
-    }
-
-    const value = (searchParams as Record<string, SearchParamValue>)[key]
-    return Array.isArray(value) ? value[0] : value
-}
-
 function findIdBySlug(items: SidebarFilterItem[] | undefined, slug: string) {
     return items?.find((item) => item.slug === slug)?._id
 }
@@ -120,8 +87,19 @@ function findSlugById(items: SidebarFilterItem[] | undefined, id: string) {
     return items?.find((item) => item._id === id)?.slug
 }
 
+function getPathSegments(pathname: string) {
+    return (
+        pathname
+            .split('?')[0]
+            ?.split('#')[0]
+            ?.split('/')
+            .filter(Boolean)
+            .map((segment) => decodeURIComponent(segment)) ?? []
+    )
+}
+
 function isFilterTypeEnabled(
-    sidebarFilters: WorkFilterIndexInput,
+    sidebarFilters: WorkIndexInput,
     type: 'brand' | 'personality' | 'projectType',
 ) {
     if (type === 'brand') return sidebarFilters?.settings?.showBrands ?? true
@@ -141,7 +119,7 @@ function filterBySlug(
     return id ? {type, id} : null
 }
 
-export function buildWorkFilterIndex(sidebarFilters: WorkFilterIndexInput): WorkFilterIndex {
+export function buildWorkIndex(sidebarFilters: WorkIndexInput): WorkIndex {
     if (!sidebarFilters) {
         return {
             projectTypes: [],
@@ -155,7 +133,7 @@ export function buildWorkFilterIndex(sidebarFilters: WorkFilterIndexInput): Work
         ? toVisibleCollaboratorOptions('personality', sidebarFilters.personalities)
         : []
     const brands = showBrands ? toVisibleCollaboratorOptions('brand', sidebarFilters.brands) : []
-    const projectTypes: WorkFilterOption[] = [
+    const projectTypes: WorkIndexOption[] = [
         {
             id: 'featured',
             title: 'Featured',
@@ -190,17 +168,16 @@ export function buildWorkFilterIndex(sidebarFilters: WorkFilterIndexInput): Work
     }
 }
 
-export function createWorkFilterCatalog(sidebarFilters: WorkFilterIndexInput): WorkFilterCatalog {
+export function createWorkIndexCatalog(sidebarFilters: WorkIndexInput): WorkIndexCatalog {
     return {
-        filters: buildWorkFilterIndex(sidebarFilters),
-        parseFilter: (searchParams) => parseWorkFilter(searchParams, sidebarFilters),
-        writeFilterToParams: (filter, params) =>
-            writeWorkFilterToParams(filter, sidebarFilters, params),
-        toggleFilter: toggleWorkFilter,
+        filters: buildWorkIndex(sidebarFilters),
+        parsePath: (pathname) => parseWorkIndexPath(pathname, sidebarFilters),
+        getHref: (filter) => getWorkIndexHref(filter, sidebarFilters),
+        toggleFilter: toggleWorkIndex,
     }
 }
 
-export function toggleWorkFilter(currentFilter: Filter, nextFilter: Filter): Filter {
+export function toggleWorkIndex(currentFilter: Filter, nextFilter: Filter): Filter {
     if (
         'id' in currentFilter &&
         'id' in nextFilter &&
@@ -213,57 +190,55 @@ export function toggleWorkFilter(currentFilter: Filter, nextFilter: Filter): Fil
     return nextFilter
 }
 
-export function parseWorkFilter(
-    searchParams: SearchParamsInput,
-    sidebarFilters: WorkFilterIndexInput,
-): Filter {
-    if (isFilterTypeEnabled(sidebarFilters, 'brand')) {
-        const brandFilter = filterBySlug(
-            'brand',
-            sidebarFilters?.brands,
-            readParam(searchParams, PARAM_KEYS.brand),
-        )
-        if (brandFilter) return brandFilter
+export function parseWorkIndexPath(pathname: string, sidebarFilters: WorkIndexInput): Filter {
+    const segments = getPathSegments(pathname)
+
+    if (segments.length === 0) {
+        return {type: 'featured'}
     }
 
-    if (isFilterTypeEnabled(sidebarFilters, 'personality')) {
-        const personalityFilter = filterBySlug(
-            'personality',
-            sidebarFilters?.personalities,
-            readParam(searchParams, PARAM_KEYS.personality),
-        )
-        if (personalityFilter) return personalityFilter
+    if (segments[0] !== 'work') {
+        return {type: 'featured'}
     }
 
-    const view = readParam(searchParams, PARAM_KEYS.view)
-    if (view === 'all') return {type: 'all'}
-    if (view === 'featured') return {type: 'featured'}
+    if (segments.length === 1) {
+        return {type: 'featured'}
+    }
 
-    const projectTypeFilter = filterBySlug(
-        'projectType',
-        sidebarFilters?.projectTypes,
-        readParam(searchParams, PARAM_KEYS.projectType),
-    )
+    if (segments[1] === 'all') {
+        return {type: 'all'}
+    }
 
-    return projectTypeFilter ?? {type: 'featured'}
+    if (segments[1] === 'type') {
+        return (
+            filterBySlug('projectType', sidebarFilters?.projectTypes, segments[2]) ?? {
+                type: 'featured',
+            }
+        )
+    }
+
+    if (segments[1] === 'brand' && isFilterTypeEnabled(sidebarFilters, 'brand')) {
+        return filterBySlug('brand', sidebarFilters?.brands, segments[2]) ?? {type: 'featured'}
+    }
+
+    if (segments[1] === 'personality' && isFilterTypeEnabled(sidebarFilters, 'personality')) {
+        return (
+            filterBySlug('personality', sidebarFilters?.personalities, segments[2]) ?? {
+                type: 'featured',
+            }
+        )
+    }
+
+    return {type: 'featured'}
 }
 
-export function writeWorkFilterToParams(
-    filter: Filter,
-    sidebarFilters: WorkFilterIndexInput,
-    params: URLSearchParams | ReadonlyURLSearchParams = new URLSearchParams(),
-) {
-    const nextParams = new URLSearchParams(params.toString())
-
-    Object.values(PARAM_KEYS).forEach((key) => nextParams.delete(key))
-
+export function getWorkIndexHref(filter: Filter, sidebarFilters: WorkIndexInput) {
     if (filter.type === 'featured') {
-        return nextParams
+        return '/'
     }
 
     if (filter.type === 'all') {
-        nextParams.set(PARAM_KEYS.view, 'all')
-        return nextParams
+        return '/work/all'
     }
 
     const itemsByType = {
@@ -275,9 +250,13 @@ export function writeWorkFilterToParams(
     }
     const slug = findSlugById(itemsByType[filter.type], filter.id)
 
-    if (slug) {
-        nextParams.set(PARAM_KEYS[filter.type], slug)
+    if (!slug) {
+        return '/'
     }
 
-    return nextParams
+    if (filter.type === 'projectType') {
+        return `/work/type/${encodeURIComponent(slug)}`
+    }
+
+    return `/work/${filter.type}/${encodeURIComponent(slug)}`
 }

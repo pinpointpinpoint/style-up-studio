@@ -50,7 +50,6 @@ export function WorkSection({
         isLoading,
         hoveredProject,
         filter,
-        setFilter,
         loadMore,
         getProjectHref,
         handleProjectOpen,
@@ -141,7 +140,6 @@ export function WorkSection({
                     displayedProject={displayedProject}
                     sidebarFilters={activeSidebarFilters}
                     filter={filter}
-                    setFilter={setFilter}
                 />
             )}
         </div>
