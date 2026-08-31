@@ -114,6 +114,7 @@ describe('getProjectCardMedia', () => {
                 media: [
                     image('cover-asset', 'duplicate-cover'),
                     image('gallery-asset', 'gallery-image'),
+                    image('second-gallery-asset', 'second-gallery-image'),
                 ],
             }),
             {
@@ -126,12 +127,10 @@ describe('getProjectCardMedia', () => {
                 url: 'cover-asset:card',
                 alt: 'Cover image for Editorial Story',
             },
-            hoverImages: [
-                {
-                    url: 'gallery-asset:card',
-                    alt: 'Gallery image for Editorial Story',
-                },
-            ],
+            hoverImage: {
+                url: 'gallery-asset:card',
+                alt: 'Gallery image for Editorial Story',
+            },
             previewVideoUrl: null,
         })
     })

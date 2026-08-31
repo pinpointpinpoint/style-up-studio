@@ -1,4 +1,5 @@
 import type {Metadata} from 'next'
+import {getWorkIndexRouteMetadata} from '../../workIndexRouteMetadata'
 
 type WorkPersonalityRouteProps = {
     params: Promise<{slug: string}>
@@ -7,12 +8,10 @@ type WorkPersonalityRouteProps = {
 export async function generateMetadata({params}: WorkPersonalityRouteProps): Promise<Metadata> {
     const {slug} = await params
 
-    return {
-        title: 'Work',
-        alternates: {
-            canonical: `/work/personality/${slug}`,
-        },
-    }
+    return getWorkIndexRouteMetadata({
+        pathname: `/work/personality/${slug}`,
+        canonical: `/work/personality/${slug}`,
+    })
 }
 
 export default function WorkPersonalityRoute() {

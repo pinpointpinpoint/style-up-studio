@@ -1,130 +1,65 @@
-'use client';
+'use client'
 
-import { useEffect, useRef } from 'react'
-import styles from'./ProjectGallery.module.css'
+import {useRef} from 'react'
+import styles from './ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
-import { Project } from '@/types'
+import {Project} from '@/types'
+import {useProjectGalleryScrollRestoration} from '@/features/work/hooks/useProjectGalleryScrollRestoration'
 
 type ProjectGalleryProps = {
-  projects: Project[]
-  hasMore: boolean
-  isLoading?: boolean
-  onLoadMore: () => void
-  getProjectHref: (project: Project) => string
-  onProjectOpen?: () => void
-  onProjectIntent?: () => void
-  onProjectHover?: (project: Project) => void
-  onProjectLeave?: () => void
-  hasMouseMoved?: boolean
+    projects: Project[]
+    hasMore: boolean
+    isLoading?: boolean
+    onLoadMore: () => void
+    getProjectHref: (project: Project) => string
+    onProjectOpen?: () => void
+    onProjectHover?: (project: Project) => void
+    onProjectLeave?: () => void
 }
 
 export default function ProjectGallery({
-  projects,
-  hasMore,
-  isLoading = false,
-  onLoadMore,
-  getProjectHref,
-  onProjectOpen,
-  onProjectIntent,
-  onProjectHover,
-  onProjectLeave,
-  hasMouseMoved = false
+    projects,
+    hasMore,
+    isLoading = false,
+    onLoadMore,
+    getProjectHref,
+    onProjectOpen,
+    onProjectHover,
+    onProjectLeave,
 }: ProjectGalleryProps) {
-  const galleryRef = useRef<HTMLDivElement | null>(null)
+    const galleryRef = useRef<HTMLDivElement | null>(null)
+    useProjectGalleryScrollRestoration(galleryRef)
 
-  useEffect(() => {
-    const el = galleryRef.current
-  if (!el) return
+    const onEnter = (project: Project) => () => {
+        onProjectHover?.(project)
+    }
 
-  const saved = sessionStorage.getItem('projectGalleryScrollY')
-  if (saved) el.scrollTop = Number(saved)
+    const onLeave = () => {
+        onProjectLeave?.()
+    }
 
-  const onScroll = () => {
-    sessionStorage.setItem('projectGalleryScrollY', String(el.scrollTop))
-  }
-
-  el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const onEnter = (project: Project) => (e: React.MouseEvent) => {
-    onProjectHover?.(project)
-  }
-
-  const onLeave = () => {
-    onProjectLeave?.()
-  }
-
-  const onGalleryMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target
-
-    if (!(target instanceof Element)) return
-    if (target.closest('[data-project-gallery-item]')) return
-
-    const gallery = galleryRef.current
-
-    if (!gallery) return
-
-    const galleryItems = Array.from(
-      gallery.querySelectorAll<HTMLElement>('[data-project-gallery-item]'),
-    )
-    const itemRects = galleryItems.map((item) => item.getBoundingClientRect())
-
-    const { columnGap, rowGap } = getComputedStyle(gallery)
-    const horizontalGap = Number.parseFloat(columnGap) || 0
-    const verticalGap = Number.parseFloat(rowGap) || 0
-    const isNearProjectItem = itemRects.some((rect) => (
-      event.clientX >= rect.left - horizontalGap / 2 &&
-      event.clientX <= rect.right + horizontalGap / 2 &&
-      event.clientY >= rect.top - verticalGap / 2 &&
-      event.clientY <= rect.bottom + verticalGap / 2
-    ))
-
-    if (isNearProjectItem) return
-
-    onProjectLeave?.()
-  }
-
-  if (projects.length < 1) {
     return (
-      <div className={styles.projectGallery}>
-        {isLoading ? '[LOADING...]' : 'No projects'}
-      </div>
-    )
-  }
-
-  return (
-    <div
-      ref={galleryRef}
-      className={styles.projectGallery}
-      onMouseMove={onGalleryMove}
-      onMouseLeave={onLeave}
-    >
-        {projects?.map((project, idx) => (
         <div
-          key={project._id}
-          data-project-gallery-item
+            ref={galleryRef}
+            className={styles.projectGallery}
+            onMouseLeave={onLeave}
         >
-          <ProjectCard
-            project={project}
-            index={idx}
-            href={getProjectHref(project)}
-            onOpen={onProjectOpen}
-            onIntent={onProjectIntent}
-            onHoverStart={onEnter(project)}
-            onHoverMove={() => {}}
-            hasMouseMoved={hasMouseMoved}
-          />
+            {projects?.map((project, idx) => (
+                <div key={project._id}>
+                    <ProjectCard
+                        project={project}
+                        index={idx}
+                        href={getProjectHref(project)}
+                        onOpen={onProjectOpen}
+                        onHoverStart={onEnter(project)}
+                    />
+                </div>
+            ))}
+            {hasMore && (
+                <button onClick={onLoadMore} disabled={isLoading} className={styles.viewMoreButton}>
+                    {isLoading ? '[LOADING...]' : '[LOAD MORE]'}
+                </button>
+            )}
         </div>
-        ))}
-        {hasMore && (
-        <button 
-          onClick={onLoadMore} 
-          disabled={isLoading}
-          className={styles.viewMoreButton}        >
-          {isLoading ? '[LOADING...]' : '[LOAD MORE]'}
-        </button>
-)}
-    </div>
-  )
+    )
 }

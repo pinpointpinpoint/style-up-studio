@@ -12,7 +12,6 @@ import {
 } from '@/features/site-shell/services/siteMetadataService'
 import type {Metadata, Viewport} from 'next'
 import {SpeedInsights} from '@vercel/speed-insights/next'
-import {Toaster} from 'sonner'
 import IntroGate from '@/features/site-shell/components/IntroGate/IntroGate'
 import SiteSectionsAccordion from '@/features/site-shell/components/SiteSectionsAccordion/SiteSectionsAccordion'
 import Navbar from '@/features/site-shell/components/Navbar/Navbar'
@@ -40,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
     themeColor: [
         {media: '(prefers-color-scheme: light)', color: '#ffffff'},
-        {media: '(prefers-color-scheme: dark)', color: '#000000'},
+        {media: '(prefers-color-scheme: dark)', color: 'var(--off-black)'},
     ],
 }
 
@@ -65,7 +64,6 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
                 </div>
                 <EasterEgg />
                 <SiteConsoleCredits />
-                <Toaster />
                 <SpeedInsights />
             </IntroGate>
         </>

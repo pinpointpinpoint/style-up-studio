@@ -1,17 +1,18 @@
 'use client'
 
-import {lazy, Suspense, useEffect} from 'react'
+import {lazy, Suspense, useEffect, useRef} from 'react'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {WorkSidebar} from '../WorkSidebar/WorkSidebar'
 import {Filter, Project} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import styles from './WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
-import {useMouseMoved} from '@/features/work/hooks/useMouseInitiatedHover'
 import {useWorkSectionSession} from '../../hooks/useWorkSectionSession'
+import {useProjectGalleryScrollRestoration} from '../../hooks/useProjectGalleryScrollRestoration'
 import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
+import SectionFooterScroll from '@/features/site-shell/components/SectionFooterScroll/SectionFooterScroll'
 
 const loadProjectDetailView = () => import('../ProjectDetailView/ProjectDetailView')
 const DeferredProjectDetailView = lazy(loadProjectDetailView)
@@ -31,10 +32,11 @@ export function WorkSection({
     sidebarFilters,
     isProjectsLoading = false,
 }: WorkSectionProps) {
+    const workScrollRef = useRef<HTMLDivElement | null>(null)
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const hasMouseMoved = useMouseMoved()
+    useProjectGalleryScrollRestoration(workScrollRef)
     const {
         activeProject,
         hasRouteProjectSelection,
@@ -86,62 +88,58 @@ export function WorkSection({
 
     return (
         <div className={styles.workSection}>
-            <div className={styles.contentPane}>
-                <div
-                    className={`${styles.contentLayer} ${isProjectDetail ? styles.contentLayerHidden : styles.contentLayerActive}`}
-                    aria-hidden={isProjectDetail}
-                    inert={isProjectDetail ? true : undefined}
-                >
-                    <ProjectGallery
-                        projects={visibleProjects}
-                        hasMore={hasMore}
-                        isLoading={isLoading}
-                        onLoadMore={loadMore}
-                        getProjectHref={getProjectHref}
-                        onProjectOpen={handleProjectOpen}
-                        onProjectIntent={() => {
-                            void loadProjectDetailView()
-                        }}
-                        onProjectHover={setHoveredProject}
-                        onProjectLeave={() => setHoveredProject(null)}
-                        hasMouseMoved={hasMouseMoved}
-                    />
-                </div>
-                <div
-                    className={`${styles.contentLayer} ${isProjectDetail ? styles.contentLayerActive : styles.contentLayerHidden}`}
-                    aria-hidden={!isProjectDetail}
-                    inert={!isProjectDetail ? true : undefined}
-                >
-                    {activeProject ? (
-                        <Suspense
-                            fallback={
-                                <section
-                                    className={styles.projectDetailLoading}
-                                    aria-label={`${activeProject.title ?? 'Project'} details`}
-                                >
-                                    <div className={styles.projectDetailLoadingMedia}>
-                                        <DelayedLoadingMessage />
-                                    </div>
-                                    <aside className={styles.projectDetailLoadingSidebar} />
-                                </section>
-                            }
-                        >
-                            <DeferredProjectDetailView project={activeProject} />
-                        </Suspense>
-                    ) : isRouteProjectNotFound ? (
-                        <div className={styles.projectLoading}>[PROJECT NOT FOUND]</div>
-                    ) : (
-                        <div className={styles.projectLoading} aria-hidden="true" />
-                    )}
-                </div>
-            </div>
-            {!isProjectDetail && (
-                <WorkSidebar
-                    displayedProject={displayedProject}
-                    sidebarFilters={activeSidebarFilters}
-                    filter={filter}
-                />
-            )}
+            <SectionFooterScroll ref={workScrollRef}>
+                {!isProjectDetail ? (
+                    <div className={styles.workMain}>
+                        <div className={styles.contentPane}>
+                            <ProjectGallery
+                                projects={visibleProjects}
+                                hasMore={hasMore}
+                                isLoading={isLoading}
+                                onLoadMore={loadMore}
+                                getProjectHref={getProjectHref}
+                                onProjectOpen={handleProjectOpen}
+                                onProjectHover={setHoveredProject}
+                                onProjectLeave={() => setHoveredProject(null)}
+                            />
+                        </div>
+                        <div className={styles.sidebarPane}>
+                            <WorkSidebar
+                                displayedProject={displayedProject}
+                                sidebarFilters={activeSidebarFilters}
+                                filter={filter}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className={styles.detailMain}>
+                        {activeProject ? (
+                            <Suspense
+                                fallback={
+                                    <section
+                                        className={styles.projectDetailLoading}
+                                        aria-label={`${activeProject.title ?? 'Project'} details`}
+                                    >
+                                        <div className={styles.projectDetailLoadingMedia}>
+                                            <DelayedLoadingMessage />
+                                        </div>
+                                        <aside className={styles.projectDetailLoadingSidebar} />
+                                    </section>
+                                }
+                            >
+                                <DeferredProjectDetailView
+                                    project={activeProject}
+                                    scrollContainerRef={workScrollRef}
+                                />
+                            </Suspense>
+                        ) : isRouteProjectNotFound ? (
+                            <div className={styles.projectLoading}>[PROJECT NOT FOUND]</div>
+                        ) : (
+                            <div className={styles.projectLoading} aria-hidden="true" />
+                        )}
+                    </div>
+                )}
+            </SectionFooterScroll>
         </div>
     )
 }

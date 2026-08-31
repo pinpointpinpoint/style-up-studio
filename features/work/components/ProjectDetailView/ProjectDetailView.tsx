@@ -1,6 +1,15 @@
 'use client'
 
-import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {
+    lazy,
+    Suspense,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type RefObject,
+} from 'react'
 import {getExternalVideoPoster} from '@/features/video/services/externalVideoService'
 import {getVideoMediaProviderPosterRequest} from '@/features/video/lib/videoMedia'
 import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
@@ -20,6 +29,7 @@ const DeferredVideoPlayer = lazy(
 
 type ProjectDetailViewProps = {
     project: Project
+    scrollContainerRef?: RefObject<HTMLDivElement | null>
 }
 
 type ProjectImageProps = {
@@ -51,7 +61,7 @@ function VideoPlayerLoading({poster, title}: {poster?: string; title?: string}) 
     )
 }
 
-export default function ProjectDetailView({project}: ProjectDetailViewProps) {
+export default function ProjectDetailView({project, scrollContainerRef}: ProjectDetailViewProps) {
     const mediaPaneRef = useRef<HTMLDivElement | null>(null)
     const mediaFrameRefs = useRef<Record<number, HTMLDivElement | null>>({})
     const [selectedMedia, setSelectedMedia] = useState<{
@@ -136,11 +146,11 @@ export default function ProjectDetailView({project}: ProjectDetailViewProps) {
     }, [project, videoPosterStateKey])
 
     const handleMediaScroll = useCallback(() => {
-        const mediaPane = mediaPaneRef.current
+        const scrollContainer = scrollContainerRef?.current ?? mediaPaneRef.current
 
-        if (!mediaPane) return
+        if (!scrollContainer) return
 
-        const paneRect = mediaPane.getBoundingClientRect()
+        const paneRect = scrollContainer.getBoundingClientRect()
         const nextActiveMediaIndex = getProjectDetailMediaScrollSelection({
             currentActiveMediaIndex: activeMediaIndex,
             paneRect: {
@@ -170,7 +180,17 @@ export default function ProjectDetailView({project}: ProjectDetailViewProps) {
                 mediaIndex: nextActiveMediaIndex,
             })
         }
-    }, [activeMediaIndex, project._id])
+    }, [activeMediaIndex, project._id, scrollContainerRef])
+
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef?.current
+
+        if (!scrollContainer) return
+
+        scrollContainer.addEventListener('scroll', handleMediaScroll, {passive: true})
+
+        return () => scrollContainer.removeEventListener('scroll', handleMediaScroll)
+    }, [handleMediaScroll, scrollContainerRef])
 
     return (
         <section className={styles.container} aria-label={`${project.title ?? 'Project'} details`}>

@@ -69,7 +69,7 @@ function SiteSectionsAccordionView({
 }: SiteSectionsAccordionProps) {
     const router = useRouter()
     const {
-        activeSection,
+        activeSection, 
         activeProject,
         isProjectDetail,
         routeProjectNotFound,

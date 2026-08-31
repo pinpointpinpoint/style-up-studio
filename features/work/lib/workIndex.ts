@@ -44,6 +44,7 @@ export type WorkIndexCatalog = {
     filters: WorkIndex
     parsePath(pathname: string): Filter
     getHref(filter: Filter): string
+    getTitle(filter: Filter): string | null
     toggleFilter(currentFilter: Filter, nextFilter: Filter): Filter
 }
 
@@ -173,6 +174,7 @@ export function createWorkIndexCatalog(sidebarFilters: WorkIndexInput): WorkInde
         filters: buildWorkIndex(sidebarFilters),
         parsePath: (pathname) => parseWorkIndexPath(pathname, sidebarFilters),
         getHref: (filter) => getWorkIndexHref(filter, sidebarFilters),
+        getTitle: (filter) => getWorkIndexTitle(filter, sidebarFilters),
         toggleFilter: toggleWorkIndex,
     }
 }
@@ -259,4 +261,24 @@ export function getWorkIndexHref(filter: Filter, sidebarFilters: WorkIndexInput)
     }
 
     return `/work/${filter.type}/${encodeURIComponent(slug)}`
+}
+
+export function getWorkIndexTitle(filter: Filter, sidebarFilters: WorkIndexInput) {
+    if (filter.type === 'featured') {
+        return 'Featured'
+    }
+
+    if (filter.type === 'all') {
+        return 'All'
+    }
+
+    const itemsByType = {
+        projectType: sidebarFilters?.projectTypes,
+        brand: isFilterTypeEnabled(sidebarFilters, 'brand') ? sidebarFilters?.brands : undefined,
+        personality: isFilterTypeEnabled(sidebarFilters, 'personality')
+            ? sidebarFilters?.personalities
+            : undefined,
+    }
+
+    return itemsByType[filter.type]?.find((item) => item._id === filter.id)?.title ?? null
 }

@@ -1,7 +1,7 @@
 import type {Metadata} from 'next'
 
 export const metadata: Metadata = {
-    title: 'All Work',
+    title: 'All',
     alternates: {
         canonical: '/work/all',
     },

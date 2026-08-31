@@ -3,6 +3,7 @@ import {
     buildWorkIndex,
     createWorkIndexCatalog,
     getWorkIndexHref,
+    getWorkIndexTitle,
     parseWorkIndexPath,
     toggleWorkIndex,
 } from './workIndex'
@@ -282,5 +283,18 @@ describe('work index routes', () => {
             '/work/personality/stylist',
         )
         expect(getWorkIndexHref({type: 'brand', id: 'missing'}, sidebarFilters)).toBe('/')
+    })
+
+    it('resolves page-like Work collection titles', () => {
+        expect(getWorkIndexTitle({type: 'featured'}, sidebarFilters)).toBe('Featured')
+        expect(getWorkIndexTitle({type: 'all'}, sidebarFilters)).toBe('All')
+        expect(getWorkIndexTitle({type: 'projectType', id: 'editorial'}, sidebarFilters)).toBe(
+            'Editorial',
+        )
+        expect(getWorkIndexTitle({type: 'brand', id: 'brand-a'}, sidebarFilters)).toBe('Brand A')
+        expect(getWorkIndexTitle({type: 'personality', id: 'stylist'}, sidebarFilters)).toBe(
+            'Stylist',
+        )
+        expect(getWorkIndexTitle({type: 'brand', id: 'missing'}, sidebarFilters)).toBeNull()
     })
 })

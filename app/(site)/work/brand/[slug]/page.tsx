@@ -1,4 +1,5 @@
 import type {Metadata} from 'next'
+import {getWorkIndexRouteMetadata} from '../../workIndexRouteMetadata'
 
 type WorkBrandRouteProps = {
     params: Promise<{slug: string}>
@@ -7,12 +8,10 @@ type WorkBrandRouteProps = {
 export async function generateMetadata({params}: WorkBrandRouteProps): Promise<Metadata> {
     const {slug} = await params
 
-    return {
-        title: 'Work',
-        alternates: {
-            canonical: `/work/brand/${slug}`,
-        },
-    }
+    return getWorkIndexRouteMetadata({
+        pathname: `/work/brand/${slug}`,
+        canonical: `/work/brand/${slug}`,
+    })
 }
 
 export default function WorkBrandRoute() {

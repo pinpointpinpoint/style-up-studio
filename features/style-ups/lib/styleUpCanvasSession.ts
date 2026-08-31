@@ -29,6 +29,8 @@ export type StyleUpCanvasSession = {
     drag: StyleUpDragState | null
 }
 
+const LOAD_MORE_CARD_WIDTH = 18
+
 function clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(max, value))
 }
@@ -219,4 +221,16 @@ export function getStyleUpCanvasHeight(count: number) {
     const rows = Math.max(2, Math.ceil(count / 3))
 
     return `max(calc(100% - 60px), ${Math.max(660, rows * 260)}px)`
+}
+
+export function getStyleUpLoadMoreLayout(count: number): StyleUpLayout {
+    const positions = [22, 46, 70]
+
+    return {
+        left: positions[count % positions.length],
+        top: 90,
+        width: LOAD_MORE_CARD_WIDTH,
+        x: 0,
+        y: 0,
+    }
 }

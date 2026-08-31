@@ -5,6 +5,7 @@ import {
     endStyleUpDrag,
     getStyleUpDragOffsetBounds,
     getStyleUpCanvasHeight,
+    getStyleUpLoadMoreLayout,
     moveStyleUpDrag,
     startStyleUpDrag,
 } from './styleUpCanvasSession'
@@ -260,6 +261,31 @@ describe('style up canvas session', () => {
             ...session,
             drag: null,
         })
+    })
+
+    it('places the load more card near the bottom with a stable scattered x position', () => {
+        expect(getStyleUpLoadMoreLayout(0)).toEqual({
+            left: 22,
+            top: 90,
+            width: 18,
+            x: 0,
+            y: 0,
+        })
+        expect(getStyleUpLoadMoreLayout(1)).toEqual({
+            left: 46,
+            top: 90,
+            width: 18,
+            x: 0,
+            y: 0,
+        })
+        expect(getStyleUpLoadMoreLayout(2)).toEqual({
+            left: 70,
+            top: 90,
+            width: 18,
+            x: 0,
+            y: 0,
+        })
+        expect(getStyleUpLoadMoreLayout(3)).toEqual(getStyleUpLoadMoreLayout(0))
     })
 
     it('scales canvas height with item count', () => {

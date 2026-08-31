@@ -1,0 +1,15 @@
+.scroll {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    width: 100%;
+}
+
+.scroll::-webkit-scrollbar {
+    display: none;
+}

@@ -65,31 +65,33 @@ function AboutDrawerContent({
     <>
       {hasContent && (
         <div className={styles.aboutSummary}>
-          {imageUrl && previewUrl && (
-            <div className={styles.aboutImage}>
-              <Image
-                className={styles.aboutImageThumb}
-                src={imageUrl}
-                alt=""
-                width={400}
-                height={600}
-                sizes="60px"
-              />
-              <Image
-                className={styles.aboutImageFull}
-                src={previewUrl}
-                alt=""
-                width={400}
-                height={600}
-                sizes="400px"
-                aria-hidden="true"
-              />
-            </div>
-          )}
-          {trimmedBio && <p className={styles.bio}>{trimmedBio}</p>}
+          <button onClick={onClose}>[CLOSE]</button>
+          <div>
+            {/* {imageUrl && previewUrl && (
+              <div className={styles.aboutImage}>
+                <Image
+                  className={styles.aboutImageThumb}
+                  src={imageUrl}
+                  alt=""
+                  width={400}
+                  height={600}
+                  sizes="60px"
+                />
+                <Image
+                  className={styles.aboutImageFull}
+                  src={previewUrl}
+                  alt=""
+                  width={400}
+                  height={600}
+                  sizes="400px"
+                  aria-hidden="true"
+                />
+              </div>
+            )} */}
+            {trimmedBio && <p className={styles.bio}>{trimmedBio}</p>}
+          </div>
         </div>
       )}
-      <ArrowButton direction="left" ariaLabel="Close about menu" onClick={onClose} />
     </>
   )
 }
@@ -106,7 +108,6 @@ function ContactDrawerContent({
 
   return (
     <>
-      <ArrowButton direction="right" ariaLabel="Close contact menu" onClick={onClose} />
       {hasLinks && (
         <div className={styles.contactLinks}>
           <div className={styles.contactLinkList}>
@@ -117,6 +118,7 @@ function ContactDrawerContent({
               </a>
             )}
           </div>
+          <button onClick={onClose}>[CLOSE]</button>
         </div>
       )}
     </>
@@ -153,7 +155,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
             onClick={() => toggleMenu('about')}
           >
             <span>ABOUT</span>
-            <ArrowIcon direction="right" />
+            {/* <ArrowIcon direction="right" /> */}
           </button>
           <NavbarDrawer
             id={aboutMenuId}
@@ -181,7 +183,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
             aria-controls={contactMenuId}
             onClick={() => toggleMenu('contact')}
           >
-            <ArrowIcon direction="left" />
+            {/* <ArrowIcon direction="left" /> */}
             <span>CONTACT</span>
           </button>
           <NavbarDrawer

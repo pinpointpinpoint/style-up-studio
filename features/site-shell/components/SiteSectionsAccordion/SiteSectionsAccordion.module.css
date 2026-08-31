@@ -9,7 +9,7 @@
 }
 
 .section {
-    background: white;
+    background: black;
     min-height: 0;
     overflow: hidden;
     display: flex;

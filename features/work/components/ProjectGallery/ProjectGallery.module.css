@@ -2,22 +2,17 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
     display: grid;
     flex: 2;
-    gap: var(--space-sm);
-    padding: var(--space-sm);
-    height: 100%;
     min-height: 0;
     min-width: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
     align-content: start;
+    gap: 1;
+    background: white;
 }
 
 .viewMoreButton {
     width: 100%;
     height: 100%;
     aspect-ratio: 1 / 1;
-    border: 1px solid black;
     cursor: pointer;
 }
 
@@ -29,7 +24,7 @@
 .skeletonCard {
     position: relative;
     aspect-ratio: 1 / 1;
-    border: 1px solid black;
+    /* border: 1px solid black; */
     background: #f3f3f3;
 }
 
@@ -53,7 +48,7 @@
 }
 
 /* 3 columns on medium screens */
-@media (max-width: 1200px) {
+@media (max-width: 1245px) {
     .projectGallery,
     .archiveGallery,
     .curatedGallery {
@@ -62,7 +57,7 @@
 }
 
 /* 2 columns on smaller screens */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     .projectGallery,
     .archiveGallery,
     .curatedGallery {
@@ -77,10 +72,6 @@
     .curatedGallery {
         grid-template-columns: 1fr;
     }
-}
-
-.projectGallery::-webkit-scrollbar {
-    display: none;
 }
 
 .empty {

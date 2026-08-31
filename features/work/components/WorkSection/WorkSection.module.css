@@ -6,6 +6,25 @@
     min-height: 0;
     position: relative;
     border-top: solid 1px black;
+    overflow: hidden;
+}
+
+.workMain {
+    align-items: stretch;
+    display: flex;
+    flex: 0 0 auto;
+    min-height: 100%;
+    min-width: 0;
+    width: 100%;
+    background: white;
+}
+
+.detailMain {
+    display: flex;
+    flex: 0 0 auto;
+    min-height: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .contentPane {
@@ -15,24 +34,11 @@
     position: relative;
 }
 
-.contentLayer {
-    display: flex;
-    inset: 0;
-    min-height: 0;
-    min-width: 0;
-    position: absolute;
-}
-
-.contentLayerActive {
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
-}
-
-.contentLayerHidden {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
+.sidebarPane {
+    align-self: flex-start;
+    height: calc(100vh - var(--header-height) * 3);
+    position: sticky;
+    top: 0;
 }
 
 .projectLoading {

@@ -8,9 +8,11 @@ import {
     createStyleUpCanvasSession,
     endStyleUpDrag,
     getStyleUpCanvasHeight,
+    getStyleUpLoadMoreLayout,
     moveStyleUpDrag,
     startStyleUpDrag,
 } from '@/features/style-ups/lib/styleUpCanvasSession'
+import SectionFooterScroll from '@/features/site-shell/components/SectionFooterScroll/SectionFooterScroll'
 import styles from './StyleUps.module.css'
 
 export type StyleUpItem = {
@@ -38,6 +40,7 @@ export function StyleUps({styleUps}: StyleUpsProps) {
 
     const canvasHeight = getStyleUpCanvasHeight(styleUps.length)
     const hasRandomLayouts = styleUps.every((styleUp) => activeSession.layouts[styleUp._id])
+    const loadMoreLayout = getStyleUpLoadMoreLayout(styleUps.length)
     const getLayout = (styleUp: StyleUpItem) => activeSession.layouts[styleUp._id]
 
     const bringToFront = (id: string) => {
@@ -102,51 +105,70 @@ export function StyleUps({styleUps}: StyleUpsProps) {
     }
 
     return (
-        <div className={styles.main}>
-            <div ref={styleUpsRef} className={styles.styleUps}>
-                <div ref={canvasRef} className={styles.canvas} style={{minHeight: canvasHeight}}>
-                    {hasRandomLayouts &&
-                        styleUps.map((su, index) => {
-                            const layout = getLayout(su)
+        <SectionFooterScroll>
+            <div className={styles.main}>
+                <div ref={styleUpsRef} className={styles.styleUps}>
+                    <div
+                        ref={canvasRef}
+                        className={styles.canvas}
+                        style={{minHeight: canvasHeight}}
+                    >
+                        {hasRandomLayouts &&
+                            styleUps.map((su, index) => {
+                                const layout = getLayout(su)
 
-                            if (!layout) return null
+                                if (!layout) return null
 
-                            return (
-                                <div
-                                    key={su._id}
-                                    className={styles.card}
-                                    style={{
-                                        left: `${layout.left}%`,
-                                        top: `${layout.top}%`,
-                                        width: `${layout.width}%`,
-                                        zIndex: activeSession.zIndexes[su._id] ?? index + 1,
-                                        transform: `translate(${layout.x}px, ${layout.y}px) translate(-50%, -50%)`,
-                                    }}
-                                    onMouseEnter={() => bringToFront(su._id)}
-                                    onPointerDown={handlePointerDown(su)}
-                                    onPointerMove={handlePointerMove}
-                                    onPointerUp={handlePointerUp}
-                                    onPointerCancel={handlePointerUp}
-                                >
-                                    {su.image && (
-                                        <img
-                                            src={urlFor(su.image)
-                                                .width(900)
-                                                .height(900)
-                                                .fit('crop')
-                                                .url()}
-                                            alt={`Style up image for ${su.name ?? 'style up'}`}
-                                            draggable={false}
-                                        />
-                                    )}
-                                </div>
-                            )
-                        })}
+                                return (
+                                    <div
+                                        key={su._id}
+                                        className={styles.card}
+                                        style={{
+                                            left: `${layout.left}%`,
+                                            top: `${layout.top}%`,
+                                            width: `${layout.width}%`,
+                                            zIndex: activeSession.zIndexes[su._id] ?? index + 1,
+                                            transform: `translate(${layout.x}px, ${layout.y}px) translate(-50%, -50%)`,
+                                        }}
+                                        onMouseEnter={() => bringToFront(su._id)}
+                                        onPointerDown={handlePointerDown(su)}
+                                        onPointerMove={handlePointerMove}
+                                        onPointerUp={handlePointerUp}
+                                        onPointerCancel={handlePointerUp}
+                                    >
+                                        {su.image && (
+                                            <img
+                                                src={urlFor(su.image)
+                                                    .width(900)
+                                                    .height(900)
+                                                    .fit('crop')
+                                                    .url()}
+                                                alt={`Style up image for ${su.name ?? 'style up'}`}
+                                                draggable={false}
+                                            />
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        <button
+                            type="button"
+                            className={styles.loadMoreCard}
+                            style={{
+                                left: `${loadMoreLayout.left}%`,
+                                top: `${loadMoreLayout.top}%`,
+                                width: `${loadMoreLayout.width}%`,
+                                zIndex: activeSession.nextZIndex + 1,
+                                transform: 'translate(-50%, -50%)',
+                            }}
+                        >
+                            LOAD MORE
+                        </button>
+                    </div>
                 </div>
+                <aside className={styles.sidebar}>
+                    <div></div>
+                </aside>
             </div>
-            <aside className={styles.sidebar}>
-                <div></div>
-            </aside>
-        </div>
+        </SectionFooterScroll>
     )
 }

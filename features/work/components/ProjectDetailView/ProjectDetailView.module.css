@@ -1,20 +1,19 @@
 .container {
     box-sizing: border-box;
     display: flex;
-    height: 100%;
+    min-height: 100%;
     width: 100%;
-    min-height: 0;
     min-width: 0;
+    background: white;
 }
 
 .mediaPane {
     box-sizing: border-box;
     flex: 2;
-    height: 100%;
     min-height: 0;
     min-width: 0;
-    overflow-y: auto;
-    padding: var(--space-xl);
+    overflow: visible;
+    /* padding: var(--space-xl); */
     scrollbar-width: none;
 }
 
@@ -29,32 +28,38 @@
     flex-direction: column;
     flex-grow: 1;
     flex-shrink: 0;
-    height: 100%;
-    max-width: 350px;
-    min-width: 350px;
+    align-self: flex-start;
+    height: calc(100vh - var(--header-height) * 3);
+    max-width: 400px;
+    min-width: 400px;
     min-height: 0;
     overflow: hidden;
     padding-top: var(--space-lg);
+    position: sticky;
+    top: 0;
 }
 
 .mediaList {
+    --media-frame-height: calc(100vh - var(--header-height) * 3 - (var(--space-xl) * 2));
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
-    height: 100%;
+    /* gap: var(--space-xl); */
     min-height: 100%;
+    /* padding: var(--space-xl); */
 }
 
 .mediaFrame {
     box-sizing: border-box;
-    flex: 0 0 100%;
+    flex: 0 0 var(--media-frame-height);
     width: 100%;
-    height: calc(100vh - var(--header-height));
+    height: var(--media-frame-height);
     min-height: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    padding: 20px;
 }
 
 .image {
@@ -86,4 +91,12 @@
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+}
+
+@media (max-width: 785px) {
+    .sidebar {
+      max-width: 300px;
+      min-width: 300px;
+      width: 300px;
+    }
 }

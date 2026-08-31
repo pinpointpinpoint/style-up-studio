@@ -6,9 +6,9 @@
     border-left: 1px solid black;
     height: 100%;
     overflow: hidden;
-    max-width: 350px;
-    min-width: 350px;
-    width: 350px;
+    max-width: 400px;
+    min-width: 400px;
+    width: 400px;
     scrollbar-width: none; 
     -ms-overflow-style: none; 
 }
@@ -30,4 +30,12 @@
 
 .detailsSectionOverflow {
   border-top: 1px solid black;
+}
+
+@media (max-width: 785px) {
+    .container {
+      max-width: 300px;
+      min-width: 300px;
+      width: 300px;
+    }
 }

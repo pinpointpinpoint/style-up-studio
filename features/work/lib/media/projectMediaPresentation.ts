@@ -21,7 +21,7 @@ export type ProjectPresentedImage = {
 
 export type ProjectCardMedia = {
     cardImage: ProjectPresentedImage | null
-    hoverImages: ProjectPresentedImage[]
+    hoverImage: ProjectPresentedImage | null
     previewVideoUrl: string | null
 }
 
@@ -104,7 +104,12 @@ function toPresentedImage(
     if (!source) return null
 
     const url = imageUrl(source, preset)
-    return url ? {url, alt} : null
+    if (!url) return null
+
+    return {
+        url,
+        alt,
+    }
 }
 
 export function getProjectCardMedia(
@@ -118,18 +123,22 @@ export function getProjectCardMedia(
         project.coverImage,
         `Cover image for ${projectTitle}`,
         imageUrl,
+        'card',
     )
     const mediaImages = project.media.filter(
         (item): item is ProjectMediaImage => item._type === 'image',
     )
-    const hoverImages = mediaImages
-        .filter((image) => getAssetRef(image) !== coverAssetRef)
-        .map((image) => toPresentedImage(image, `Gallery image for ${projectTitle}`, imageUrl))
-        .filter((image): image is ProjectPresentedImage => Boolean(image))
+    const firstHoverImage = mediaImages.find((image) => getAssetRef(image) !== coverAssetRef)
+    const hoverImage = toPresentedImage(
+        firstHoverImage,
+        `Gallery image for ${projectTitle}`,
+        imageUrl,
+        'card',
+    )
 
     return {
         cardImage,
-        hoverImages,
+        hoverImage,
         previewVideoUrl: project.previewUrl,
     }
 }

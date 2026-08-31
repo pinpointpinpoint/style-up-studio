@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import {Filter} from '@/types'
+import {usePathname} from 'next/navigation'
+import type {MouseEvent} from 'react'
+import type {Filter} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import {useState} from 'react'
 import styles from './WorkIndexMenu.module.css'
@@ -15,13 +17,52 @@ type WorkIndexMenuProps = {
     filter: Filter
 }
 
+type OptimisticFilter = {
+    filter: Filter
+    fromPathname: string
+    targetPathname: string
+}
+
+function isModifiedLinkClick(event: MouseEvent<HTMLAnchorElement>) {
+    return (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey
+    )
+}
+
+function getHrefPathname(href: string) {
+    return href.split('?')[0]?.split('#')[0] || '/'
+}
+
 export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuProps) {
+    const pathname = usePathname()
     const indexCatalog = createWorkIndexCatalog(sidebarFilters)
     const {projectTypes, collaborators} = indexCatalog.filters
 
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+    const [optimisticFilter, setOptimisticFilter] = useState<OptimisticFilter | null>(null)
+    const activeFilter =
+        optimisticFilter &&
+        (optimisticFilter.fromPathname === pathname || optimisticFilter.targetPathname === pathname)
+            ? optimisticFilter.filter
+            : filter
 
-    const getNextFilter = (nextFilter: Filter) => indexCatalog.toggleFilter(filter, nextFilter)
+    const getNextFilter = (nextFilter: Filter) =>
+        indexCatalog.toggleFilter(activeFilter, nextFilter)
+    const handleIndexClick =
+        (nextFilter: Filter, href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+            if (isModifiedLinkClick(event)) return
+
+            setOptimisticFilter({
+                filter: nextFilter,
+                fromPathname: pathname,
+                targetPathname: getHrefPathname(href),
+            })
+        }
 
     return (
         <div className={styles.menu}>
@@ -29,22 +70,25 @@ export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuPro
             <div className={`${styles.scroller} scrollbar`} data-sidebar-scroll-area>
                 <div className={styles.projectTypeList}>
                     {projectTypes.map((type) => {
+                        const nextFilter = getNextFilter(type.filter)
+                        const href = indexCatalog.getHref(nextFilter)
                         const isActive =
-                            (filter.type === 'featured' && type.filter.type === 'featured') ||
-                            (filter.type === 'all' && type.filter.type === 'all') ||
-                            ('id' in filter &&
+                            (activeFilter.type === 'featured' && type.filter.type === 'featured') ||
+                            (activeFilter.type === 'all' && type.filter.type === 'all') ||
+                            ('id' in activeFilter &&
                                 'id' in type.filter &&
-                                filter.type === type.filter.type &&
-                                filter.id === type.filter.id)
+                                activeFilter.type === type.filter.type &&
+                                activeFilter.id === type.filter.id)
 
                         return (
                             <Link
                                 key={type.id}
                                 className={styles.projectTypeButton}
-                                href={indexCatalog.getHref(getNextFilter(type.filter))}
+                                href={href}
+                                onClick={handleIndexClick(nextFilter, href)}
                             >
                                 <span className={styles.filterLabel}>
-                                    {filter.type === 'featured' &&
+                                    {activeFilter.type === 'featured' &&
                                     type.filter.type === 'featured' &&
                                     FEATURED_ACTIVE_IMAGE_SRC ? (
                                         <img
@@ -65,11 +109,11 @@ export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuPro
                 </div>
                 <div className={`${styles.collaboratorSection} scrollbar`} data-sidebar-scroll-area>
                     {collaborators.map((c) => {
-                        const isActiveGroup = filter.type === c.filterType
+                        const isActiveGroup = activeFilter.type === c.filterType
                         const isOpen = openGroups[c.filterType] ?? false
                         const activeItem =
-                            'id' in filter && isActiveGroup
-                                ? c.options.find((item) => item.id === filter.id)
+                            'id' in activeFilter && isActiveGroup
+                                ? c.options.find((item) => item.id === activeFilter.id)
                                 : undefined
 
                         return (
@@ -102,27 +146,35 @@ export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuPro
                                 </summary>
 
                                 <div className={styles.collaboratorOptions}>
-                                    {c.options.map((i) => (
-                                        <Link
-                                            className={styles.collaboratorOption}
-                                            key={i.id}
-                                            href={indexCatalog.getHref(getNextFilter(i.filter))}
-                                        >
-                                            <span className={styles.filterLabel}>
-                                                {'id' in filter &&
-                                                    filter.type === c.filterType &&
-                                                    filter.id === i.id && (
-                                                        <span
-                                                            className={
-                                                                styles.collaboratorActiveMarker
-                                                            }
-                                                        ></span>
-                                                    )}
-                                                {i.title}
-                                            </span>
-                                            <span className={styles.filterCount}>({i.count})</span>
-                                        </Link>
-                                    ))}
+                                    {c.options.map((i) => {
+                                        const nextFilter = getNextFilter(i.filter)
+                                        const href = indexCatalog.getHref(nextFilter)
+
+                                        return (
+                                            <Link
+                                                className={styles.collaboratorOption}
+                                                key={i.id}
+                                                href={href}
+                                                onClick={handleIndexClick(nextFilter, href)}
+                                            >
+                                                <span className={styles.filterLabel}>
+                                                    {'id' in activeFilter &&
+                                                        activeFilter.type === c.filterType &&
+                                                        activeFilter.id === i.id && (
+                                                            <span
+                                                                className={
+                                                                    styles.collaboratorActiveMarker
+                                                                }
+                                                            ></span>
+                                                        )}
+                                                    {i.title}
+                                                </span>
+                                                <span className={styles.filterCount}>
+                                                    ({i.count})
+                                                </span>
+                                            </Link>
+                                        )
+                                    })}
                                 </div>
                             </details>
                         )
