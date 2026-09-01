@@ -1,4 +1,5 @@
 import './globals.css'
+import '@/styles/index.css'
 import {Geist} from 'next/font/google'
 import type { Metadata } from 'next';
 

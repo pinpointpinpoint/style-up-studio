@@ -130,8 +130,8 @@ export function applyWorkIndexRoute({
     const nextState = {
         ...state,
         filter: nextFilter,
-        visibleProjects: cachedProjectPage?.visibleProjects ?? state.visibleProjects,
-        hasMore: cachedProjectPage?.hasMore ?? state.hasMore,
+        visibleProjects: cachedProjectPage?.visibleProjects ?? [],
+        hasMore: cachedProjectPage?.hasMore ?? false,
         hoveredProject: null,
         isLoading: cachedProjectPage ? false : state.isLoading,
     }

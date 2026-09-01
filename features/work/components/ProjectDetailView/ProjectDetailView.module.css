@@ -22,21 +22,10 @@
 }
 
 .sidebar {
-    border-left: 1px solid black;
-    display: flex;
-    flex-basis: 0;
-    flex-direction: column;
-    flex-grow: 1;
-    flex-shrink: 0;
-    align-self: flex-start;
-    height: calc(100vh - var(--header-height) * 3);
-    max-width: 400px;
-    min-width: 400px;
+    composes: sidebarFrame stickySidebarFrame from '../shared/WorkSidebarLayout.module.css';
+
     min-height: 0;
-    overflow: hidden;
     padding-top: var(--space-lg);
-    position: sticky;
-    top: 0;
 }
 
 .mediaList {
@@ -91,12 +80,4 @@
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-}
-
-@media (max-width: 785px) {
-    .sidebar {
-      max-width: 300px;
-      min-width: 300px;
-      width: 300px;
-    }
 }

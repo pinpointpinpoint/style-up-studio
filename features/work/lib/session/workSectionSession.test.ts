@@ -159,6 +159,8 @@ describe('work browsing session', () => {
             state: {
                 ...state,
                 filter: {type: 'brand', id: 'brand-a'},
+                visibleProjects: [],
+                hasMore: false,
                 hoveredProject: null,
             },
             filterKey: BRAND_A_FILTER_KEY,
@@ -185,6 +187,8 @@ describe('work browsing session', () => {
             state: {
                 ...state,
                 filter: {type: 'brand', id: 'brand-a'},
+                visibleProjects: [],
+                hasMore: false,
                 hoveredProject: null,
                 isLoading: true,
             },

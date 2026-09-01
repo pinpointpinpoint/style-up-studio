@@ -134,6 +134,43 @@ describe('getProjectCardMedia', () => {
             previewVideoUrl: null,
         })
     })
+
+    it('includes card image source sets when supplied by the image resolver', () => {
+        const media = getProjectCardMedia(
+            project({
+                coverImage: {
+                    asset: {_ref: 'cover-asset', _type: 'reference'},
+                    crop: null,
+                    hotspot: null,
+                },
+                media: [image('gallery-asset', 'gallery-image')],
+            }),
+            {
+                imageUrl: (source, preset) => `${source.asset?._ref}:${preset}`,
+                imageSourceSet: (source, preset) =>
+                    preset === 'card'
+                        ? {
+                              src: `${source.asset?._ref}:card-src`,
+                              srcSet: `${source.asset?._ref}:600 600w, ${source.asset?._ref}:1200 1200w`,
+                              sizes: '25vw',
+                          }
+                        : null,
+            },
+        )
+
+        expect(media.cardImage).toEqual({
+            url: 'cover-asset:card-src',
+            srcSet: 'cover-asset:600 600w, cover-asset:1200 1200w',
+            sizes: '25vw',
+            alt: 'Cover image for Editorial Story',
+        })
+        expect(media.hoverImage).toEqual({
+            url: 'gallery-asset:card-src',
+            srcSet: 'gallery-asset:600 600w, gallery-asset:1200 1200w',
+            sizes: '25vw',
+            alt: 'Gallery image for Editorial Story',
+        })
+    })
 })
 
 describe('getProjectDetailImageMedia', () => {
@@ -282,16 +319,33 @@ describe('getProjectImageThumbnails', () => {
             {
                 key: 'first',
                 mediaIndex: 0,
+                displayWidth: 80,
                 url: 'first-image:thumbnail-80',
                 alt: 'Gallery thumbnail for Editorial Story',
             },
             {
                 key: 'third',
                 mediaIndex: 2,
+                displayWidth: 80,
                 url: 'third-image:thumbnail-80',
                 alt: 'Gallery thumbnail for Editorial Story',
             },
         ])
+    })
+
+    it('calculates thumbnail display width from Sanity asset dimensions', () => {
+        const thumbnails = getProjectImageThumbnails(
+            project({
+                media: [image('image-wide-1200x800-jpg', 'wide-image')],
+            }),
+            {
+                imageUrl: (source, preset) => `${source.asset?._ref}:${preset}`,
+                thumbnailHeight: 80,
+                displayThumbnailHeight: 30,
+            },
+        )
+
+        expect(thumbnails[0]?.displayWidth).toBe(45)
     })
 })
 
@@ -316,6 +370,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'image',
                 key: 'first',
                 mediaIndex: 0,
+                displayWidth: 80,
                 url: 'first-image:thumbnail-80',
                 alt: 'Gallery thumbnail for Editorial Story',
             },
@@ -323,6 +378,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'uploadedVideo',
                 key: 'behind-scenes',
                 mediaIndex: 1,
+                displayWidth: 142.22222222222223,
                 url: 'video-thumbnail:thumbnail-80',
                 alt: 'Video thumbnail 2 for Editorial Story',
             },
@@ -359,6 +415,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'videoUrl',
                 key: 'custom-thumbnail',
                 mediaIndex: 0,
+                displayWidth: 142.22222222222223,
                 url: 'custom-video-thumbnail:thumbnail-80',
                 alt: 'Video link thumbnail 1 for Editorial Story',
             },
@@ -366,6 +423,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'videoUrl',
                 key: 'provider-thumbnail',
                 mediaIndex: 1,
+                displayWidth: 142.22222222222223,
                 url: 'provider:https://vimeo.com/123456789:thumbnail-80',
                 alt: 'Video link thumbnail 2 for Editorial Story',
             },
@@ -397,6 +455,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'uploadedVideo',
                 key: 'uploaded',
                 mediaIndex: 0,
+                displayWidth: 711.1111111111111,
                 url: 'uploaded-thumbnail:thumbnail-400',
                 alt: 'Video thumbnail 1 for Editorial Story',
             },
@@ -404,6 +463,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'videoUrl',
                 key: 'external',
                 mediaIndex: 1,
+                displayWidth: 711.1111111111111,
                 url: 'external-thumbnail:thumbnail-400',
                 alt: 'Video link thumbnail 2 for Editorial Story',
             },
@@ -411,6 +471,7 @@ describe('getProjectThumbnails', () => {
                 kind: 'videoUrl',
                 key: 'provider-thumbnail',
                 mediaIndex: 2,
+                displayWidth: 711.1111111111111,
                 url: 'provider:https://vimeo.com/123456789:thumbnail-400',
                 alt: 'Video link thumbnail 3 for Editorial Story',
             },

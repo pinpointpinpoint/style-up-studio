@@ -12,6 +12,7 @@ type ProjectSidebarMediaOptions = {
         preset: `thumbnail-${number}`,
     ) => string | null | undefined
     thumbnailHeight: number
+    displayThumbnailHeight?: number
     visibleThumbnailCount?: number | null
 }
 

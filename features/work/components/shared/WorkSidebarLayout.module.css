@@ -1,0 +1,26 @@
+.sidebarFrame {
+    --work-sidebar-width: clamp(300px, 28vw, 400px);
+
+    border-left: 1px solid black;
+    display: flex;
+    flex: 0 0 var(--work-sidebar-width);
+    flex-direction: column;
+    height: 100%;
+    max-width: var(--work-sidebar-width);
+    min-height: 0;
+    min-width: var(--work-sidebar-width);
+    overflow: hidden;
+    scrollbar-width: none;
+    width: var(--work-sidebar-width);
+}
+
+.stickySidebarFrame {
+    align-self: flex-start;
+    height: calc(100vh - var(--header-height) * 3);
+    position: sticky;
+    top: 0;
+}
+
+.sidebarFrame::-webkit-scrollbar {
+    display: none;
+}

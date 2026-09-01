@@ -7,33 +7,40 @@ import React, {useMemo, useState} from 'react'
 import {Project} from '@/types'
 import styles from './ProjectCard.module.css'
 import {getProjectCardMedia} from '../../lib/media/projectMediaPresentation'
-import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
+import {
+    getSanityProjectImageSourceSet,
+    getSanityProjectImageUrl,
+} from '../../lib/media/sanityProjectImageUrl'
 
 interface ProjectCardProps {
     project: Project
     index: number
     href: string
     onOpen?: () => void
-    onHoverStart: () => void
 }
 
-const PRIORITY_PROJECT_CARD_COUNT = 9
+const EAGER_PROJECT_CARD_COUNT = 8
+const HIGH_PRIORITY_PROJECT_CARD_COUNT = 2
 
-const ProjectCard = ({project, index, href, onOpen, onHoverStart}: ProjectCardProps) => {
+const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     const [isHovered, setIsHovered] = useState(false)
     const cardMedia = useMemo(
-        () => getProjectCardMedia(project, {imageUrl: getSanityProjectImageUrl}),
+        () =>
+            getProjectCardMedia(project, {
+                imageUrl: getSanityProjectImageUrl,
+                imageSourceSet: getSanityProjectImageSourceSet,
+            }),
         [project],
     )
     const previewVideoUrl = cardMedia.previewVideoUrl
-    const shouldPrioritizeImage = index < PRIORITY_PROJECT_CARD_COUNT
+    const shouldLoadEagerly = index < EAGER_PROJECT_CARD_COUNT
+    const shouldPrioritizeImage = index < HIGH_PRIORITY_PROJECT_CARD_COUNT
     const hoverImage = cardMedia.hoverImage
     const activeImage =
         isHovered && !previewVideoUrl && hoverImage ? hoverImage : cardMedia.cardImage
 
     const handleMouseEnter = () => {
         setIsHovered(true)
-        onHoverStart()
     }
 
     const handleMouseLeave = () => {
@@ -52,10 +59,12 @@ const ProjectCard = ({project, index, href, onOpen, onHoverStart}: ProjectCardPr
             {activeImage && (
                 <img
                     src={activeImage.url}
+                    srcSet={activeImage.srcSet}
+                    sizes={activeImage.sizes}
                     alt={activeImage.alt}
                     className={styles.projectCardImage}
-                    loading={shouldPrioritizeImage ? 'eager' : 'lazy'}
-                    fetchPriority={shouldPrioritizeImage ? 'high' : 'low'}
+                    loading={shouldLoadEagerly ? 'eager' : 'lazy'}
+                    fetchPriority={shouldPrioritizeImage ? 'high' : 'auto'}
                 />
             )}
             {isHovered && previewVideoUrl && (

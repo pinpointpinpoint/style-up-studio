@@ -6,10 +6,13 @@ import {getVideoMediaProviderThumbnailRequest} from '@/features/video/lib/videoM
 import {getExternalVideoThumbnail} from '@/features/video/services/externalVideoService'
 import {Project} from '@/types'
 import styles from './ProjectInfoPanel.module.css'
-import {getProjectSidebarMedia, getVisibleSidebarThumbnailCount} from '../../lib/media/projectSidebarMedia'
+import {
+    getProjectSidebarMedia,
+    getVisibleSidebarThumbnailCount,
+} from '../../lib/media/projectSidebarMedia'
 import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
 
-const THUMBNAIL_WIDTH = 30
+const COMPACT_THUMBNAIL_HEIGHT = 30
 const THUMBNAIL_GAP = 5
 const ASSETS_HORIZONTAL_PADDING = 60
 const COUNT_BADGE_WIDTH = 30
@@ -49,7 +52,6 @@ const ProjectInfoPanel = ({
         count: number
     } | null>(null)
     const assetsWrapperRef = useRef<HTMLDivElement | null>(null)
-    const measuringWrapperRef = useRef<HTMLDivElement | null>(null)
     const projectYear = getProjectYear(displayedProject?.date)
     const hasDescription = Boolean(displayedProject?.description?.length)
     const hasCredits = Boolean(displayedProject?.credits?.length)
@@ -83,26 +85,34 @@ const ProjectInfoPanel = ({
             imageUrl: getSanityProjectImageUrl,
             externalVideoThumbnailUrl: (url) => videoUrlThumbnails[url],
             thumbnailHeight: thumbnailImageHeight,
+            displayThumbnailHeight: expandDetails ? thumbnailImageHeight : COMPACT_THUMBNAIL_HEIGHT,
             visibleThumbnailCount: resolvedVisibleThumbnailCount,
         })
-    }, [displayedProject, resolvedVisibleThumbnailCount, thumbnailImageHeight, videoUrlThumbnails])
+    }, [
+        displayedProject,
+        expandDetails,
+        resolvedVisibleThumbnailCount,
+        thumbnailImageHeight,
+        videoUrlThumbnails,
+    ])
     const {thumbnails, visibleThumbnails, hiddenThumbnailCount} = sidebarMedia
+    const thumbnailDisplayWidthKey = thumbnails
+        .map((thumbnail) => String(thumbnail.displayWidth))
+        .join(',')
 
     useEffect(() => {
         if (expandDetails) return
 
         const wrapper = assetsWrapperRef.current
-        const measuringWrapper = measuringWrapperRef.current
         const projectId = displayedProject?._id
 
-        if (!wrapper || !measuringWrapper || !projectId) return
+        if (!wrapper || !projectId) return
 
         const updateVisibleCount = () => {
             const contentWidth = wrapper.clientWidth - ASSETS_HORIZONTAL_PADDING
-            const thumbnailElements = Array.from(measuringWrapper.querySelectorAll('img'))
-            const thumbnailWidths = thumbnailElements.map(
-                (thumbnail) => thumbnail.getBoundingClientRect().width || THUMBNAIL_WIDTH,
-            )
+            const thumbnailWidths = thumbnailDisplayWidthKey
+                ? thumbnailDisplayWidthKey.split(',').map(Number)
+                : []
 
             setVisibleThumbnailState({
                 projectId,
@@ -118,10 +128,9 @@ const ProjectInfoPanel = ({
 
         updateVisibleCount()
         observer.observe(wrapper)
-        observer.observe(measuringWrapper)
 
         return () => observer.disconnect()
-    }, [displayedProject?._id, expandDetails, thumbnails.length])
+    }, [displayedProject?._id, expandDetails, thumbnailDisplayWidthKey])
 
     useEffect(() => {
         let cancelled = false
@@ -204,24 +213,31 @@ const ProjectInfoPanel = ({
                         <section className={styles.credits}>
                             <ul>
                                 {displayedProject.credits.map((credit, index) => {
-                                    const key = `${credit.role ?? 'credit'}-${credit.name ?? index}`
-                                    const name = credit.name ?? ''
-                                    const content = credit.link ? (
-                                        <a
-                                            href={credit.link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {name}
-                                        </a>
-                                    ) : (
-                                        <span>{name}</span>
-                                    )
+                                    const people = credit.people ?? []
+                                    const key = `${credit.role ?? 'credit'}-${people.map((person) => person.name).join('-') || index}`
 
                                     return (
                                         <li key={key}>
                                             <span>{credit.role}</span>
-                                            {content}
+                                            <span className={styles.creditPeople}>
+                                                {people.map((person, personIndex) => (
+                                                    <span
+                                                        key={`${person.name ?? 'person'}-${personIndex}`}
+                                                    >
+                                                        {person.link ? (
+                                                            <a
+                                                                href={person.link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {person.name}
+                                                            </a>
+                                                        ) : (
+                                                            person.name
+                                                        )}
+                                                    </span>
+                                                ))}
+                                            </span>
                                         </li>
                                     )
                                 })}
@@ -232,22 +248,6 @@ const ProjectInfoPanel = ({
             )}
             {thumbnails.length > 0 ? (
                 <>
-                    {!expandDetails && (
-                    <div
-                        className={styles.assetsMeasurer}
-                        ref={measuringWrapperRef}
-                        aria-hidden="true"
-                    >
-                        {thumbnails.map((thumbnail) => (
-                        <img
-                            key={thumbnail.key}
-                            src={thumbnail.url}
-                            alt=""
-                            className={styles.asset}
-                        />
-                        ))}
-                    </div>
-                    )}
                     <div
                         className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
                         ref={assetsWrapperRef}
@@ -267,9 +267,8 @@ const ProjectInfoPanel = ({
                                     alt={thumbnail.alt}
                                     className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
                                     height={expandDetails ? 80 : 30}
-                                    loading={idx < 6 ? 'eager' : 'lazy'}
+                                    loading="lazy"
                                     decoding="async"
-                                    fetchPriority={idx < 6 ? 'high' : 'low'}
                                 />
                             )
 

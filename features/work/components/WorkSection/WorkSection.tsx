@@ -1,6 +1,6 @@
 'use client'
 
-import {lazy, Suspense, useEffect, useRef} from 'react'
+import {lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef} from 'react'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {WorkSidebar} from '../WorkSidebar/WorkSidebar'
 import {Filter, Project} from '@/types'
@@ -8,7 +8,6 @@ import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import styles from './WorkSection.module.css'
 import ProjectGallery from '../ProjectGallery/ProjectGallery'
 import {useWorkSectionSession} from '../../hooks/useWorkSectionSession'
-import {useProjectGalleryScrollRestoration} from '../../hooks/useProjectGalleryScrollRestoration'
 import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
@@ -33,10 +32,11 @@ export function WorkSection({
     isProjectsLoading = false,
 }: WorkSectionProps) {
     const workScrollRef = useRef<HTMLDivElement | null>(null)
+    const projectGridScrollTopRef = useRef(0)
+    const wasProjectDetailRef = useRef(false)
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
-    useProjectGalleryScrollRestoration(workScrollRef)
     const {
         activeProject,
         hasRouteProjectSelection,
@@ -69,12 +69,34 @@ export function WorkSection({
     })
 
     const displayedProject = hoveredProject ?? activeProject
+    const scrollContainerKey = isProjectDetail
+        ? `detail-${activeProject?._id ?? 'loading'}`
+        : 'id' in filter
+          ? `gallery-${filter.type}-${filter.id}`
+          : `gallery-${filter.type}`
+    const handleProjectOpenFromGrid = useCallback(() => {
+        projectGridScrollTopRef.current = workScrollRef.current?.scrollTop ?? 0
+        handleProjectOpen()
+    }, [handleProjectOpen])
 
     useEffect(() => {
         if (isProjectDetail || !hasRouteProjectSelection) return
 
         clearRouteProjectSelection()
     }, [clearRouteProjectSelection, hasRouteProjectSelection, isProjectDetail])
+
+    useLayoutEffect(() => {
+        const didReturnToProjectGrid = wasProjectDetailRef.current && !isProjectDetail
+
+        if (didReturnToProjectGrid) {
+            workScrollRef.current?.scrollTo({
+                top: projectGridScrollTopRef.current,
+                behavior: 'instant',
+            })
+        }
+
+        wasProjectDetailRef.current = isProjectDetail
+    }, [isProjectDetail, scrollContainerKey])
 
     useEffect(() => {
         if (!isProjectDetail) return
@@ -88,7 +110,7 @@ export function WorkSection({
 
     return (
         <div className={styles.workSection}>
-            <SectionFooterScroll ref={workScrollRef}>
+            <SectionFooterScroll key={scrollContainerKey} ref={workScrollRef}>
                 {!isProjectDetail ? (
                     <div className={styles.workMain}>
                         <div className={styles.contentPane}>
@@ -98,7 +120,7 @@ export function WorkSection({
                                 isLoading={isLoading}
                                 onLoadMore={loadMore}
                                 getProjectHref={getProjectHref}
-                                onProjectOpen={handleProjectOpen}
+                                onProjectOpen={handleProjectOpenFromGrid}
                                 onProjectHover={setHoveredProject}
                                 onProjectLeave={() => setHoveredProject(null)}
                             />

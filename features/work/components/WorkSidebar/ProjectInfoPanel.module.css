@@ -93,6 +93,13 @@
     justify-content: space-between;
 }
 
+.creditPeople {
+    display: grid;
+    justify-items: end;
+    text-align: right;
+    gap: 6px;
+}
+
 .credits a {
     color: inherit;
     text-decoration: underline;
@@ -140,21 +147,6 @@
     gap: var(--space-lg);
     overflow: visible;
     padding: var(--space-lg) var(--space-xl);
-}
-
-.assetsMeasurer {
-    display: flex;
-    gap: var(--space-xs);
-    height: 0;
-    left: -9999px;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-    position: absolute;
-}
-
-.assetsMeasurerHidden {
-    display: none;
 }
 
 .asset {
@@ -218,10 +210,10 @@
 
 .assetEmpty {
     border: 1px solid var(--dimmed);
-    flex: 0 0 22px;
+    flex: 0 0 30px;
     height: 30px;
     position: relative;
-    width: 22px;
+    width: 30px;
 }
 
 .assetEmpty::before,
@@ -232,15 +224,15 @@
     left: 50%;
     position: absolute;
     top: 50%;
-    width: 35px;
+    width: calc(100% * 1.414);
 }
 
 .assetEmpty::before {
-    transform: translate(-50%, -50%) rotate(53deg);
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .assetEmpty::after {
-    transform: translate(-50%, -50%) rotate(-53deg);
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .assetsWrapper::-webkit-scrollbar {

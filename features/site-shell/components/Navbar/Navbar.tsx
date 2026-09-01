@@ -2,12 +2,10 @@
 
 import { useCallback, useId, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { urlForImage } from '@/sanity/lib/utils'
 import type { About, Contact } from '@/sanity.types'
 import getSafeMailto from '@/shared/utils/getSafeMailto'
 import getSafeInstagramProfile from '@/shared/utils/getSafeInstagramProfile'
-import ArrowIcon, { ArrowDirection } from '../ArrowIcon/ArrowIcon'
 import { NavbarDrawer } from './NavbarDrawer'
 import styles from './Navbar.module.css'
 
@@ -35,20 +33,6 @@ interface ContactDrawerContentProps {
   emailHref: EmailHref
   instagram: InstagramProfile
   onClose: () => void
-}
-
-interface ArrowButtonProps {
-  ariaLabel: string
-  direction: ArrowDirection
-  onClick: () => void
-}
-
-function ArrowButton({ ariaLabel, direction, onClick }: ArrowButtonProps) {
-  return (
-    <button type="button" aria-label={ariaLabel} onClick={onClick}>
-      <ArrowIcon direction={direction} />
-    </button>
-  )
 }
 
 function AboutDrawerContent({
@@ -155,7 +139,6 @@ export default function Navbar({ about, contact }: NavbarProps) {
             onClick={() => toggleMenu('about')}
           >
             <span>ABOUT</span>
-            {/* <ArrowIcon direction="right" /> */}
           </button>
           <NavbarDrawer
             id={aboutMenuId}
@@ -183,7 +166,6 @@ export default function Navbar({ about, contact }: NavbarProps) {
             aria-controls={contactMenuId}
             onClick={() => toggleMenu('contact')}
           >
-            {/* <ArrowIcon direction="left" /> */}
             <span>CONTACT</span>
           </button>
           <NavbarDrawer

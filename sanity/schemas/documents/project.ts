@@ -355,21 +355,59 @@ export default defineType({
                             validation: (Rule) => Rule.required().error('Credit role is required.'),
                         }),
                         defineField({
-                            name: 'name',
-                            title: 'Name*',
-                            type: 'string',
-                            validation: (Rule) => Rule.required().error('Credit name is required.'),
-                        }),
-                        defineField({
-                            name: 'link',
-                            title: 'External Link',
-                            type: 'url',
+                            name: 'people',
+                            title: 'People*',
+                            type: 'array',
+                            of: [
+                                defineArrayMember({
+                                    type: 'object',
+                                    name: 'person',
+                                    title: 'Person',
+                                    fields: [
+                                        defineField({
+                                            name: 'name',
+                                            title: 'Name*',
+                                            type: 'string',
+                                            validation: (Rule) =>
+                                                Rule.required().error('Credit name is required.'),
+                                        }),
+                                        defineField({
+                                            name: 'link',
+                                            title: 'External Link',
+                                            type: 'url',
+                                        }),
+                                    ],
+                                    preview: {
+                                        select: {
+                                            title: 'name',
+                                        },
+                                    },
+                                }),
+                            ],
+                            validation: (Rule) =>
+                                Rule.required()
+                                    .min(1)
+                                    .error('Add at least one person for this credit.'),
                         }),
                     ],
                     preview: {
                         select: {
                             title: 'role',
-                            subtitle: 'name',
+                            firstPerson: 'people.0.name',
+                            people: 'people',
+                        },
+                        prepare({title, firstPerson, people}) {
+                            const peopleCount = Array.isArray(people) ? people.length : 0
+                            const extraPeopleCount = Math.max(0, peopleCount - 1)
+                            const subtitle =
+                                firstPerson && extraPeopleCount > 0
+                                    ? `${firstPerson} +${extraPeopleCount}`
+                                    : firstPerson
+
+                            return {
+                                title,
+                                subtitle,
+                            }
                         },
                     },
                 }),

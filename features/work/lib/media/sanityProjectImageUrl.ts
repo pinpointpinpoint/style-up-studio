@@ -1,5 +1,12 @@
 import {urlForImage} from '@/sanity/lib/utils'
-import type {ProjectImageUrlResolver} from './projectMediaPresentation'
+import type {
+    ProjectImageSourceSetResolver,
+    ProjectImageUrlResolver,
+} from './projectMediaPresentation'
+
+const PROJECT_CARD_IMAGE_WIDTHS = [600, 900, 1200, 1600]
+const PROJECT_CARD_IMAGE_SIZES =
+    '(max-width: 600px) 100vw, (max-width: 1000px) 50vw, (max-width: 1245px) 33vw, 25vw'
 
 export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset) => {
     if (preset === 'card') {
@@ -21,4 +28,28 @@ export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset
     }
 
     return null
+}
+
+export const getSanityProjectImageSourceSet: ProjectImageSourceSetResolver = (source, preset) => {
+    if (preset !== 'card') return null
+
+    const src = getSanityProjectImageUrl(source, preset)
+
+    if (!src) return null
+
+    const srcSet = PROJECT_CARD_IMAGE_WIDTHS.map((width) => {
+        const url = urlForImage(source)?.height(width).width(width).url()
+
+        return url ? `${url} ${width}w` : null
+    })
+        .filter((candidate): candidate is string => Boolean(candidate))
+        .join(', ')
+
+    if (!srcSet) return null
+
+    return {
+        src,
+        srcSet,
+        sizes: PROJECT_CARD_IMAGE_SIZES,
+    }
 }

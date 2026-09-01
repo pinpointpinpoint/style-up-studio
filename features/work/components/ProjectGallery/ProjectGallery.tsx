@@ -1,10 +1,21 @@
 'use client'
 
-import {useRef} from 'react'
+import {motion} from 'motion/react'
 import styles from './ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import {Project} from '@/types'
-import {useProjectGalleryScrollRestoration} from '@/features/work/hooks/useProjectGalleryScrollRestoration'
+
+const PROJECT_LOADING_CELL_COUNT = 12
+
+function getStableDelay(id: string) {
+    let hash = 0
+
+    for (let index = 0; index < id.length; index += 1) {
+        hash = (hash * 31 + id.charCodeAt(index)) % 1000
+    }
+
+    return (hash / 1000) * 0.28
+}
 
 type ProjectGalleryProps = {
     projects: Project[]
@@ -26,38 +37,43 @@ export default function ProjectGallery({
     onProjectOpen,
     onProjectHover,
     onProjectLeave,
-}: ProjectGalleryProps) {
-    const galleryRef = useRef<HTMLDivElement | null>(null)
-    useProjectGalleryScrollRestoration(galleryRef)
+	}: ProjectGalleryProps) {
+	const shouldShowLoadingCells = isLoading && projects.length === 0
 
-    const onEnter = (project: Project) => () => {
-        onProjectHover?.(project)
-    }
-
-    const onLeave = () => {
-        onProjectLeave?.()
-    }
-
-    return (
-        <div
-            ref={galleryRef}
-            className={styles.projectGallery}
-            onMouseLeave={onLeave}
-        >
-            {projects?.map((project, idx) => (
-                <div key={project._id}>
+	return (
+		<div className={styles.projectGallery}>
+			{shouldShowLoadingCells &&
+				Array.from({length: PROJECT_LOADING_CELL_COUNT}, (_, index) => (
+					<div
+						key={`project-loading-cell-${index}`}
+						className={styles.loadingCell}
+						aria-hidden="true"
+					/>
+				))}
+			{projects?.map((project, idx) => (
+				<motion.div
+                    key={project._id}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{
+                        duration: 0.18,
+                        delay: getStableDelay(project._id),
+                        ease: 'easeOut',
+                    }}
+                    onMouseEnter={() => onProjectHover?.(project)}
+                    onMouseLeave={() => onProjectLeave?.()}
+                >
                     <ProjectCard
                         project={project}
                         index={idx}
                         href={getProjectHref(project)}
                         onOpen={onProjectOpen}
-                        onHoverStart={onEnter(project)}
                     />
-                </div>
+                </motion.div>
             ))}
             {hasMore && (
                 <button onClick={onLoadMore} disabled={isLoading} className={styles.viewMoreButton}>
-                    {isLoading ? '[LOADING...]' : '[LOAD MORE]'}
+                    <div>{isLoading ? '[LOADING...]' : '[LOAD MORE]'}</div>
                 </button>
             )}
         </div>

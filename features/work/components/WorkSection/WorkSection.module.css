@@ -35,13 +35,11 @@
 }
 
 .sidebarPane {
-    align-self: flex-start;
-    height: calc(100vh - var(--header-height) * 3);
-    position: sticky;
-    top: 0;
+    composes: stickySidebarFrame from '../shared/WorkSidebarLayout.module.css';
 }
 
 .projectLoading {
+    background: white;
     align-items: center;
     display: flex;
     font-size: var(--font-sm);
@@ -65,10 +63,7 @@
 }
 
 .projectDetailLoadingSidebar {
-    border-left: 1px solid black;
-    flex: 1 0 0;
-    height: 100%;
-    max-width: 350px;
-    min-width: 350px;
+    composes: sidebarFrame from '../shared/WorkSidebarLayout.module.css';
+
     padding: var(--space-lg) var(--space-xl);
 }

@@ -1,41 +1,22 @@
 .container {
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-left: 1px solid black;
-    height: 100%;
-    overflow: hidden;
-    max-width: 400px;
-    min-width: 400px;
-    width: 400px;
-    scrollbar-width: none; 
-    -ms-overflow-style: none; 
-}
+    composes: sidebarFrame from '../shared/WorkSidebarLayout.module.css';
 
-.container::-webkit-scrollbar {
-    display: none;
+    min-height: 0;
+    justify-content: space-between;
+    -ms-overflow-style: none;
 }
 
 .filterSection {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  background-color: white;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    background-color: white;
 }
 
 .detailsSection {
-  flex: 0 0 auto;
+    flex: 0 0 auto;
 }
 
 .detailsSectionOverflow {
-  border-top: 1px solid black;
-}
-
-@media (max-width: 785px) {
-    .container {
-      max-width: 300px;
-      min-width: 300px;
-      width: 300px;
-    }
+    border-top: 1px solid black;
 }

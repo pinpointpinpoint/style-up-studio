@@ -14,9 +14,22 @@ export type ProjectImageUrlResolver = (
     preset: ProjectImagePreset,
 ) => string | null | undefined
 
+export type ProjectImageSourceSet = {
+    src: string
+    srcSet: string
+    sizes: string
+}
+
+export type ProjectImageSourceSetResolver = (
+    source: ProjectImage | ProjectMediaImage,
+    preset: ProjectImagePreset,
+) => ProjectImageSourceSet | null | undefined
+
 export type ProjectPresentedImage = {
     url: string
     alt: string
+    srcSet?: string
+    sizes?: string
 }
 
 export type ProjectCardMedia = {
@@ -59,18 +72,21 @@ export type ProjectImageThumbnail = ProjectPresentedImage & {
     kind?: 'image'
     key: string
     mediaIndex: number
+    displayWidth: number
 }
 
 export type ProjectUploadedVideoThumbnail = ProjectPresentedImage & {
     kind: 'uploadedVideo'
     key: string
     mediaIndex: number
+    displayWidth: number
 }
 
 export type ProjectExternalVideoThumbnail = ProjectPresentedImage & {
     kind: 'videoUrl'
     key: string
     mediaIndex: number
+    displayWidth: number
 }
 
 export type ProjectThumbnail =
@@ -80,6 +96,7 @@ export type ProjectThumbnail =
 
 type ProjectMediaPresentationOptions = {
     imageUrl: ProjectImageUrlResolver
+    imageSourceSet?: ProjectImageSourceSetResolver
     externalVideoPosterUrl?: (url: string) => string | null | undefined
 }
 
@@ -89,6 +106,31 @@ type ProjectThumbnailPresentationOptions = ProjectMediaPresentationOptions & {
         preset: `thumbnail-${number}`,
     ) => string | null | undefined
     thumbnailHeight: number
+    displayThumbnailHeight?: number
+}
+
+const FALLBACK_THUMBNAIL_ASPECT_RATIO = 1
+const FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO = 16 / 9
+
+function getSanityAssetAspectRatio(assetRef: string | null | undefined) {
+    const match = assetRef?.match(/-(\d+)x(\d+)-[^-]+$/)
+
+    if (!match) return null
+
+    const width = Number(match[1])
+    const height = Number(match[2])
+
+    return width > 0 && height > 0 ? width / height : null
+}
+
+function getThumbnailDisplayWidth(
+    aspectRatio: number | null | undefined,
+    options: ProjectThumbnailPresentationOptions,
+) {
+    return (
+        (options.displayThumbnailHeight ?? options.thumbnailHeight) *
+        (aspectRatio ?? FALLBACK_THUMBNAIL_ASPECT_RATIO)
+    )
 }
 
 function getAssetRef(image: ProjectImage | ProjectMediaImage | null | undefined) {
@@ -100,15 +142,21 @@ function toPresentedImage(
     alt: string,
     imageUrl: ProjectImageUrlResolver,
     preset: ProjectImagePreset = 'card',
+    imageSourceSet?: ProjectImageSourceSetResolver,
 ): ProjectPresentedImage | null {
     if (!source) return null
 
+    const sourceSet = imageSourceSet?.(source, preset)
     const url = imageUrl(source, preset)
-    if (!url) return null
+    const src = sourceSet?.src ?? url
+
+    if (!src) return null
 
     return {
-        url,
+        url: src,
         alt,
+        ...(sourceSet?.srcSet ? {srcSet: sourceSet.srcSet} : {}),
+        ...(sourceSet?.sizes ? {sizes: sourceSet.sizes} : {}),
     }
 }
 
@@ -124,6 +172,7 @@ export function getProjectCardMedia(
         `Cover image for ${projectTitle}`,
         imageUrl,
         'card',
+        options.imageSourceSet,
     )
     const mediaImages = project.media.filter(
         (item): item is ProjectMediaImage => item._type === 'image',
@@ -134,6 +183,7 @@ export function getProjectCardMedia(
         `Gallery image for ${projectTitle}`,
         imageUrl,
         'card',
+        options.imageSourceSet,
     )
 
     return {
@@ -279,6 +329,10 @@ export function getProjectImageThumbnails(
             return {
                 key: item._key ?? item.asset?._ref ?? String(mediaIndex),
                 mediaIndex,
+                displayWidth: getThumbnailDisplayWidth(
+                    getSanityAssetAspectRatio(item.asset?._ref),
+                    options,
+                ),
                 ...image,
             }
         })
@@ -321,6 +375,11 @@ export function getProjectThumbnails(
                     mediaIndex,
                     url,
                     alt: `Video thumbnail ${mediaIndex + 1} for ${projectTitle}`,
+                    displayWidth: getThumbnailDisplayWidth(
+                        getSanityAssetAspectRatio(item.thumbnail.asset?._ref) ??
+                            FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
+                        options,
+                    ),
                 }
             }
 
@@ -345,6 +404,11 @@ export function getProjectThumbnails(
                     mediaIndex,
                     url,
                     alt: `Video link thumbnail ${mediaIndex + 1} for ${projectTitle}`,
+                    displayWidth: getThumbnailDisplayWidth(
+                        getSanityAssetAspectRatio(item.thumbnail?.asset?._ref) ??
+                            FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
+                        options,
+                    ),
                 }
             }
 

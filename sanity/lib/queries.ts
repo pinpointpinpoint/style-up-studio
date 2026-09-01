@@ -135,8 +135,17 @@ const projectBaseProjection = `
   description[],
   credits[]{
     role,
-    name,
-    link
+    "people": select(
+      defined(people) => people[]{
+        name,
+        link
+      },
+      defined(name) => [{
+        "name": name,
+        "link": link
+      }],
+      []
+    )
   },
   orderRank
 `
