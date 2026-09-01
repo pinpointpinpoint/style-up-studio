@@ -15,6 +15,7 @@
     background-color: white;
     font-size: var(--font-sm);
     font-weight: 600;
+    color: var(--off-black);
 }
 
 .scroller {
@@ -63,23 +64,7 @@
     min-height: 120px;
     overflow-y: auto;
     padding-top: var(--space-xl);
-    /* scrollbar-color: black transparent;
-    scrollbar-width: thin; */
 }
-
-/* .collaboratorSection::-webkit-scrollbar {
-    width: 6px;
-}
-
-.collaboratorSection::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.collaboratorSection::-webkit-scrollbar-thumb {
-    background-color: black;
-    border: 2px solid white;
-    border-radius: 0;
-} */
 
 .collaboratorGroup {
     border-top: 1px solid var(--off-black);
@@ -174,6 +159,7 @@
     line-height: 1;
     min-width: 0;
     padding-right: var(--space-xs);
+    color: var(--off-black);
 }
 
 .filterCount {
@@ -185,6 +171,7 @@
 .collaboratorArrow {
     display: inline-flex;
     flex: 0 0 auto;
+    color: var(--off-black);
 }
 
 .collaboratorArrow img {

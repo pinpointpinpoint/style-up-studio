@@ -67,3 +67,10 @@
 
     padding: var(--space-lg) var(--space-xl);
 }
+
+
+@media (max-width: 576px) {
+    .workMain {
+        flex-direction: column-reverse;
+    }
+}

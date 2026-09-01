@@ -57,6 +57,7 @@
 .headerArrow {
     display: inline-flex;
     flex: 0 0 auto;
+    color: var(--off-black);
 }
 
 .headerLabel {
@@ -69,6 +70,7 @@
     align-items: center;
     display: flex;
     min-width: 0;
+    font-size: var(--font-md);
 }
 
 .projectHeaderArrow {

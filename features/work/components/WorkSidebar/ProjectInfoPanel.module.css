@@ -16,6 +16,7 @@
     min-height: 30px;
     display: flex;
     align-items: center;
+    color: var(--off-black);
 }
 
 .titleEmpty {
@@ -50,6 +51,7 @@
 
 .description,
 .credits {
+    color: var(--off-black);
     padding: var(--space-sm) var(--space-xl) var(--space-sm);
 }
 
@@ -98,6 +100,7 @@
     justify-items: end;
     text-align: right;
     gap: 6px;
+    color: var(--links);
 }
 
 .credits a {
@@ -252,6 +255,7 @@
     top: 0;
     background-color: white;
     border-bottom: 1px solid var(--off-black);
+    color: var(--off-black);
 }
 
 .headingEmpty {

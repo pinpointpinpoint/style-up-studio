@@ -16,8 +16,8 @@
     --space-xl: 30px;
 
     --dimmed: #b9b9b9;
-    --off-black: #131212;
-    --links-teal: #218287;
+    --off-black: #100F0F;
+    --links: #218287;
     --hover: #767676;
     --disabled-gray: #AEAEAE;
 
@@ -27,7 +27,16 @@
 }
 
 body {
+    color: var(--off-black);
     margin: 0;
     padding: 0;
     box-sizing: border-box; /* optional, usually good */
+}
+
+a {
+    color: var(--links);
+}
+
+p, h1, h2, h3, h4, h5, h6, button { 
+    color: var(--off-black);
 }

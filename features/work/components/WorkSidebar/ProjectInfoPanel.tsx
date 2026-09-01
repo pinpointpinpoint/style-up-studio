@@ -203,11 +203,26 @@ const ProjectInfoPanel = ({
                         {projectYear || 'Year'}
                     </div>
                     {hasDescription && displayedProject?.description && (
-                        <section className={styles.description}>
-                            <div className={styles.portableText}>
-                                <PortableText value={displayedProject.description} />
-                            </div>
-                        </section>
+                    <section className={styles.description}>
+                        <div className={styles.portableText}>
+                        <PortableText
+                            value={displayedProject.description}
+                            components={{
+                            marks: {
+                                link: ({ children, value }) => (
+                                <a
+                                    href={value?.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {children}
+                                </a>
+                                ),
+                            },
+                            }}
+                        />
+                        </div>
+                    </section>
                     )}
                     {hasCredits && displayedProject?.credits && (
                         <section className={styles.credits}>

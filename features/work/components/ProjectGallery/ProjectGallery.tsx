@@ -56,7 +56,7 @@ export default function ProjectGallery({
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
                     transition={{
-                        duration: 0.18,
+                        duration: 0.11,
                         delay: getStableDelay(project._id),
                         ease: 'easeOut',
                     }}
