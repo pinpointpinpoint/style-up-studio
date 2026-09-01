@@ -58,7 +58,7 @@ button:hover {
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-    background-color: black;
+    background-color: var(--off-black);
     border: solid 2px white;
     border-radius: 0;
 }

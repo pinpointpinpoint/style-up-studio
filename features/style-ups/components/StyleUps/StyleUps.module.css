@@ -2,7 +2,7 @@
     align-self: flex-start;
     height: calc(100vh - var(--header-height) * 3);
     max-width: 400px;
-    border-left: solid 1px black;
+    border-left: solid 1px var(--off-black);
     flex: 1 0 0;
     position: sticky;
     top: 0;
@@ -12,7 +12,7 @@
     display: flex;
     width: 100%;
     min-height: 100%;
-    border-top: solid 1px black;
+    border-top: solid 1px var(--off-black);
 }
 
 .styleUps {
@@ -43,12 +43,12 @@
 }
 
 .card:focus-visible img {
-    outline: 2px solid black;
+    outline: 2px solid var(--off-black);
     outline-offset: 4px;
 }
 
 .card img {
-    border: 1px solid black;
+    border: 1px solid var(--off-black);
     box-shadow: 0 0 0 0 white;
     height: auto;
     pointer-events: none;
@@ -62,7 +62,7 @@
     appearance: none;
     aspect-ratio: 1 / 1;
     background: white;
-    border: 1px solid black;
+    border: 1px solid var(--off-black);
     border-radius: 0;
     color: inherit;
     cursor: pointer;
@@ -76,6 +76,6 @@
 }
 
 .loadMoreCard:focus-visible {
-    outline: 2px solid black;
+    outline: 2px solid var(--off-black);
     outline-offset: 4px;
 }

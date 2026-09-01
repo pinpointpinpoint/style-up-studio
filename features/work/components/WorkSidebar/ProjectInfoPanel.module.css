@@ -11,7 +11,7 @@
 
 .title {
     padding: 0 var(--space-xl);
-    border-bottom: solid 1px black;
+    border-bottom: solid 1px var(--off-black);
     font-size: var(--font-sm);
     min-height: 30px;
     display: flex;
@@ -28,11 +28,11 @@
 }
 
 .revealedDetails {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
 }
 
 .metaRow {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
     display: grid;
     font-size: var(--font-sm);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -45,7 +45,7 @@
 }
 
 .metaRow span + span {
-    border-left: 1px solid black;
+    border-left: 1px solid var(--off-black);
 }
 
 .description,
@@ -54,7 +54,7 @@
 }
 
 .description + .credits {
-    border-top: 1px solid black;
+    border-top: 1px solid var(--off-black);
 }
 
 .description h3,
@@ -193,12 +193,12 @@
 }
 
 .assetActive {
-    border-color: black;
+    border-color: var(--off-black);
 }
 
 .assetCount {
     align-items: center;
-    border: 1px solid black;
+    border: 1px solid var(--off-black);
     display: flex;
     flex: 0 0 30px;
     font-size: var(--font-sm);
@@ -251,7 +251,7 @@
     position: sticky;
     top: 0;
     background-color: white;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
 }
 
 .headingEmpty {

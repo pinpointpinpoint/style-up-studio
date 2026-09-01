@@ -1,7 +1,7 @@
 .sidebarFrame {
     --work-sidebar-width: clamp(300px, 28vw, 400px);
 
-    border-left: 1px solid black;
+    border-left: 1px solid var(--off-black);
     display: flex;
     flex: 0 0 var(--work-sidebar-width);
     flex-direction: column;

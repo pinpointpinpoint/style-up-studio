@@ -1,5 +1,5 @@
 .root {
-    --vp-border: 1px solid #000;
+    --vp-border: 1px solid var(--off-black);
     --vp-bg: #fff;
     --vp-control-size: 36px;
 }
@@ -11,7 +11,7 @@
     height: 100%;
     min-width: 0;
     min-height: 0;
-    background: #000;
+    background: var(--off-black);
     overflow: hidden;
     outline: var(--vp-border);
 }
@@ -23,7 +23,7 @@
     width: 100%;
     height: 100%;
     --media-brand: #fff;
-    --media-focus-ring-color: #000;
+    --media-focus-ring-color: var(--off-black);
 }
 
 .frameToggle {
@@ -116,7 +116,7 @@
     padding: 0 14px;
     border: var(--vp-border);
     background: #fff;
-    color: #000;
+    color: var(--off-black);
     text-decoration: none;
     font-size: 12px;
     font-weight: 700;
@@ -166,7 +166,7 @@
     flex-shrink: 0;
     outline: none;
     padding: 0;
-    color: #000;
+    color: var(--off-black);
     transition: background 0.1s ease;
 }
 
@@ -188,7 +188,7 @@
     padding: 0 8px;
     font-size: 11px;
     font-weight: 600;
-    color: #000;
+    color: var(--off-black);
     white-space: nowrap;
     border-right: var(--vp-border);
     user-select: none;
@@ -222,7 +222,7 @@
     left: 0;
     top: 0;
     bottom: 0;
-    background: #000;
+    background: var(--off-black);
     will-change: width;
     width: var(--slider-fill, 0%);
 }

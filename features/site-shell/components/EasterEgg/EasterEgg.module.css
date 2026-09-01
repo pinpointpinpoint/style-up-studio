@@ -11,8 +11,8 @@
 
 .trigger {
     background: white;
-    border: 1px solid black;
-    color: black;
+    border: 1px solid var(--off-black);
+    color: var(--off-black);
     font-size: var(--font-sm);
     line-height: 1;
     padding: var(--space-xs) 8px;
@@ -22,7 +22,7 @@
 }
 
 .trigger:hover {
-    background: black;
+    background: var(--off-black);
     color: white;
 }
 
@@ -35,8 +35,8 @@
 
 .modal {
     background: white;
-    border: 1px solid black;
-    box-shadow: 8px 8px 0 black;
+    border: 1px solid var(--off-black);
+    box-shadow: 8px 8px 0 var(--off-black);
     left: 50%;
     max-width: min(360px, calc(100vw - 40px));
     pointer-events: auto;
@@ -48,7 +48,7 @@
 
 .header {
     align-items: center;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
     display: flex;
     gap: 16px;
     justify-content: space-between;
@@ -62,14 +62,14 @@
 }
 
 .header button {
-    border-left: 1px solid black;
+    border-left: 1px solid var(--off-black);
     font-size: var(--font-sm);
     height: 100%;
     padding: var(--space-xs) var(--space-sm);
 }
 
 .header button:hover {
-    background: black;
+    background: var(--off-black);
     color: white;
 }
 

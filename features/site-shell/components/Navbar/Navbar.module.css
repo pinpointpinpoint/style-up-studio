@@ -99,7 +99,7 @@
 }
 
 .aboutImageFull {
-    border: 1px solid black;
+    border: 1px solid var(--off-black);
     height: 400px;
     left: 0;
     opacity: 0;
@@ -144,7 +144,7 @@
 
 .contactLinkList a {
     white-space: nowrap;
-    color: black;
+    color: var(--off-black);
     text-decoration: none;
     text-transform: uppercase;
 }

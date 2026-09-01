@@ -1,7 +1,7 @@
 .page {
     align-items: stretch;
     background: white;
-    color: black;
+    color: var(--off-black);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -9,7 +9,7 @@
 
 .header {
     align-items: center;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
     display: flex;
     justify-content: space-between;
     min-height: var(--header-height);
@@ -31,13 +31,13 @@
 }
 
 .panel {
-    border: 1px solid black;
+    border: 1px solid var(--off-black);
     max-width: min(420px, calc(100vw - 60px));
     width: 420px;
 }
 
 .title {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--off-black);
     font-size: var(--font-md);
     font-weight: inherit;
     margin: 0;
@@ -52,7 +52,7 @@
 }
 
 .actions {
-    border-top: 1px solid black;
+    border-top: 1px solid var(--off-black);
     display: flex;
 }
 
@@ -66,6 +66,6 @@
 }
 
 .link:hover {
-    background: black;
+    background: var(--off-black);
     color: white;
 }

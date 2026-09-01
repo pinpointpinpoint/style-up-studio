@@ -9,7 +9,7 @@
 }
 
 .section {
-    background: black;
+    background: var(--off-black);
     min-height: 0;
     overflow: hidden;
     display: flex;
@@ -19,10 +19,10 @@
 .header {
     width: 100%;
     background: white;
-    color: black;
+    color: var(--off-black);
     padding: 0 var(--space-xl);
     text-align: left;
-    border-top: 1px solid black;
+    border-top: 1px solid var(--off-black);
     font-size: 16px;
     height: var(--header-height);
     min-height: var(--header-height);
@@ -32,10 +32,10 @@
 }
 
 .open .header {
-    background: rgb(0, 0, 0);
+    background: var(--off-black);
     color: white;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
+    border-top: 1px solid var(--off-black);
+    border-bottom: 1px solid var(--off-black);
 }
 
 .headerAction {
@@ -103,7 +103,7 @@
 }
 
 .deferredSectionShell {
-    border-top: 1px solid black;
+    border-top: 1px solid var(--off-black);
     display: flex;
     height: 100%;
     width: 100%;
@@ -117,7 +117,7 @@
 }
 
 .deferredSectionSidebar {
-    border-left: 1px solid black;
+    border-left: 1px solid var(--off-black);
     flex: 1 0 0;
     max-width: 350px;
 }
