@@ -12,6 +12,7 @@ import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSele
 import {PROJECTS_PAGE_SIZE} from '@/features/work/lib/constants'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
 import SectionFooterScroll from '@/features/site-shell/components/SectionFooterScroll/SectionFooterScroll'
+import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const loadProjectDetailView = () => import('../ProjectDetailView/ProjectDetailView')
 const DeferredProjectDetailView = lazy(loadProjectDetailView)
@@ -113,6 +114,12 @@ export function WorkSection({
             <SectionFooterScroll key={scrollContainerKey} ref={workScrollRef}>
                 {!isProjectDetail ? (
                     <div className={styles.workMain}>
+                        <div className={styles.mobileMenu}>
+                            <MobileMenu
+                                sidebarFilters={activeSidebarFilters}
+                                filter={filter}
+                            />
+                        </div>
                         <div className={styles.contentPane}>
                             <ProjectGallery
                                 projects={visibleProjects}

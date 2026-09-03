@@ -209,6 +209,7 @@ export function getProjectDetailImageMedia(
                 `Project image ${mediaIndex + 1} for ${projectTitle}`,
                 imageUrl,
                 'detail',
+                options.imageSourceSet,
             )
 
             if (!image) return null

@@ -5,25 +5,50 @@
 }
 
 .playerWrapper {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
-    background: var(--off-black);
     overflow: hidden;
-    outline: var(--vp-border);
 }
 
 .mediaPlayer {
     display: block;
-    position: absolute;
-    inset: 0;
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
     width: 100%;
-    height: 100%;
     --media-brand: #fff;
     --media-focus-ring-color: var(--off-black);
+    background: transparent;
+}
+
+.mediaPlayer :global([data-media-provider]) {
+    align-items: center;
+    background: transparent;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    max-height: 100%;
+    max-width: 100%;
+    width: 100%;
+}
+
+.mediaPlayer :global(video),
+.mediaPlayer :global(iframe) {
+    background: transparent;
+    display: block;
+    height: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    width: 100%;
 }
 
 .frameToggle {
@@ -53,9 +78,10 @@
 
 .poster :global(img) {
     width: 100%;
-    height: 100%;
+    height: auto;
     display: block;
-    object-fit: cover;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .playOverlay {

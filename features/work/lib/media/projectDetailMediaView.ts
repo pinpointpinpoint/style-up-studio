@@ -2,11 +2,13 @@ import type {Project} from '@/types'
 import {
     getProjectDetailMedia,
     type ProjectDetailMedia,
+    type ProjectImageSourceSetResolver,
     type ProjectImageUrlResolver,
 } from './projectMediaPresentation'
 
 type ProjectDetailMediaViewOptions = {
     imageUrl: ProjectImageUrlResolver
+    imageSourceSet?: ProjectImageSourceSetResolver
     externalVideoPosterUrl?: (url: string) => string | null | undefined
 }
 

@@ -68,9 +68,23 @@
     padding: var(--space-lg) var(--space-xl);
 }
 
+.mobileMenu {
+    display: none;
+}
 
 @media (max-width: 576px) {
     .workMain {
-        flex-direction: column-reverse;
+        flex-direction: column;
+    }
+    .sidebarPane {
+        display: none;
+    }
+    .mobileMenu {
+        display: block;
+        position: sticky;
+        z-index: 999;
+        background: white;
+        width: 100%;
+        top: 0;
     }
 }

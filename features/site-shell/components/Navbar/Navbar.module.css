@@ -30,7 +30,7 @@
     background: transparent;
     border: 0;
     cursor: pointer;
-    font-size: var(--font-md);
+    font-size: var(--font-sm);
     gap: 6px;
     padding: 0;
 }
@@ -144,7 +144,13 @@
 
 .contactLinkList a {
     white-space: nowrap;
-    color: var(--off-black);
-    text-decoration: none;
+    color: var(--links);
     text-transform: uppercase;
+    font-size: var(--font-sm);
+}
+
+@media (max-width: 576px) {
+    .header, .nav, .drawerInner {
+        height: var(--mobile-header-height);
+    }
 }

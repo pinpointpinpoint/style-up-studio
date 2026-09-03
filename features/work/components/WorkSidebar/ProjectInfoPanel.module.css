@@ -100,13 +100,10 @@
     justify-items: end;
     text-align: right;
     gap: 6px;
-    color: var(--links);
 }
 
-.credits a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+.creditPeople a {
+    color: var(--links);
 }
 
 .credits li > * {

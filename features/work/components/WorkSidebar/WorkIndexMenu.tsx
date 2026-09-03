@@ -15,6 +15,7 @@ const FEATURED_ACTIVE_IMAGE_SRC = '/featured.svg'
 type WorkIndexMenuProps = {
     sidebarFilters: SidebarFiltersQueryResult | null
     filter: Filter
+    variant?: 'sidebar' | 'mobile'
 }
 
 type OptimisticFilter = {
@@ -38,7 +39,8 @@ function getHrefPathname(href: string) {
     return href.split('?')[0]?.split('#')[0] || '/'
 }
 
-export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuProps) {
+export default function WorkIndexMenu({sidebarFilters, filter, variant = 'sidebar'}: WorkIndexMenuProps) {
+    const showHeading = variant === 'sidebar'
     const pathname = usePathname()
     const indexCatalog = createWorkIndexCatalog(sidebarFilters)
     const {projectTypes, collaborators} = indexCatalog.filters
@@ -65,8 +67,8 @@ export default function WorkIndexMenu({sidebarFilters, filter}: WorkIndexMenuPro
         }
 
     return (
-        <div className={styles.menu}>
-            <div className={styles.heading}>INDEX</div>
+        <div className={styles.menu} data-variant={variant}>
+            {showHeading && <div className={styles.heading}>INDEX</div>}
             <div className={`${styles.scroller} scrollbar`} data-sidebar-scroll-area>
                 <div className={styles.projectTypeList}>
                     {projectTypes.map((type) => {

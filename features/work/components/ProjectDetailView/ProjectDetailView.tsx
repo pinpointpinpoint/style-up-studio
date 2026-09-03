@@ -21,7 +21,10 @@ import {
     getProjectDetailMediaScrollSelection,
     selectProjectDetailMedia,
 } from '../../lib/media/projectDetailMediaView'
-import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
+import {
+    getSanityProjectImageSourceSet,
+    getSanityProjectImageUrl,
+} from '../../lib/media/sanityProjectImageUrl'
 
 const DeferredVideoPlayer = lazy(
     () => import('@/features/video/components/VideoPlayer/VideoPlayer'),
@@ -36,12 +39,16 @@ type ProjectImageProps = {
     src: string
     alt: string
     eager: boolean
+    srcSet?: string
+    sizes?: string
 }
 
-function ProjectImage({src, alt, eager}: ProjectImageProps) {
+function ProjectImage({src, alt, eager, srcSet, sizes}: ProjectImageProps) {
     return (
         <img
             src={src}
+            srcSet={srcSet}
+            sizes={sizes}
             alt={alt}
             className={styles.image}
             loading={eager ? 'eager' : 'lazy'}
@@ -76,6 +83,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
         () =>
             createProjectDetailMediaView(project, {
                 imageUrl: getSanityProjectImageUrl,
+                imageSourceSet: getSanityProjectImageSourceSet,
                 externalVideoPosterUrl: (url) =>
                     videoPosterState?.key === project._id ? videoPosterState.posters[url] : null,
             }),
@@ -208,6 +216,8 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                 >
                                     <ProjectImage
                                         src={item.url}
+                                        srcSet={item.srcSet}
+                                        sizes={item.sizes}
                                         alt={item.alt}
                                         eager={item.eager}
                                     />

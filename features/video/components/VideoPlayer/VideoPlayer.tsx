@@ -103,7 +103,11 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     return <VideoPlayerInstance key={props.src} {...props} />
 }
 
-function VideoPlayerInstance({src, poster, title}: VideoPlayerProps) {
+function VideoPlayerInstance({
+    src,
+    poster,
+    title,
+}: VideoPlayerProps) {
     const [hasStarted, setHasStarted] = useState(false)
     const [hasEnded, setHasEnded] = useState(false)
     const [hasPlaybackFailed, setHasPlaybackFailed] = useState(false)
@@ -136,7 +140,10 @@ function VideoPlayerInstance({src, poster, title}: VideoPlayerProps) {
     }, [])
 
     return (
-        <div className={`${styles.root} ${styles.playerWrapper}`} data-started={showControls ? '' : undefined}>
+        <div
+            className={`${styles.root} ${styles.playerWrapper}`}
+            data-started={showControls ? '' : undefined}
+        >
             <MediaPlayer
                 src={src}
                 title={title}

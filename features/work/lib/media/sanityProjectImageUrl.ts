@@ -7,6 +7,9 @@ import type {
 const PROJECT_CARD_IMAGE_WIDTHS = [600, 900, 1200, 1600]
 const PROJECT_CARD_IMAGE_SIZES =
     '(max-width: 600px) 100vw, (max-width: 1000px) 50vw, (max-width: 1245px) 33vw, 25vw'
+const PROJECT_DETAIL_IMAGE_WIDTHS = [900, 1200, 1600, 1800, 2200]
+const PROJECT_DETAIL_IMAGE_SIZES =
+    '(max-width: 700px) 100vw, calc(100vw - clamp(300px, 28vw, 400px))'
 
 export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset) => {
     if (preset === 'card') {
@@ -31,14 +34,17 @@ export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset
 }
 
 export const getSanityProjectImageSourceSet: ProjectImageSourceSetResolver = (source, preset) => {
-    if (preset !== 'card') return null
+    if (preset !== 'card' && preset !== 'detail') return null
 
     const src = getSanityProjectImageUrl(source, preset)
 
     if (!src) return null
 
-    const srcSet = PROJECT_CARD_IMAGE_WIDTHS.map((width) => {
-        const url = urlForImage(source)?.height(width).width(width).url()
+    const widths = preset === 'card' ? PROJECT_CARD_IMAGE_WIDTHS : PROJECT_DETAIL_IMAGE_WIDTHS
+    const sizes = preset === 'card' ? PROJECT_CARD_IMAGE_SIZES : PROJECT_DETAIL_IMAGE_SIZES
+    const srcSet = widths.map((width) => {
+        const builder = urlForImage(source)?.width(width)
+        const url = preset === 'card' ? builder?.height(width).url() : builder?.quality(85).url()
 
         return url ? `${url} ${width}w` : null
     })
@@ -50,6 +56,6 @@ export const getSanityProjectImageSourceSet: ProjectImageSourceSetResolver = (so
     return {
         src,
         srcSet,
-        sizes: PROJECT_CARD_IMAGE_SIZES,
+        sizes,
     }
 }

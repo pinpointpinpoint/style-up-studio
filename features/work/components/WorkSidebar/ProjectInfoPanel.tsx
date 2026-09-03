@@ -43,6 +43,7 @@ const ProjectInfoPanel = ({
     onAssetSelect?: (mediaIndex: number) => void
     activeAssetIndex?: number
 }) => {
+    const imageSizeProps = expandDetails ? {} : {height: 30}
     const [videoUrlThumbnailState, setVideoUrlThumbnailState] = useState<{
         key: string
         thumbnails: Record<string, string | null>
@@ -281,7 +282,7 @@ const ProjectInfoPanel = ({
                                     src={thumbnail.url}
                                     alt={thumbnail.alt}
                                     className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
-                                    height={expandDetails ? 80 : 30}
+                                    {...imageSizeProps}
                                     loading="lazy"
                                     decoding="async"
                                 />
@@ -315,9 +316,6 @@ const ProjectInfoPanel = ({
                 </>
             ) : (
                 <div className={styles.assetsWrapper}>
-                    <div className={styles.assetEmpty}></div>
-                    <div className={styles.assetEmpty}></div>
-                    <div className={styles.assetEmpty}></div>
                     <div className={styles.assetEmpty}></div>
                 </div>
             )}
