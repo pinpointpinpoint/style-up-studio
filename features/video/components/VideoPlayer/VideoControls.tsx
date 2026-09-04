@@ -8,6 +8,10 @@ import {
 } from '@vidstack/react'
 import styles from './VideoPlayer.module.css'
 
+type VideoControlsProps = {
+    onNativePlaybackRequest?: () => void
+}
+
 function TimeDisplay() {
     const currentTime = useMediaState('currentTime')
     const duration = useMediaState('duration')
@@ -22,7 +26,7 @@ function TimeDisplay() {
     return <span className={styles.time}>{fmt(currentTime)} / {fmt(duration)}</span>
 }
 
-export default function VideoControls() {
+export default function VideoControls({onNativePlaybackRequest}: VideoControlsProps) {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
     const ended = useMediaState('ended')
@@ -31,8 +35,17 @@ export default function VideoControls() {
     const fullscreen = useMediaState('fullscreen')
 
     const handleReplay = () => {
+        if (onNativePlaybackRequest) {
+            onNativePlaybackRequest()
+            return
+        }
+
         remote.seek(0)
         remote.play()
+    }
+
+    const handleNativePlaybackRequest = () => {
+        onNativePlaybackRequest?.()
     }
 
     return (
@@ -45,6 +58,15 @@ export default function VideoControls() {
                     onClick={handleReplay}
                 >
                     [REPLAY]
+                </button>
+            ) : onNativePlaybackRequest ? (
+                <button
+                    className={`${styles.gridBtn} ${styles.playBtn}`}
+                    type="button"
+                    aria-label="Play"
+                    onClick={handleNativePlaybackRequest}
+                >
+                    [PLAY]
                 </button>
             ) : (
                 <PlayButton
@@ -70,13 +92,24 @@ export default function VideoControls() {
                 {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
             </MuteButton>
 
-            <FullscreenButton
-                className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
-                aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                target="prefer-media"
-            >
-                {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
-            </FullscreenButton>
+            {onNativePlaybackRequest ? (
+                <button
+                    className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
+                    type="button"
+                    aria-label="Fullscreen"
+                    onClick={handleNativePlaybackRequest}
+                >
+                    [FULLSCREEN]
+                </button>
+            ) : (
+                <FullscreenButton
+                    className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
+                    aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    target="prefer-media"
+                >
+                    {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
+                </FullscreenButton>
+            )}
         </div>
     )
 }

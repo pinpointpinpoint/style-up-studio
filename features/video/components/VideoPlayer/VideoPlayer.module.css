@@ -200,6 +200,47 @@
     display: none;
 }
 
+.mobileNativeOverlay {
+    align-items: center;
+    background: #000;
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 40px 0;
+    position: fixed;
+    z-index: 1000;
+}
+
+.mobileNativeClose {
+    background: #fff;
+    border: 1px solid var(--off-black);
+    color: var(--off-black);
+    cursor: pointer;
+    font-size: 16px;
+    height: var(--vp-control-size);
+    padding: 0 8px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 2;
+}
+
+.mobileNativePlayer {
+    aspect-ratio: 16 / 9;
+    background: #000;
+    max-height: 100%;
+    max-width: 100%;
+    width: 100%;
+}
+
+.mobileNativePlayer :global([data-media-provider]),
+.mobileNativePlayer :global(video),
+.mobileNativePlayer :global(iframe) {
+    background: #000;
+    height: 100%;
+    width: 100%;
+}
+
 :global([data-media-player][data-layout='video']:not([data-fullscreen])) {
     border-radius: 0;
 }

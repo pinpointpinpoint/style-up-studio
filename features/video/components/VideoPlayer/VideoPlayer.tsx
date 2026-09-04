@@ -15,11 +15,36 @@ interface VideoPlayerProps {
     videoId?: string
 }
 
-function VideoFrameToggle() {
+const MOBILE_VIDEO_QUERY = '(max-width: 768px)'
+
+function useIsMobileVideo() {
+    const [isMobileVideo, setIsMobileVideo] = useState(false)
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(MOBILE_VIDEO_QUERY)
+
+        setIsMobileVideo(mediaQuery.matches)
+
+        const handleChange = () => setIsMobileVideo(mediaQuery.matches)
+
+        mediaQuery.addEventListener('change', handleChange)
+
+        return () => mediaQuery.removeEventListener('change', handleChange)
+    }, [])
+
+    return isMobileVideo
+}
+
+function VideoFrameToggle({onNativePlaybackRequest}: {onNativePlaybackRequest?: () => void}) {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
 
     const handleClick = () => {
+        if (onNativePlaybackRequest) {
+            onNativePlaybackRequest()
+            return
+        }
+
         try {
             if (paused) {
                 remote.play()
@@ -42,7 +67,7 @@ function VideoFrameToggle() {
     )
 }
 
-function CustomVideoLayout() {
+function CustomVideoLayout({onNativePlaybackRequest}: {onNativePlaybackRequest?: () => void}) {
     const viewType = useMediaState('viewType')
     const streamType = useMediaState('streamType')
     const started = useMediaState('started')
@@ -53,8 +78,8 @@ function CustomVideoLayout() {
     return (
         <>
             {(!started || ended) && <Poster className={styles.poster} />}
-            <VideoFrameToggle />
-            <VideoControls />
+            <VideoFrameToggle onNativePlaybackRequest={onNativePlaybackRequest} />
+            <VideoControls onNativePlaybackRequest={onNativePlaybackRequest} />
         </>
     )
 }
@@ -94,6 +119,8 @@ export default function VideoPlayer({
     const controlsHiddenAt = useRef(0)
     const lastPointerPosition = useRef<{x: number; y: number} | null>(null)
     const [controlsVisible, setControlsVisible] = useState(true)
+    const [mobileNativePlaybackOpen, setMobileNativePlaybackOpen] = useState(false)
+    const isMobileVideo = useIsMobileVideo()
 
     const clearHideControlsTimer = useCallback(() => {
         if (!hideControlsTimer.current) return
@@ -122,6 +149,15 @@ export default function VideoPlayer({
 
         onPlay?.(videoId)
     }, [onPlay, videoId])
+
+    const openMobileNativePlayback = useCallback(() => {
+        handlePlay()
+        setMobileNativePlaybackOpen(true)
+    }, [handlePlay])
+
+    const closeMobileNativePlayback = useCallback(() => {
+        setMobileNativePlaybackOpen(false)
+    }, [])
 
     const handlePointerMove = useCallback(
         (event: PointerEvent<HTMLDivElement>) => {
@@ -163,15 +199,6 @@ export default function VideoPlayer({
         [hideControls],
     )
 
-    const handlePointerDown = useCallback(
-        (event: PointerEvent<HTMLDivElement>) => {
-            if (event.pointerType === 'mouse') return
-
-            showControls()
-        },
-        [showControls],
-    )
-
     useEffect(() => clearHideControlsTimer, [clearHideControlsTimer])
 
     if (!src) return null
@@ -181,7 +208,6 @@ export default function VideoPlayer({
             className={`${styles.root} ${styles.playerWrapper}`}
             data-controls-visible={controlsVisible ? true : undefined}
             onFocus={showControls}
-            onPointerDown={handlePointerDown}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
             onPointerMove={handlePointerMove}
@@ -204,8 +230,39 @@ export default function VideoPlayer({
                     }}
                 />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
-                <CustomVideoLayout />
+                <CustomVideoLayout
+                    onNativePlaybackRequest={isMobileVideo ? openMobileNativePlayback : undefined}
+                />
             </MediaPlayer>
+            {mobileNativePlaybackOpen ? (
+                <div className={styles.mobileNativeOverlay} role="dialog" aria-modal="true">
+                    <button
+                        className={styles.mobileNativeClose}
+                        type="button"
+                        onClick={closeMobileNativePlayback}
+                    >
+                        [CLOSE]
+                    </button>
+                    <MediaPlayer
+                        src={src}
+                        autoPlay
+                        controls
+                        poster={poster}
+                        title={title}
+                        viewType="video"
+                        streamType="on-demand"
+                        playsInline={false}
+                        className={styles.mobileNativePlayer}
+                    >
+                        <MediaProvider
+                            iframeProps={{
+                                allow: 'autoplay; fullscreen; picture-in-picture',
+                                allowFullScreen: true,
+                            }}
+                        />
+                    </MediaPlayer>
+                </div>
+            ) : null}
         </div>
     )
 }
