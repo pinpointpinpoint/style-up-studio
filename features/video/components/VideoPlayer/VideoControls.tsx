@@ -6,10 +6,11 @@ import {
     useMediaRemote,
     useMediaState,
 } from '@vidstack/react'
+import type {MouseEvent} from 'react'
 import styles from './VideoPlayer.module.css'
 
 type VideoControlsProps = {
-    onNativePlaybackRequest?: () => void
+    onNativePlaybackRequest?: (trigger: Event) => void
 }
 
 function TimeDisplay() {
@@ -34,9 +35,12 @@ export default function VideoControls({onNativePlaybackRequest}: VideoControlsPr
     const volume = useMediaState('volume')
     const fullscreen = useMediaState('fullscreen')
 
-    const handleReplay = () => {
+    const handleReplay = (event: MouseEvent<HTMLButtonElement>) => {
         if (onNativePlaybackRequest) {
-            onNativePlaybackRequest()
+            onNativePlaybackRequest(event.nativeEvent)
+            remote.seek(0, event.nativeEvent)
+            remote.enterFullscreen('prefer-media', event.nativeEvent)
+            remote.play(event.nativeEvent)
             return
         }
 
@@ -44,8 +48,10 @@ export default function VideoControls({onNativePlaybackRequest}: VideoControlsPr
         remote.play()
     }
 
-    const handleNativePlaybackRequest = () => {
-        onNativePlaybackRequest?.()
+    const handleNativePlaybackRequest = (event: MouseEvent<HTMLButtonElement>) => {
+        onNativePlaybackRequest?.(event.nativeEvent)
+        remote.enterFullscreen('prefer-media', event.nativeEvent)
+        remote.play(event.nativeEvent)
     }
 
     return (
