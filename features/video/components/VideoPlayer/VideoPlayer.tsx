@@ -163,6 +163,15 @@ export default function VideoPlayer({
         [hideControls],
     )
 
+    const handlePointerDown = useCallback(
+        (event: PointerEvent<HTMLDivElement>) => {
+            if (event.pointerType === 'mouse') return
+
+            showControls()
+        },
+        [showControls],
+    )
+
     useEffect(() => clearHideControlsTimer, [clearHideControlsTimer])
 
     if (!src) return null
@@ -172,6 +181,7 @@ export default function VideoPlayer({
             className={`${styles.root} ${styles.playerWrapper}`}
             data-controls-visible={controlsVisible ? true : undefined}
             onFocus={showControls}
+            onPointerDown={handlePointerDown}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
             onPointerMove={handlePointerMove}
@@ -187,7 +197,12 @@ export default function VideoPlayer({
                 className={styles.mediaPlayer}
                 onPlay={handlePlay}
             >
-                <MediaProvider />
+                <MediaProvider
+                    iframeProps={{
+                        allow: 'autoplay; fullscreen; picture-in-picture',
+                        allowFullScreen: true,
+                    }}
+                />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
                 <CustomVideoLayout />
             </MediaPlayer>

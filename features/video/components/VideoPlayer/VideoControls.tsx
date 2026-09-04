@@ -73,6 +73,7 @@ export default function VideoControls() {
             <FullscreenButton
                 className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
                 aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                target="prefer-media"
             >
                 {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
             </FullscreenButton>
