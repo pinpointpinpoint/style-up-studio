@@ -21,18 +21,19 @@
     --media-focus-ring-color: var(--off-black);
 
     aspect-ratio: 16 / 9;
-    background: transparent;
+    background: #000;
     display: block;
     height: auto;
     max-height: 100%;
     max-width: 100%;
     position: relative;
     width: 100%;
+    border: 1px solid var(--off-black);
 }
 
 .mediaPlayer :global([data-media-provider]) {
     align-items: center;
-    background: transparent;
+    background: #000;
     display: flex;
     height: 100%;
     justify-content: center;
@@ -43,7 +44,7 @@
 
 .mediaPlayer :global(video),
 .mediaPlayer :global(iframe) {
-    background: transparent;
+    background: #000;
     display: block;
     height: 100%;
     max-height: 100%;
@@ -52,14 +53,24 @@
     width: 100%;
 }
 
+.mediaPlayer :global(iframe.vds-youtube[data-no-controls]) {
+    height: 1000%;
+    max-height: none;
+    pointer-events: none;
+}
+
 .poster {
-    background: #fff;
+    background: #000;
     height: 100%;
     inset: 0;
     object-fit: contain;
     position: absolute;
     width: 100%;
     z-index: 10;
+}
+
+.mediaPlayer :global(.vds-poster) {
+    object-fit: contain;
 }
 
 .poster:not([data-visible]),
@@ -83,14 +94,14 @@
     display: flex;
     height: var(--vp-control-size);
     left: 0;
+    /* margin: 1px; */
     opacity: 0;
+    /* outline: solid 1px var(--off-black); */
     pointer-events: none;
     position: absolute;
     right: 0;
     transition: opacity 0.12s ease;
     z-index: 30;
-    outline: solid 1px var(--off-black);
-    margin: 1px;
 }
 
 .playerWrapper[data-controls-visible='true'] .controls {
@@ -186,22 +197,9 @@
 }
 
 .sliderThumb {
-    background: #fff;
-    border: var(--vp-border);
-    border-radius: 0;
     display: none;
-    height: 10px;
-    left: var(--slider-fill, 0%);
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.15s ease;
-    width: 10px;
 }
 
-.progressTrack:hover .sliderThumb,
-.progressTrack[data-dragging] .sliderThumb {
-    opacity: 1;
+:global([data-media-player][data-layout='video']:not([data-fullscreen])) {
+    border-radius: 0;
 }

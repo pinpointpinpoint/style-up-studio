@@ -34,8 +34,9 @@
 .open .header {
     background: var(--off-black);
     color: white;
-    border-top: 1px solid var(--off-black);
-    border-bottom: 1px solid var(--off-black);
+    /* border-top: 1px solid var(--off-black);
+    border-bottom: 1px solid var(--off-black); */
+    border: none;
 }
 
 .headerAction {

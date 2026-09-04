@@ -30,7 +30,7 @@
     background: transparent;
     border: 0;
     cursor: pointer;
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     gap: 6px;
     padding: 0;
 }

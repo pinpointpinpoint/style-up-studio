@@ -45,12 +45,14 @@ function VideoFrameToggle() {
 function CustomVideoLayout() {
     const viewType = useMediaState('viewType')
     const streamType = useMediaState('streamType')
+    const started = useMediaState('started')
+    const ended = useMediaState('ended')
 
     if (viewType !== 'video' || streamType !== 'on-demand') return null
 
     return (
         <>
-            <Poster className={styles.poster} />
+            {(!started || ended) && <Poster className={styles.poster} />}
             <VideoFrameToggle />
             <VideoControls />
         </>
@@ -89,6 +91,8 @@ export default function VideoPlayer({
     videoId,
 }: VideoPlayerProps) {
     const hideControlsTimer = useRef<number | null>(null)
+    const controlsHiddenAt = useRef(0)
+    const lastPointerPosition = useRef<{x: number; y: number} | null>(null)
     const [controlsVisible, setControlsVisible] = useState(true)
 
     const clearHideControlsTimer = useCallback(() => {
@@ -109,6 +113,7 @@ export default function VideoPlayer({
 
     const hideControls = useCallback(() => {
         clearHideControlsTimer()
+        controlsHiddenAt.current = window.performance.now()
         setControlsVisible(false)
     }, [clearHideControlsTimer])
 
@@ -122,6 +127,18 @@ export default function VideoPlayer({
         (event: PointerEvent<HTMLDivElement>) => {
             if (event.pointerType !== 'mouse') return
 
+            const nextPointerPosition = {x: event.clientX, y: event.clientY}
+            const lastPosition = lastPointerPosition.current
+            const pointerDelta = lastPosition
+                ? Math.abs(lastPosition.x - nextPointerPosition.x) +
+                  Math.abs(lastPosition.y - nextPointerPosition.y)
+                : Number.POSITIVE_INFINITY
+
+            lastPointerPosition.current = nextPointerPosition
+
+            if (pointerDelta < 3) return
+            if (window.performance.now() - controlsHiddenAt.current < 1000) return
+
             showControls()
         },
         [showControls],
@@ -131,6 +148,7 @@ export default function VideoPlayer({
         (event: PointerEvent<HTMLDivElement>) => {
             if (event.pointerType !== 'mouse') return
 
+            lastPointerPosition.current = {x: event.clientX, y: event.clientY}
             showControls()
         },
         [showControls],
@@ -160,8 +178,11 @@ export default function VideoPlayer({
         >
             <MediaPlayer
                 src={src}
+                controls={false}
                 poster={poster}
                 title={title}
+                viewType="video"
+                streamType="on-demand"
                 playsInline
                 className={styles.mediaPlayer}
                 onPlay={handlePlay}

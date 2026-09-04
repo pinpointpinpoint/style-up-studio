@@ -11,6 +11,8 @@ import {
     type RefObject,
 } from 'react'
 import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
+import {getYouTubePosterCandidates} from '@/features/video/lib/videoMedia'
+import {getExternalVideoPoster} from '@/features/video/services/externalVideoService'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
 import type {Project} from '@/types'
 import styles from './ProjectDetailView.module.css'
@@ -77,13 +79,18 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
         mediaIndex: number
     } | null>(null)
     const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
+    const [externalVideoPosterUrls, setExternalVideoPosterUrls] = useState<
+        Record<string, string | null>
+    >({})
     const mediaView = useMemo(
         () =>
             createProjectDetailMediaView(project, {
                 imageUrl: getSanityProjectImageUrl,
                 imageSourceSet: getSanityProjectImageSourceSet,
+                externalVideoPosterUrl: (url) =>
+                    externalVideoPosterUrls[url] ?? getYouTubePosterCandidates(url)?.fallback,
             }),
-        [project],
+        [externalVideoPosterUrls, project],
     )
     const activeMediaIndex =
         selectedMedia?.projectId === project._id
@@ -156,7 +163,56 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
 
     useEffect(() => {
         setActiveVideoId(null)
+        setExternalVideoPosterUrls({})
     }, [project._id])
+
+    useEffect(() => {
+        const missingExternalPosterUrls = Array.from(
+            new Set(
+                mediaView.media
+                    .filter(
+                        (item): item is Extract<(typeof mediaView.media)[number], {kind: 'videoUrl'}> =>
+                            item.kind === 'videoUrl',
+                    )
+                    .filter((item) => {
+                        const youtubeFallbackPoster = getYouTubePosterCandidates(item.url)?.fallback
+
+                        return !item.poster || item.poster === youtubeFallbackPoster
+                    })
+                    .map((item) => item.url)
+                    .filter((url) => externalVideoPosterUrls[url] === undefined),
+            ),
+        )
+
+        if (missingExternalPosterUrls.length === 0) return
+
+        let cancelled = false
+
+        Promise.all(
+            missingExternalPosterUrls.map(async (url) => ({
+                url,
+                poster: await getExternalVideoPoster(url),
+            })),
+        ).then((posters) => {
+            if (cancelled) return
+
+            setExternalVideoPosterUrls((currentPosterUrls) => {
+                const nextPosterUrls = {...currentPosterUrls}
+
+                for (const {url, poster} of posters) {
+                    if (nextPosterUrls[url] === undefined) {
+                        nextPosterUrls[url] = poster
+                    }
+                }
+
+                return nextPosterUrls
+            })
+        })
+
+        return () => {
+            cancelled = true
+        }
+    }, [externalVideoPosterUrls, mediaView.media])
 
     return (
         <section className={styles.container} aria-label={`${project.title ?? 'Project'} details`}>
