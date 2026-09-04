@@ -62,7 +62,9 @@
 
 .videoLoadingPoster {
     height: 100%;
+    inset: 0;
     object-fit: contain;
+    position: absolute;
     width: 100%;
 }
 
@@ -71,4 +73,20 @@
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+}
+
+.mobileInfoPanel {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobileInfoPanel {
+        display: block;
+    }
+    .sidebar {
+        display: none;
+    }
+    .container {
+        flex-direction: column;
+    }
 }

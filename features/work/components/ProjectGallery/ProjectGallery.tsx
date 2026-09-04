@@ -1,21 +1,20 @@
 'use client'
 
-import {motion} from 'motion/react'
 import styles from './ProjectGallery.module.css'
 import ProjectCard from '../ProjectCard/ProjectCard'
 import {Project} from '@/types'
 
 const PROJECT_LOADING_CELL_COUNT = 12
 
-function getStableDelay(id: string) {
-    let hash = 0
-
-    for (let index = 0; index < id.length; index += 1) {
-        hash = (hash * 31 + id.charCodeAt(index)) % 1000
-    }
-
-    return (hash / 1000) * 0.28
-}
+// function getStableDelay(id: string) {
+//     let hash = 0
+//
+//     for (let index = 0; index < id.length; index += 1) {
+//         hash = (hash * 31 + id.charCodeAt(index)) % 1000
+//     }
+//
+//     return (hash / 1000) * 0.28
+// }
 
 type ProjectGalleryProps = {
     projects: Project[]
@@ -51,15 +50,15 @@ export default function ProjectGallery({
 					/>
 				))}
 			{projects?.map((project, idx) => (
-				<motion.div
+				<div
                     key={project._id}
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    transition={{
-                        duration: 0.11,
-                        delay: getStableDelay(project._id),
-                        ease: 'easeOut',
-                    }}
+                    // initial={{opacity: 0}}
+                    // animate={{opacity: 1}}
+                    // transition={{
+                    //     duration: 0.11,
+                    //     delay: getStableDelay(project._id),
+                    //     ease: 'easeOut',
+                    // }}
                     onMouseEnter={() => onProjectHover?.(project)}
                     onMouseLeave={() => onProjectLeave?.()}
                 >
@@ -69,7 +68,7 @@ export default function ProjectGallery({
                         href={getProjectHref(project)}
                         onOpen={onProjectOpen}
                     />
-                </motion.div>
+                </div>
             ))}
             {hasMore && (
                 <button onClick={onLoadMore} disabled={isLoading} className={styles.viewMoreButton}>

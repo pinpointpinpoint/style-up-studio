@@ -76,6 +76,7 @@ export function WorkSection({
           ? `gallery-${filter.type}-${filter.id}`
           : `gallery-${filter.type}`
     const handleProjectOpenFromGrid = useCallback(() => {
+        void loadProjectDetailView()
         projectGridScrollTopRef.current = workScrollRef.current?.scrollTop ?? 0
         handleProjectOpen()
     }, [handleProjectOpen])

@@ -152,5 +152,9 @@
 @media (max-width: 576px) {
     .header, .nav, .drawerInner {
         height: var(--mobile-header-height);
+        justify-content: center;
+    }
+    .navItem {
+        display: none;
     }
 }

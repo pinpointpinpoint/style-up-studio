@@ -20,6 +20,7 @@
 }
 
 .detailMain {
+    background: white;
     display: flex;
     flex: 0 0 auto;
     min-height: 100%;
@@ -49,6 +50,7 @@
 }
 
 .projectDetailLoading {
+    background: white;
     display: flex;
     height: 100%;
     width: 100%;
@@ -56,6 +58,7 @@
 
 .projectDetailLoadingMedia {
     align-items: center;
+    background: white;
     display: flex;
     flex: 2;
     justify-content: center;

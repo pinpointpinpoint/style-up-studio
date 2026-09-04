@@ -258,3 +258,7 @@
 .headingEmpty {
     color: var(--dimmed);
 }
+
+.container[data-variant='mobile'] .heading {
+    display: none;
+}

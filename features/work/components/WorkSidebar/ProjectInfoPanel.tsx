@@ -30,19 +30,23 @@ function getProjectYear(date?: string | null) {
     return Number.isNaN(year) ? null : String(year)
 }
 
+type ProjectInfoPanelProps = {
+    displayedProject: Project | null
+    expandDetails?: boolean
+    headerAction?: ReactNode
+    onAssetSelect?: (mediaIndex: number) => void
+    activeAssetIndex?: number
+    variant?: 'desktop' | 'mobile'
+}
+
 const ProjectInfoPanel = ({
     displayedProject,
     expandDetails = false,
     headerAction,
     onAssetSelect,
     activeAssetIndex,
-}: {
-    displayedProject: Project | null
-    expandDetails?: boolean
-    headerAction?: ReactNode
-    onAssetSelect?: (mediaIndex: number) => void
-    activeAssetIndex?: number
-}) => {
+    variant = 'desktop'
+}: ProjectInfoPanelProps) => {
     const imageSizeProps = expandDetails ? {} : {height: 30}
     const [videoUrlThumbnailState, setVideoUrlThumbnailState] = useState<{
         key: string
@@ -181,7 +185,7 @@ const ProjectInfoPanel = ({
     }, [displayedProject, thumbnailImageHeight, videoThumbnailStateKey])
 
     return (
-        <div className={`${styles.container} scrollbar`}>
+        <div className={`${styles.container} scrollbar`} data-variant={variant}>
             <div className={`${styles.heading} ${!displayedProject ? styles.headingEmpty : ''}`}>
                 <span>INFO</span>
                 {headerAction}

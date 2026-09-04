@@ -25,8 +25,15 @@
     --header-height: 40px;
     --mobile-btn-height: 44px;
     --mobile-header-height: 44px;
+    --section-header-height: var(--header-height);
 
     --focus: 4px dotted teal;
+}
+
+@media (max-width: 576px) {
+    :root {
+        --section-header-height: var(--mobile-header-height);
+    }
 }
 
 body {

@@ -1,0 +1,11 @@
+.summary {
+    height: var(--mobile-btn-height);
+    border-bottom: 1px solid var(--off-black);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-sm);
+}
+
+.summary:hover {
+    cursor: pointer;
+}

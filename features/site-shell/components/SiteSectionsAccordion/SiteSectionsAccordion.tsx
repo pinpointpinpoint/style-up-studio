@@ -25,8 +25,8 @@ import type {Filter, Project} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
 import styles from './SiteSectionsAccordion.module.css'
 
-const CLOSED_HEIGHT = 'var(--header-height)'
-const OPEN_HEIGHT = `calc(100% - var(--header-height))`
+const CLOSED_HEIGHT = 'var(--section-header-height)'
+const OPEN_HEIGHT = `calc(100% - var(--section-header-height))`
 const WORK_HOME_ROUTE = '/'
 const STYLE_UPS_ROUTE = '/style-ups'
 const loadStyleUps = () =>

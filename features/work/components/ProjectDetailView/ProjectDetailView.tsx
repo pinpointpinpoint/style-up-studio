@@ -10,8 +10,6 @@ import {
     useState,
     type RefObject,
 } from 'react'
-import {getExternalVideoPoster} from '@/features/video/services/externalVideoService'
-import {getVideoMediaProviderPosterRequest} from '@/features/video/lib/videoMedia'
 import ProjectInfoPanel from '@/features/work/components/WorkSidebar/ProjectInfoPanel'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
 import type {Project} from '@/types'
@@ -25,6 +23,7 @@ import {
     getSanityProjectImageSourceSet,
     getSanityProjectImageUrl,
 } from '../../lib/media/sanityProjectImageUrl'
+import { MobileProjectInfo } from '../MobileProjectInfo/MobileProjectInfo'
 
 const DeferredVideoPlayer = lazy(
     () => import('@/features/video/components/VideoPlayer/VideoPlayer'),
@@ -60,7 +59,9 @@ function ProjectImage({src, alt, eager, srcSet, sizes}: ProjectImageProps) {
 function VideoPlayerLoading({poster, title}: {poster?: string; title?: string}) {
     return (
         <div className={styles.videoLoading}>
-            {poster ? <img src={poster} alt="" className={styles.videoLoadingPoster} /> : null}
+            {poster ? (
+                <img src={poster} alt="" className={styles.videoLoadingPoster} aria-hidden="true" />
+            ) : null}
             <span className={styles.videoLoadingMessage}>
                 <DelayedLoadingMessage>{`[LOADING ${title ?? 'VIDEO'}...]`}</DelayedLoadingMessage>
             </span>
@@ -75,21 +76,15 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
         projectId: string
         mediaIndex: number
     } | null>(null)
-    const [videoPosterState, setVideoPosterState] = useState<{
-        key: string
-        posters: Record<string, string | null>
-    } | null>(null)
+    const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
     const mediaView = useMemo(
         () =>
             createProjectDetailMediaView(project, {
                 imageUrl: getSanityProjectImageUrl,
                 imageSourceSet: getSanityProjectImageSourceSet,
-                externalVideoPosterUrl: (url) =>
-                    videoPosterState?.key === project._id ? videoPosterState.posters[url] : null,
             }),
-        [project, videoPosterState],
+        [project],
     )
-    const videoPosterStateKey = project._id
     const activeMediaIndex =
         selectedMedia?.projectId === project._id
             ? selectedMedia.mediaIndex
@@ -111,47 +106,6 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
         },
         [activeMediaIndex, mediaView],
     )
-
-    useEffect(() => {
-        let cancelled = false
-
-        async function resolveVideoPosters() {
-            const posterRequests = project.media
-                .map((item) => {
-                    if (item._type !== 'videoUrl' || !item.url) return null
-
-                    return getVideoMediaProviderPosterRequest({
-                        sourceKind: 'videoUrl',
-                        sourceUrl: item.url,
-                        sanityThumbnail: item.thumbnail,
-                        sanityThumbnailUrl: getSanityProjectImageUrl,
-                    })
-                })
-                .filter((request): request is NonNullable<typeof request> => Boolean(request))
-
-            const resolvedPosters = await Promise.all(
-                posterRequests.map(async ({sourceUrl}) => ({
-                    sourceUrl,
-                    posterUrl: await getExternalVideoPoster(sourceUrl),
-                })),
-            )
-
-            if (!cancelled) {
-                setVideoPosterState({
-                    key: videoPosterStateKey,
-                    posters: Object.fromEntries(
-                        resolvedPosters.map(({sourceUrl, posterUrl}) => [sourceUrl, posterUrl]),
-                    ),
-                })
-            }
-        }
-
-        resolveVideoPosters()
-
-        return () => {
-            cancelled = true
-        }
-    }, [project, videoPosterStateKey])
 
     const handleMediaScroll = useCallback(() => {
         const scrollContainer = scrollContainerRef?.current ?? mediaPaneRef.current
@@ -200,8 +154,19 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
         return () => scrollContainer.removeEventListener('scroll', handleMediaScroll)
     }, [handleMediaScroll, scrollContainerRef])
 
+    useEffect(() => {
+        setActiveVideoId(null)
+    }, [project._id])
+
     return (
         <section className={styles.container} aria-label={`${project.title ?? 'Project'} details`}>
+            <div className={styles.mobileInfoPanel}>
+                <MobileProjectInfo
+                    project={project}
+                    activeAssetIndex={activeMediaIndex}
+                    onAssetSelect={handleAssetSelect}
+                />
+            </div>
             <div className={styles.mediaPane} ref={mediaPaneRef} onScroll={handleMediaScroll}>
                 <div className={styles.mediaList}>
                     {mediaView.media.map((item) => {
@@ -244,9 +209,12 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                     >
                                         <DeferredVideoPlayer
                                             key={item.fileUrl}
+                                            activeVideoId={activeVideoId}
+                                            onPlay={setActiveVideoId}
                                             src={item.fileUrl}
                                             poster={item.poster}
                                             title={item.title}
+                                            videoId={`${project._id}:${item.key}`}
                                         />
                                     </Suspense>
                                 </div>
@@ -271,9 +239,12 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                 >
                                     <DeferredVideoPlayer
                                         key={item.url}
+                                        activeVideoId={activeVideoId}
+                                        onPlay={setActiveVideoId}
                                         src={item.url}
                                         poster={item.poster}
                                         title={item.title}
+                                        videoId={`${project._id}:${item.key}`}
                                     />
                                 </Suspense>
                             </div>

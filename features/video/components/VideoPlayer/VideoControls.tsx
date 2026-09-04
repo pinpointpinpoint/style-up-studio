@@ -1,5 +1,11 @@
-import {FullscreenButton, MuteButton, PlayButton, TimeSlider, useMediaState} from '@vidstack/react'
-import {FullscreenIcon, MuteIcon, PauseIcon, PlayIcon, ShrinkIcon, VolumeIcon} from './VideoIcons'
+import {
+    FullscreenButton,
+    MuteButton,
+    PlayButton,
+    TimeSlider,
+    useMediaRemote,
+    useMediaState,
+} from '@vidstack/react'
 import styles from './VideoPlayer.module.css'
 
 function TimeDisplay() {
@@ -17,16 +23,37 @@ function TimeDisplay() {
 }
 
 export default function VideoControls() {
+    const remote = useMediaRemote()
     const paused = useMediaState('paused')
+    const ended = useMediaState('ended')
     const muted = useMediaState('muted')
     const volume = useMediaState('volume')
     const fullscreen = useMediaState('fullscreen')
 
+    const handleReplay = () => {
+        remote.seek(0)
+        remote.play()
+    }
+
     return (
         <div className={styles.controls}>
-            <PlayButton className={styles.gridBtn} aria-label={paused ? 'Play' : 'Pause'}>
-                {paused ? <PlayIcon /> : <PauseIcon />}
-            </PlayButton>
+            {ended ? (
+                <button
+                    className={`${styles.gridBtn} ${styles.playBtn}`}
+                    type="button"
+                    aria-label="Replay"
+                    onClick={handleReplay}
+                >
+                    [REPLAY]
+                </button>
+            ) : (
+                <PlayButton
+                    className={`${styles.gridBtn} ${styles.playBtn}`}
+                    aria-label={paused ? 'Play' : 'Pause'}
+                >
+                    {paused ? '[PLAY]' : '[PAUSE]'}
+                </PlayButton>
+            )}
             <TimeDisplay />
 
             <TimeSlider.Root className={styles.progressTrack}>
@@ -37,17 +64,17 @@ export default function VideoControls() {
             </TimeSlider.Root>
 
             <MuteButton
-                className={styles.gridBtn}
+                className={`${styles.gridBtn} ${styles.muteBtn}`}
                 aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
             >
-                {muted || volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+                {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
             </MuteButton>
 
             <FullscreenButton
-                className={styles.gridBtn}
+                className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
                 aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
-                {fullscreen ? <ShrinkIcon /> : <FullscreenIcon />}
+                {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
             </FullscreenButton>
         </div>
     )

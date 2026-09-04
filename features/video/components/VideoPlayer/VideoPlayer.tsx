@@ -1,208 +1,174 @@
 'use client'
 
 import '@vidstack/react/player/styles/base.css'
-import {createContext, useCallback, useContext, useEffect, useState} from 'react'
-import {
-    MediaPlayer,
-    MediaProvider,
-    Poster,
-    PlayButton,
-    sortVideoQualities,
-    useMediaPlayer,
-    useMediaRemote,
-    useMediaState,
-} from '@vidstack/react'
-
-import {getExternalVideoProvider, getExternalVideoSourceUrl} from '@/features/video/lib/videoMedia'
-import {PlayIcon} from './VideoIcons'
+import {MediaPlayer, MediaProvider, Poster, useMediaRemote, useMediaState} from '@vidstack/react'
+import {useCallback, useEffect, useRef, useState, type PointerEvent} from 'react'
 import VideoControls from './VideoControls'
 import styles from './VideoPlayer.module.css'
 
 interface VideoPlayerProps {
+    activeVideoId?: string | null
+    onPlay?: (videoId: string) => void
     src: string
     poster?: string
     title?: string
-}
-
-function getVideoPlaybackErrorDetails(src: string) {
-    const provider = getExternalVideoProvider(src)
-
-    if (provider?.provider === 'youtube') {
-        return {
-            message: 'This video is restricted in the embedded player.',
-            actionLabel: 'Watch on YouTube',
-        }
-    }
-
-    if (provider?.provider === 'vimeo') {
-        return {
-            message: 'This video could not be played in the embedded player.',
-            actionLabel: 'Watch on Vimeo',
-        }
-    }
-
-    return {
-        message: 'This video could not be played in the embedded player.',
-        actionLabel: 'Open original video',
-    }
+    videoId?: string
 }
 
 function VideoFrameToggle() {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
-    const onPlayAttempt = useVideoPlayAttempt()
 
     const handleClick = () => {
-        if (paused) {
-            onPlayAttempt()
-            remote.play()
-        } else {
+        try {
+            if (paused) {
+                remote.play()
+                return
+            }
+
             remote.pause()
+        } catch {
+            // The provider can disappear while navigating away.
         }
     }
 
-    return <button type="button" className={styles.frameToggle} onClick={handleClick} aria-label={paused ? 'Play video' : 'Pause video'} />
+    return (
+        <button
+            type="button"
+            className={styles.frameToggle}
+            onClick={handleClick}
+            aria-label={paused ? 'Play video' : 'Pause video'}
+        />
+    )
 }
 
-function VideoQualityManager() {
-    const player = useMediaPlayer()
+function CustomVideoLayout() {
+    const viewType = useMediaState('viewType')
+    const streamType = useMediaState('streamType')
+
+    if (viewType !== 'video' || streamType !== 'on-demand') return null
+
+    return (
+        <>
+            <Poster className={styles.poster} />
+            <VideoFrameToggle />
+            <VideoControls />
+        </>
+    )
+}
+
+function ActiveVideoSync({
+    activeVideoId,
+    videoId,
+}: {
+    activeVideoId?: string | null
+    videoId?: string
+}) {
     const remote = useMediaRemote()
-    const qualities = useMediaState('qualities')
-    const currentQuality = useMediaState('quality')
-    const canSetQuality = useMediaState('canSetQuality')
+    const paused = useMediaState('paused')
 
     useEffect(() => {
-        if (!player || !canSetQuality || qualities.length === 0) return
-        if (player.qualities.readonly) return
+        if (!videoId || !activeVideoId || activeVideoId === videoId || paused) return
 
-        const highestQuality = sortVideoQualities(qualities, true)[0]
-
-        if (!highestQuality || currentQuality?.id === highestQuality.id) return
-
-        const highestQualityIndex = qualities.findIndex(
-            (quality) => quality.id === highestQuality.id
-        )
-
-        if (highestQualityIndex === -1) return
-
-        remote.changeQuality(highestQualityIndex)
-    }, [canSetQuality, currentQuality?.id, player, qualities, remote])
+        try {
+            remote.pause()
+        } catch {
+            // The provider can disappear while navigating away.
+        }
+    }, [activeVideoId, paused, remote, videoId])
 
     return null
 }
 
-const VideoPlayAttemptContext = createContext<() => void>(() => {})
-
-function useVideoPlayAttempt() {
-    return useContext(VideoPlayAttemptContext)
-}
-
-export default function VideoPlayer(props: VideoPlayerProps) {
-    if (!props.src) return null
-
-    return <VideoPlayerInstance key={props.src} {...props} />
-}
-
-function VideoPlayerInstance({
+export default function VideoPlayer({
+    activeVideoId,
+    onPlay,
     src,
     poster,
     title,
+    videoId,
 }: VideoPlayerProps) {
-    const [hasStarted, setHasStarted] = useState(false)
-    const [hasEnded, setHasEnded] = useState(false)
-    const [hasPlaybackFailed, setHasPlaybackFailed] = useState(false)
-    const [hasPendingPlayAttempt, setHasPendingPlayAttempt] = useState(false)
-    const provider = getExternalVideoProvider(src)
-    const {message, actionLabel} = getVideoPlaybackErrorDetails(src)
-    const sourceUrl = getExternalVideoSourceUrl(src) ?? src
-    const shouldReleasePosterOnPlayAttempt = provider?.provider === 'youtube' || provider?.provider === 'vimeo'
+    const hideControlsTimer = useRef<number | null>(null)
+    const [controlsVisible, setControlsVisible] = useState(true)
 
-    const isWaitingForEmbedPlayback = hasPendingPlayAttempt && !hasStarted && !hasPlaybackFailed
-    const showPoster = (!hasPendingPlayAttempt && (!hasStarted || hasEnded)) || hasPlaybackFailed
-    const showControls = hasStarted && !hasEnded && !hasPlaybackFailed
+    const clearHideControlsTimer = useCallback(() => {
+        if (!hideControlsTimer.current) return
 
-    const handlePlayAttempt = useCallback(() => {
-        if (shouldReleasePosterOnPlayAttempt) {
-            setHasPendingPlayAttempt(true)
-        }
-    }, [shouldReleasePosterOnPlayAttempt])
+        window.clearTimeout(hideControlsTimer.current)
+        hideControlsTimer.current = null
+    }, [])
+
+    const showControls = useCallback(() => {
+        setControlsVisible(true)
+        clearHideControlsTimer()
+
+        hideControlsTimer.current = window.setTimeout(() => {
+            setControlsVisible(false)
+        }, 1800)
+    }, [clearHideControlsTimer])
+
+    const hideControls = useCallback(() => {
+        clearHideControlsTimer()
+        setControlsVisible(false)
+    }, [clearHideControlsTimer])
 
     const handlePlay = useCallback(() => {
-        setHasStarted(true)
-        setHasEnded(false)
-        setHasPlaybackFailed(false)
-        setHasPendingPlayAttempt(false)
-    }, [])
+        if (!videoId) return
 
-    const handlePlayFail = useCallback(() => {
-        setHasPlaybackFailed(true)
-        setHasPendingPlayAttempt(false)
-    }, [])
+        onPlay?.(videoId)
+    }, [onPlay, videoId])
+
+    const handlePointerMove = useCallback(
+        (event: PointerEvent<HTMLDivElement>) => {
+            if (event.pointerType !== 'mouse') return
+
+            showControls()
+        },
+        [showControls],
+    )
+
+    const handlePointerEnter = useCallback(
+        (event: PointerEvent<HTMLDivElement>) => {
+            if (event.pointerType !== 'mouse') return
+
+            showControls()
+        },
+        [showControls],
+    )
+
+    const handlePointerLeave = useCallback(
+        (event: PointerEvent<HTMLDivElement>) => {
+            if (event.pointerType !== 'mouse') return
+
+            hideControls()
+        },
+        [hideControls],
+    )
+
+    useEffect(() => clearHideControlsTimer, [clearHideControlsTimer])
+
+    if (!src) return null
 
     return (
         <div
             className={`${styles.root} ${styles.playerWrapper}`}
-            data-started={showControls ? '' : undefined}
+            data-controls-visible={controlsVisible ? true : undefined}
+            onFocus={showControls}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+            onPointerMove={handlePointerMove}
         >
             <MediaPlayer
                 src={src}
+                poster={poster}
                 title={title}
                 playsInline
                 className={styles.mediaPlayer}
-                onEnded={() => setHasEnded(true)}
                 onPlay={handlePlay}
-                onPlaying={handlePlay}
-                onPlayFail={(e) => {
-                    handlePlayFail()
-                    console.error('Media play failed:', e)
-                }}
-                onError={(e) => {
-                    setHasPlaybackFailed(true)
-                    console.error('Media error:', e)
-                }}
             >
                 <MediaProvider />
-
-                <VideoPlayAttemptContext.Provider value={handlePlayAttempt}>
-                    <VideoQualityManager />
-
-                    {hasPlaybackFailed || isWaitingForEmbedPlayback ? null : <VideoFrameToggle />}
-
-                    {poster ? (
-                        <Poster
-                            className={`${styles.poster} ${showPoster ? styles.posterVisible : ''}`}
-                            src={poster}
-                        />
-                    ) : null}
-
-                    {showPoster && !hasPlaybackFailed ? (
-                        <PlayButton
-                            className={styles.playOverlay}
-                            aria-label="Play video"
-                            onClick={handlePlayAttempt}
-                        >
-                            <span className={styles.playIcon}>
-                                <PlayIcon size={22} />
-                            </span>
-                        </PlayButton>
-                    ) : null}
-
-                    {hasPlaybackFailed ? (
-                        <div className={styles.errorOverlay} role="alert" aria-live="polite">
-                            <p className={styles.errorMessage}>{message}</p>
-                            <a
-                                className={styles.errorAction}
-                                href={sourceUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {actionLabel}
-                            </a>
-                        </div>
-                    ) : null}
-
-                    {hasPlaybackFailed ? null : <VideoControls />}
-                </VideoPlayAttemptContext.Provider>
+                <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
+                <CustomVideoLayout />
             </MediaPlayer>
         </div>
     )
