@@ -6,12 +6,7 @@ import {
     useMediaRemote,
     useMediaState,
 } from '@vidstack/react'
-import type {MouseEvent} from 'react'
 import styles from './VideoPlayer.module.css'
-
-type VideoControlsProps = {
-    onNativePlaybackRequest?: (trigger: Event) => void
-}
 
 function TimeDisplay() {
     const currentTime = useMediaState('currentTime')
@@ -27,7 +22,7 @@ function TimeDisplay() {
     return <span className={styles.time}>{fmt(currentTime)} / {fmt(duration)}</span>
 }
 
-export default function VideoControls({onNativePlaybackRequest}: VideoControlsProps) {
+export default function VideoControls() {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
     const ended = useMediaState('ended')
@@ -35,23 +30,9 @@ export default function VideoControls({onNativePlaybackRequest}: VideoControlsPr
     const volume = useMediaState('volume')
     const fullscreen = useMediaState('fullscreen')
 
-    const handleReplay = (event: MouseEvent<HTMLButtonElement>) => {
-        if (onNativePlaybackRequest) {
-            onNativePlaybackRequest(event.nativeEvent)
-            remote.seek(0, event.nativeEvent)
-            remote.enterFullscreen('prefer-media', event.nativeEvent)
-            remote.play(event.nativeEvent)
-            return
-        }
-
+    const handleReplay = () => {
         remote.seek(0)
         remote.play()
-    }
-
-    const handleNativePlaybackRequest = (event: MouseEvent<HTMLButtonElement>) => {
-        onNativePlaybackRequest?.(event.nativeEvent)
-        remote.enterFullscreen('prefer-media', event.nativeEvent)
-        remote.play(event.nativeEvent)
     }
 
     return (
@@ -64,15 +45,6 @@ export default function VideoControls({onNativePlaybackRequest}: VideoControlsPr
                     onClick={handleReplay}
                 >
                     [REPLAY]
-                </button>
-            ) : onNativePlaybackRequest ? (
-                <button
-                    className={`${styles.gridBtn} ${styles.playBtn}`}
-                    type="button"
-                    aria-label="Play"
-                    onClick={handleNativePlaybackRequest}
-                >
-                    [PLAY]
                 </button>
             ) : (
                 <PlayButton
@@ -98,24 +70,12 @@ export default function VideoControls({onNativePlaybackRequest}: VideoControlsPr
                 {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
             </MuteButton>
 
-            {onNativePlaybackRequest ? (
-                <button
-                    className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
-                    type="button"
-                    aria-label="Fullscreen"
-                    onClick={handleNativePlaybackRequest}
-                >
-                    [FULLSCREEN]
-                </button>
-            ) : (
-                <FullscreenButton
-                    className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
-                    aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                    target="prefer-media"
-                >
-                    {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
-                </FullscreenButton>
-            )}
+            <FullscreenButton
+                className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
+                aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            >
+                {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
+            </FullscreenButton>
         </div>
     )
 }

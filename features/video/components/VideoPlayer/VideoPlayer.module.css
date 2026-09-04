@@ -96,7 +96,7 @@
     left: 0;
     /* margin: 1px; */
     opacity: 0;
-    /* outline: solid 1px var(--off-black); */
+    outline: solid 1px var(--off-black);
     pointer-events: none;
     position: absolute;
     right: 0;
