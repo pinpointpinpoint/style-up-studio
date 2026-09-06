@@ -217,8 +217,12 @@
     margin-top: -1px;
 }
 
+.menu[data-variant='mobile'] {
+    height: auto;
+}
+
 .menu[data-variant='mobile'] .scroller {
-    gap: 20;
+    overflow: visible;
 }
 
 .menu[data-variant='mobile'] .projectTypeButton,
@@ -228,8 +232,18 @@
     padding: 0 var(--space-sm);
 }
 
+.menu[data-variant='mobile'] .collaboratorOption {
+    padding-left: var(--space-xl);
+}
+
 .menu[data-variant='mobile'] .collaboratorSection {
     flex: 0 0 auto;
     min-height: 0;
     padding-top: 0;
+    overflow: visible;
+}
+
+
+.menu[data-variant='mobile'] .projectTypeButton:last-child {
+    border-bottom: 0;
 }

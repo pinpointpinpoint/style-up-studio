@@ -18,6 +18,7 @@
     align-items: center;
     justify-content: center;
     outline: solid 1px var(--off-black);
+    font-size: var(--font-sm);
 }
 
 .loadingCell {

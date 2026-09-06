@@ -1,7 +1,18 @@
+.details {
+    /* Navigation plus the open and closed section headers sit outside this pane. */
+    max-height: calc(100dvh - var(--mobile-header-height) - var(--section-header-height) * 2 - 1px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
 .summary {
+    background: white;
     height: var(--mobile-btn-height);
     border-bottom: 1px solid var(--off-black);
     display: flex;
     align-items: center;
     padding: 0 var(--space-sm);
+    position: sticky;
+    top: 0;
+    z-index: 3;
 }

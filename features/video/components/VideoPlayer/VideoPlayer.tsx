@@ -1,8 +1,16 @@
 'use client'
 
 import '@vidstack/react/player/styles/base.css'
-import {MediaPlayer, MediaProvider, Poster, useMediaRemote, useMediaState} from '@vidstack/react'
-import {useCallback, useEffect, useRef, useState, type FocusEvent, type PointerEvent} from 'react'
+import { MediaPlayer, MediaProvider, Poster, useMediaRemote, useMediaState } from '@vidstack/react'
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type FocusEvent,
+    type MouseEvent,
+    type PointerEvent,
+} from 'react'
 import useExternalPlaybackFallback from '../../hooks/useExternalPlaybackFallback'
 import VideoControls from './VideoControls'
 import styles from './VideoPlayer.module.css'
@@ -12,7 +20,6 @@ interface VideoPlayerProps {
     onPlay?: (videoId: string) => void
     src: string
     poster?: string
-    title?: string
     videoId?: string
 }
 
@@ -20,17 +27,8 @@ function VideoFrameToggle() {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
 
-    const handleClick = () => {
-        try {
-            if (paused) {
-                remote.play()
-                return
-            }
-
-            remote.pause()
-        } catch {
-            // The provider can disappear while navigating away.
-        }
+    const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+        remote.togglePaused(event.nativeEvent)
     }
 
     return (
@@ -43,7 +41,7 @@ function VideoFrameToggle() {
     )
 }
 
-function CustomVideoLayout({src}: {src: string}) {
+function CustomVideoLayout({ src }: { src: string }) {
     const viewType = useMediaState('viewType')
     const streamType = useMediaState('streamType')
     const started = useMediaState('started')
@@ -83,11 +81,7 @@ function ActiveVideoSync({
     useEffect(() => {
         if (!videoId || !activeVideoId || activeVideoId === videoId || paused) return
 
-        try {
-            remote.pause()
-        } catch {
-            // The provider can disappear while navigating away.
-        }
+        remote.pause()
     }, [activeVideoId, paused, remote, videoId])
 
     return null
@@ -98,20 +92,25 @@ export default function VideoPlayer({
     onPlay,
     src,
     poster,
-    title,
     videoId,
 }: VideoPlayerProps) {
     const hideControlsTimer = useRef<number | null>(null)
     const controlsHiddenAt = useRef(0)
-    const lastPointerPosition = useRef<{x: number; y: number} | null>(null)
+    const lastPointerPosition = useRef<{ x: number; y: number } | null>(null)
     const [controlsVisible, setControlsVisible] = useState(true)
 
     const clearHideControlsTimer = useCallback(() => {
-        if (!hideControlsTimer.current) return
+        if (hideControlsTimer.current === null) return
 
         window.clearTimeout(hideControlsTimer.current)
         hideControlsTimer.current = null
     }, [])
+
+    useEffect(() => {
+        return () => {
+            clearHideControlsTimer()
+        }
+    }, [clearHideControlsTimer])
 
     const showControls = useCallback(() => {
         setControlsVisible(true)
@@ -150,11 +149,11 @@ export default function VideoPlayer({
         (event: PointerEvent<HTMLDivElement>) => {
             if (event.pointerType !== 'mouse') return
 
-            const nextPointerPosition = {x: event.clientX, y: event.clientY}
+            const nextPointerPosition = { x: event.clientX, y: event.clientY }
             const lastPosition = lastPointerPosition.current
             const pointerDelta = lastPosition
                 ? Math.abs(lastPosition.x - nextPointerPosition.x) +
-                  Math.abs(lastPosition.y - nextPointerPosition.y)
+                Math.abs(lastPosition.y - nextPointerPosition.y)
                 : Number.POSITIVE_INFINITY
 
             lastPointerPosition.current = nextPointerPosition
@@ -171,7 +170,7 @@ export default function VideoPlayer({
         (event: PointerEvent<HTMLDivElement>) => {
             if (event.pointerType !== 'mouse') return
 
-            lastPointerPosition.current = {x: event.clientX, y: event.clientY}
+            lastPointerPosition.current = { x: event.clientX, y: event.clientY }
             showControls()
         },
         [showControls],
@@ -185,8 +184,6 @@ export default function VideoPlayer({
         },
         [hideControls],
     )
-
-    useEffect(() => clearHideControlsTimer, [clearHideControlsTimer])
 
     if (!src) return null
 
@@ -211,7 +208,7 @@ export default function VideoPlayer({
             >
                 <MediaProvider />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
-                <CustomVideoLayout key={src} src={src} />
+                <CustomVideoLayout src={src} />
             </MediaPlayer>
         </div>
     )
