@@ -75,7 +75,11 @@
     display: none;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
+    .workSection {
+        container: work-viewport / size;
+    }
+
     .workMain {
         flex-direction: column;
     }

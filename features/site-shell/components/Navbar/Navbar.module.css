@@ -158,3 +158,9 @@
         display: none;
     }
 }
+
+@media (max-width: 768px) {
+    .nav {
+        padding: 0 var(--space-md);
+    }
+}

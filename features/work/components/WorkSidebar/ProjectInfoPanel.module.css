@@ -297,5 +297,5 @@
 .container[data-variant='mobile'] .description,
 .container[data-variant='mobile'] .credits,
 .container[data-variant='mobile'] .metaRow span {
-    padding-inline: 10px;
+    padding-inline: 15px;
 }
