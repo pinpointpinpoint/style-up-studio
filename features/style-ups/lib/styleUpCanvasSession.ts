@@ -29,7 +29,7 @@ export type StyleUpCanvasSession = {
     drag: StyleUpDragState | null
 }
 
-const LOAD_MORE_CARD_WIDTH = 18
+const CARD_WIDTH = 20
 
 function clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(max, value))
@@ -55,14 +55,12 @@ function createSeededRandom(seed: string) {
 }
 
 function createRandomLayout(random: () => number): StyleUpLayout {
-    const width = 14 + random() * 12
+    const width = CARD_WIDTH
     const halfSize = width / 2
-    const left = random() * 100
-    const top = random() * 100
 
     return {
-        left: clamp(left, halfSize, 100 - halfSize),
-        top: clamp(top, halfSize, 100 - halfSize),
+        left: clamp(random() * 100, halfSize, 100 - halfSize),
+        top: clamp(random() * 100, halfSize, 100 - halfSize),
         width,
         x: 0,
         y: 0,
@@ -76,13 +74,15 @@ export function createStyleUpCanvasSession({
     styleUps: StyleUpCanvasItem[] | null
     random?: () => number
 }): StyleUpCanvasSession {
-    const layouts: Record<string, StyleUpLayout> = {}
+    // const layouts: Record<string, StyleUpLayout> = {}
 
-    styleUps?.forEach((styleUp, index) => {
-        layouts[styleUp._id] = createRandomLayout(
-            random ?? createSeededRandom(`${styleUp._id}:${index}`),
-        )
-    })
+    // styleUps?.forEach((styleUp, index) => {
+    //     layouts[styleUp._id] = createRandomLayout(
+    //         random ?? createSeededRandom(`${styleUp._id}:${index}`),
+    //     )
+    // })
+
+    const layouts = createDistributedLayouts(styleUps)
 
     return {
         drag: null,
@@ -229,8 +229,48 @@ export function getStyleUpLoadMoreLayout(count: number): StyleUpLayout {
     return {
         left: positions[count % positions.length],
         top: 90,
-        width: LOAD_MORE_CARD_WIDTH,
+        width: CARD_WIDTH,
         x: 0,
         y: 0,
     }
+}
+
+function createDistributedLayouts(
+    styleUps: StyleUpCanvasItem[] | null,
+): Record<string, StyleUpLayout> {
+    const layouts: Record<string, StyleUpLayout> = {}
+
+    if (!styleUps?.length) return layouts
+
+    const columns = 3
+    const rows = Math.ceil(styleUps.length / columns)
+
+    const cellWidth = 100 / columns
+    const cellHeight = 100 / rows
+
+    styleUps.forEach((styleUp, index) => {
+        const random = createSeededRandom(`${styleUp._id}:${index}`)
+
+        const column = index % columns
+        const row = Math.floor(index / columns)
+
+        const jitterX = (random() - 0.5) * cellWidth * 0.5
+        const jitterY = (random() - 0.5) * cellHeight * 0.5
+
+        const left = column * cellWidth + cellWidth / 2 + jitterX
+
+        const top = row * cellHeight + cellHeight / 2 + jitterY
+
+        const halfSize = CARD_WIDTH / 2
+
+        layouts[styleUp._id] = {
+            left: clamp(left, halfSize, 100 - halfSize),
+            top: clamp(top, halfSize, 100 - halfSize),
+            width: CARD_WIDTH,
+            x: 0,
+            y: 0,
+        }
+    })
+
+    return layouts
 }
