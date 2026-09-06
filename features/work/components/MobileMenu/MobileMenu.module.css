@@ -1,5 +1,4 @@
 .details {
-    /* Use the WORK pane's actual content height, including during viewport resizing. */
     max-height: 100cqh;
     overflow-y: auto;
     overscroll-behavior-y: contain;

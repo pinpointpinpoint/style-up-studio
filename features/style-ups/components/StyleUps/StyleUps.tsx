@@ -166,7 +166,7 @@ export function StyleUps({styleUps}: StyleUpsProps) {
                     </div>
                 </div>
                 <aside className={styles.sidebar}>
-                    <div></div>
+                    <div>Hover on an image to view details</div>
                 </aside>
             </div>
         </SectionFooterScroll>

@@ -50,7 +50,7 @@ function AboutDrawerContent({
       {hasContent && (
         <div className={styles.aboutSummary}>
           <button onClick={onClose}>[CLOSE]</button>
-          <div>
+          <div className={styles.aboutContent}>
             {/* {imageUrl && previewUrl && (
               <div className={styles.aboutImage}>
                 <Image
@@ -72,7 +72,13 @@ function AboutDrawerContent({
                 />
               </div>
             )} */}
-            {trimmedBio && <p className={styles.bio}>{trimmedBio}</p>}
+            {trimmedBio && (
+              <>
+                <p className={styles.bio}>
+                    <span className={styles.bioCopy}>{trimmedBio}</span>
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}

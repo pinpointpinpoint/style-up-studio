@@ -147,5 +147,7 @@
 @media (max-width: 768px) {
     .header {
         padding: 0 var(--space-md);
+        height: var(--mobile-header-height);
+        min-height: var(--mobile-header-height);
     }
 }
