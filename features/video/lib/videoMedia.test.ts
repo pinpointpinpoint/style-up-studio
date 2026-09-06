@@ -105,8 +105,17 @@ describe('video media provider helpers', () => {
                     return `provider-thumbnail:${url}:${preset}`
                 },
             }),
-        ).toBe(`provider-thumbnail:${sourceUrl}:thumbnail-400`)
-        expect(providerThumbnailRequests).toEqual([{url: sourceUrl, preset: 'thumbnail-400'}])
+        ).toBe(`provider-thumbnail:${sourceUrl}:thumbnail-600`)
+        expect(providerThumbnailRequests).toEqual([{url: sourceUrl, preset: 'thumbnail-600'}])
+        expect(
+            getVideoMediaProviderThumbnailRequest({
+                sourceKind: 'videoUrl',
+                sourceUrl,
+                assetUse: 'expandedProjectInfoThumbnail',
+                sanityThumbnail: null,
+                sanityThumbnailUrl: () => null,
+            }),
+        ).toEqual({sourceUrl, preset: 'thumbnail-600', width: 600})
     })
 
     it('returns no asset when a video URL has no Sanity asset or provider fallback', () => {

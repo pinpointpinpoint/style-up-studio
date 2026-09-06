@@ -2,7 +2,8 @@
 
 import '@vidstack/react/player/styles/base.css'
 import {MediaPlayer, MediaProvider, Poster, useMediaRemote, useMediaState} from '@vidstack/react'
-import {useCallback, useEffect, useRef, useState, type PointerEvent} from 'react'
+import {useCallback, useEffect, useRef, useState, type FocusEvent, type PointerEvent} from 'react'
+import useExternalPlaybackFallback from '../../hooks/useExternalPlaybackFallback'
 import VideoControls from './VideoControls'
 import styles from './VideoPlayer.module.css'
 
@@ -42,18 +43,28 @@ function VideoFrameToggle() {
     )
 }
 
-function CustomVideoLayout() {
+function CustomVideoLayout({src}: {src: string}) {
     const viewType = useMediaState('viewType')
     const streamType = useMediaState('streamType')
     const started = useMediaState('started')
     const ended = useMediaState('ended')
+    const fallback = useExternalPlaybackFallback(src)
 
     if (viewType !== 'video' || streamType !== 'on-demand') return null
 
     return (
         <>
             {(!started || ended) && <Poster className={styles.poster} />}
-            <VideoFrameToggle />
+            {fallback ? (
+                <div className={styles.playbackFallback}>
+                    <p role="status">Playback is unavailable here.</p>
+                    <a href={fallback.url} target="_blank" rel="noopener noreferrer">
+                        Watch on {fallback.label} ↗
+                    </a>
+                </div>
+            ) : (
+                <VideoFrameToggle />
+            )}
             <VideoControls />
         </>
     )
@@ -117,6 +128,18 @@ export default function VideoPlayer({
         setControlsVisible(false)
     }, [clearHideControlsTimer])
 
+    const handleFocus = useCallback(
+        (event: FocusEvent<HTMLDivElement>) => {
+            // Vidstack focuses the player when its idle timer hides controls.
+            // Only keyboard focus on an actual control should reveal our bar.
+            if (event.target.matches('[data-media-player]')) return
+            if (!event.target.matches(':focus-visible')) return
+
+            showControls()
+        },
+        [showControls],
+    )
+
     const handlePlay = useCallback(() => {
         if (!videoId) return
 
@@ -171,7 +194,7 @@ export default function VideoPlayer({
         <div
             className={`${styles.root} ${styles.playerWrapper}`}
             data-controls-visible={controlsVisible ? true : undefined}
-            onFocus={showControls}
+            onFocus={handleFocus}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
             onPointerMove={handlePointerMove}
@@ -180,7 +203,6 @@ export default function VideoPlayer({
                 src={src}
                 controls={false}
                 poster={poster}
-                title={title}
                 viewType="video"
                 streamType="on-demand"
                 playsInline
@@ -189,7 +211,7 @@ export default function VideoPlayer({
             >
                 <MediaProvider />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
-                <CustomVideoLayout />
+                <CustomVideoLayout key={src} src={src} />
             </MediaPlayer>
         </div>
     )

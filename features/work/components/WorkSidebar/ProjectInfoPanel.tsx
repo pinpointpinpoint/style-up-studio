@@ -185,144 +185,148 @@ const ProjectInfoPanel = ({
     }, [displayedProject, thumbnailImageHeight, videoThumbnailStateKey])
 
     return (
-        <div className={`${styles.container} scrollbar`} data-variant={variant}>
+        <div className={styles.container} data-variant={variant}>
             <div className={`${styles.heading} ${!displayedProject ? styles.headingEmpty : ''}`}>
                 <span>INFO</span>
                 {headerAction}
             </div>
-            <div className={styles.body}>
-                <div
-                    className={`${styles.title} ${!displayedProject?.client ? styles.titleEmpty : ''}`}
-                >
-                    {displayedProject?.client || 'Client'}
-                </div>
-                <div
-                    className={`${styles.title} ${!displayedProject?.title ? styles.titleEmpty : ''}`}
-                >
-                    {displayedProject?.title || 'Title'}
-                </div>
-            </div>
-            {shouldRevealDetails && (
-                <div className={styles.revealedDetails}>
-                    <div className={`${styles.title} ${!projectYear ? styles.titleEmpty : ''}`}>
-                        {projectYear || 'Year'}
-                    </div>
-                    {hasDescription && displayedProject?.description && (
-                    <section className={styles.description}>
-                        <div className={styles.portableText}>
-                        <PortableText
-                            value={displayedProject.description}
-                            components={{
-                            marks: {
-                                link: ({ children, value }) => (
-                                <a
-                                    href={value?.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {children}
-                                </a>
-                                ),
-                            },
-                            }}
-                        />
-                        </div>
-                    </section>
-                    )}
-                    {hasCredits && displayedProject?.credits && (
-                        <section className={styles.credits}>
-                            <ul>
-                                {displayedProject.credits.map((credit, index) => {
-                                    const people = credit.people ?? []
-                                    const key = `${credit.role ?? 'credit'}-${people.map((person) => person.name).join('-') || index}`
-
-                                    return (
-                                        <li key={key}>
-                                            <span>{credit.role}</span>
-                                            <span className={styles.creditPeople}>
-                                                {people.map((person, personIndex) => (
-                                                    <span
-                                                        key={`${person.name ?? 'person'}-${personIndex}`}
-                                                    >
-                                                        {person.link ? (
-                                                            <a
-                                                                href={person.link}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                {person.name}
-                                                            </a>
-                                                        ) : (
-                                                            person.name
-                                                        )}
-                                                    </span>
-                                                ))}
-                                            </span>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </section>
-                    )}
-                </div>
-            )}
-            {thumbnails.length > 0 ? (
-                <>
+            <div className={`${styles.scrollContent} scrollbar`}>
+                <div className={styles.body}>
                     <div
-                        className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
-                        ref={assetsWrapperRef}
+                        className={`${styles.title} ${!displayedProject?.client ? styles.titleEmpty : ''}`}
                     >
-                        {visibleThumbnails.map((thumbnail, idx) => {
-                            const isActiveAsset =
-                                expandDetails &&
-                                activeAssetIndex !== undefined &&
-                                thumbnail.mediaIndex === activeAssetIndex
-                            const isInactiveAsset =
-                                expandDetails &&
-                                activeAssetIndex !== undefined &&
-                                thumbnail.mediaIndex !== activeAssetIndex
-                            const assetImage = (
-                                <img
-                                    src={thumbnail.url}
-                                    alt={thumbnail.alt}
-                                    className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
-                                    {...imageSizeProps}
-                                    loading="lazy"
-                                    decoding="async"
-                                />
-                            )
-
-                            return onAssetSelect ? (
-                                <button
-                                    key={`${thumbnail.key}-${idx}`}
-                                    className={styles.assetButton}
-                                    type="button"
-                                    onClick={() => onAssetSelect(thumbnail.mediaIndex)}
-                                    aria-label={`Go to ${thumbnail.alt}`}
-                                >
-                                    {assetImage}
-                                </button>
-                            ) : (
-                                <React.Fragment key={`${thumbnail.key}-${idx}`}>
-                                    {assetImage}
-                                </React.Fragment>
-                            )
-                        })}
-                        {hiddenThumbnailCount > 0 && (
-                            <div
-                                className={styles.assetCount}
-                                aria-label={`${hiddenThumbnailCount} hidden assets`}
-                            >
-                                +{hiddenThumbnailCount}
+                        {displayedProject?.client || 'Client'}
+                    </div>
+                    <div
+                        className={`${styles.title} ${!displayedProject?.title ? styles.titleEmpty : ''}`}
+                    >
+                        {displayedProject?.title || 'Title'}
+                    </div>
+                </div>
+                {shouldRevealDetails && (
+                    <div className={styles.revealedDetails}>
+                        <div className={`${styles.title} ${!projectYear ? styles.titleEmpty : ''}`}>
+                            {projectYear || 'Year'}
+                        </div>
+                        {hasDescription && displayedProject?.description && (
+                        <section className={styles.description}>
+                            <div className={styles.portableText}>
+                            <PortableText
+                                value={displayedProject.description}
+                                components={{
+                                marks: {
+                                    link: ({ children, value }) => (
+                                    <a
+                                        href={value?.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {children}
+                                    </a>
+                                    ),
+                                },
+                                }}
+                            />
                             </div>
+                        </section>
+                        )}
+                        {hasCredits && displayedProject?.credits && (
+                            <section className={styles.credits}>
+                                <ul>
+                                    {displayedProject.credits.map((credit, index) => {
+                                        const people = credit.people ?? []
+                                        const key = `${credit.role ?? 'credit'}-${people.map((person) => person.name).join('-') || index}`
+
+                                        return (
+                                            <li key={key}>
+                                                <span>{credit.role}</span>
+                                                <span className={styles.creditPeople}>
+                                                    {people.map((person, personIndex) => (
+                                                        <span
+                                                            key={`${person.name ?? 'person'}-${personIndex}`}
+                                                        >
+                                                            {person.link ? (
+                                                                <a
+                                                                    href={person.link}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    {person.name}
+                                                                </a>
+                                                            ) : (
+                                                                person.name
+                                                            )}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            </section>
                         )}
                     </div>
-                </>
-            ) : (
-                <div className={styles.assetsWrapper}>
-                    <div className={styles.assetEmpty}></div>
-                </div>
-            )}
+                )}
+                {thumbnails.length > 0 ? (
+                    <>
+                        <div
+                            className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
+                            ref={assetsWrapperRef}
+                        >
+                            {visibleThumbnails.map((thumbnail, idx) => {
+                                const isActiveAsset =
+                                    expandDetails &&
+                                    activeAssetIndex !== undefined &&
+                                    thumbnail.mediaIndex === activeAssetIndex
+                                const isInactiveAsset =
+                                    expandDetails &&
+                                    activeAssetIndex !== undefined &&
+                                    thumbnail.mediaIndex !== activeAssetIndex
+                                const assetImage = (
+                                    <img
+                                        data-media-kind={thumbnail.kind}
+                                        src={thumbnail.url}
+                                        alt={thumbnail.alt}
+                                        className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
+                                        {...imageSizeProps}
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                )
+
+                                return onAssetSelect ? (
+                                    <button
+                                        key={`${thumbnail.key}-${idx}`}
+                                        className={styles.assetButton}
+                                        data-media-kind={thumbnail.kind}
+                                        type="button"
+                                        onClick={() => onAssetSelect(thumbnail.mediaIndex)}
+                                        aria-label={`Go to ${thumbnail.alt}`}
+                                    >
+                                        {assetImage}
+                                    </button>
+                                ) : (
+                                    <React.Fragment key={`${thumbnail.key}-${idx}`}>
+                                        {assetImage}
+                                    </React.Fragment>
+                                )
+                            })}
+                            {hiddenThumbnailCount > 0 && (
+                                <div
+                                    className={styles.assetCount}
+                                    aria-label={`${hiddenThumbnailCount} hidden assets`}
+                                >
+                                    +{hiddenThumbnailCount}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div className={styles.assetsWrapper}>
+                        <div className={styles.assetEmpty}></div>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

@@ -456,7 +456,7 @@ describe('getProjectThumbnails', () => {
                 key: 'uploaded',
                 mediaIndex: 0,
                 displayWidth: 711.1111111111111,
-                url: 'uploaded-thumbnail:thumbnail-400',
+                url: 'uploaded-thumbnail:thumbnail-600',
                 alt: 'Video thumbnail 1 for Editorial Story',
             },
             {
@@ -464,7 +464,7 @@ describe('getProjectThumbnails', () => {
                 key: 'external',
                 mediaIndex: 1,
                 displayWidth: 711.1111111111111,
-                url: 'external-thumbnail:thumbnail-400',
+                url: 'external-thumbnail:thumbnail-600',
                 alt: 'Video link thumbnail 2 for Editorial Story',
             },
             {
@@ -472,7 +472,7 @@ describe('getProjectThumbnails', () => {
                 key: 'provider-thumbnail',
                 mediaIndex: 2,
                 displayWidth: 711.1111111111111,
-                url: 'provider:https://vimeo.com/123456789:thumbnail-400',
+                url: 'provider:https://vimeo.com/123456789:thumbnail-600',
                 alt: 'Video link thumbnail 3 for Editorial Story',
             },
         ])

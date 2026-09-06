@@ -1,7 +1,7 @@
 .root {
     --vp-border: 1px solid var(--off-black);
     --vp-bg: #fff;
-    --vp-control-size: 36px;
+    --vp-control-size: 30px;
 }
 
 .playerWrapper {
@@ -59,6 +59,12 @@
     pointer-events: none;
 }
 
+.mediaPlayer :global(.vds-blocker) {
+    /* Cover the entire embed, including fullscreen letterboxing at playback end. */
+    aspect-ratio: auto;
+    height: 100%;
+}
+
 .poster {
     background: #000;
     height: 100%;
@@ -87,6 +93,34 @@
     z-index: 20;
 }
 
+.playbackFallback {
+    align-items: center;
+    background: #000;
+    color: var(--links);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    inset: 0 0 var(--vp-control-size);
+    justify-content: center;
+    padding: 24px;
+    position: absolute;
+    text-align: center;
+    z-index: 25;
+    height: 100%;
+    font-size: var(--font-sm);
+}
+
+.playbackFallback p {
+    margin: 0;
+    color: #ffff;
+}
+
+.playbackFallback a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .controls {
     align-items: stretch;
     background: var(--vp-bg);
@@ -94,7 +128,6 @@
     display: flex;
     height: var(--vp-control-size);
     left: 0;
-    /* margin: 1px; */
     opacity: 0;
     outline: solid 1px var(--off-black);
     pointer-events: none;
@@ -119,14 +152,15 @@
     cursor: pointer;
     display: flex;
     flex-shrink: 0;
-    font-size: 16px;
-    height: var(--vp-control-size);
+    font-size: var(--font-sm);
     justify-content: center;
+    align-items: center;
     min-width: var(--vp-control-size);
     outline: none;
-    padding: 0 8px;
+    padding: 5px;
     transition: background 0.1s ease;
     width: auto;
+    line-height: 1;
 }
 
 .gridBtn:last-child {
@@ -159,7 +193,7 @@
     color: var(--off-black);
     display: flex;
     flex-shrink: 0;
-    font-size: 16px;
+    font-size: var(--font-sm);
     font-variant-numeric: tabular-nums;
     justify-content: center;
     padding: 0 8px;

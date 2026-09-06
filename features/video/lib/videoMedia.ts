@@ -37,13 +37,13 @@ export type VideoMediaProviderPosterRequest = {
 
 export function getVideoMediaSanityPreset(assetUse: VideoMediaAssetUse): VideoMediaSanityPreset {
     if (assetUse === 'poster') return 'video-poster'
-    if (assetUse === 'expandedProjectInfoThumbnail') return 'thumbnail-400'
+    if (assetUse === 'expandedProjectInfoThumbnail') return 'thumbnail-600'
 
     return 'thumbnail-80'
 }
 
 function getVideoMediaProviderThumbnailWidth(assetUse: VideoMediaAssetUse): number {
-    if (assetUse === 'expandedProjectInfoThumbnail') return 400
+    if (assetUse === 'expandedProjectInfoThumbnail') return 600
 
     return 80
 }

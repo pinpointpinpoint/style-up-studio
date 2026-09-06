@@ -52,7 +52,8 @@ export async function getExternalVideoThumbnail(
     const width = options.width ?? VIMEO_THUMBNAIL_WIDTH
 
     if (provider?.provider === 'youtube') {
-        return `https://img.youtube.com/vi/${provider.id}/default.jpg`
+        const image = (options.width ?? 120) > 120 ? 'hqdefault.jpg' : 'default.jpg'
+        return `https://img.youtube.com/vi/${provider.id}/${image}`
     }
 
     const vimeoOEmbedUrl = getVimeoOEmbedUrl(url)

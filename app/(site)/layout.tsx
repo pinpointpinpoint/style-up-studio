@@ -59,7 +59,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
                         </SiteSectionsAccordion>
                     </Suspense>
                 </div>
-                <EasterEgg />
+                {/* <EasterEgg /> */}
                 <SiteConsoleCredits />
                 <SpeedInsights />
         </>

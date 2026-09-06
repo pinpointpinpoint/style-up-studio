@@ -113,7 +113,7 @@ describe('external video service', () => {
         ).resolves.toBe('https://i.vimeocdn.com/video/123_400.jpg')
     })
 
-    it('keeps YouTube thumbnails on the most reliable generated thumbnail for larger display widths', async () => {
+    it('uses sharper YouTube thumbnails for expanded display widths', async () => {
         const fetchers = {
             head: async () => {
                 throw new Error('Poster HEAD lookup should not be used for thumbnails')
@@ -124,8 +124,8 @@ describe('external video service', () => {
         }
 
         await expect(
-            getExternalVideoThumbnail('https://youtu.be/dQw4w9WgXcQ', {width: 400}, fetchers),
-        ).resolves.toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg')
+            getExternalVideoThumbnail('https://youtu.be/dQw4w9WgXcQ', {width: 600}, fetchers),
+        ).resolves.toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
     })
 
     it('returns null for unsupported URLs and failed provider lookups', async () => {
