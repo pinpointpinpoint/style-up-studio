@@ -259,7 +259,6 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                         fallback={
                                             <VideoPlayerLoading
                                                 poster={item.poster}
-                                                title={item.title}
                                             />
                                         }
                                     >
@@ -269,7 +268,6 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                             onPlay={setActiveVideoId}
                                             src={item.fileUrl}
                                             poster={item.poster}
-                                            title={item.title}
                                             videoId={`${project._id}:${item.key}`}
                                         />
                                     </Suspense>
@@ -289,7 +287,6 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                     fallback={
                                         <VideoPlayerLoading
                                             poster={item.poster}
-                                            title={item.title}
                                         />
                                     }
                                 >
@@ -299,7 +296,6 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                         onPlay={setActiveVideoId}
                                         src={item.url}
                                         poster={item.poster}
-                                        title={item.title}
                                         videoId={`${project._id}:${item.key}`}
                                     />
                                 </Suspense>
