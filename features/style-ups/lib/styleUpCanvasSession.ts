@@ -220,7 +220,7 @@ export function endStyleUpDrag(session: StyleUpCanvasSession): StyleUpCanvasSess
 export function getStyleUpCanvasHeight(count: number) {
     const rows = Math.max(2, Math.ceil(count / 3))
 
-    return `max(calc(100% - 60px), ${Math.max(660, rows * 260)}px)`
+    return `max(calc(100dvh - var(--header-height) - var(--section-header-height) * 2 - var(--space-xl) * 2 - 1px), ${Math.max(660, rows * 260)}px)`
 }
 
 export function getStyleUpLoadMoreLayout(count: number): StyleUpLayout {

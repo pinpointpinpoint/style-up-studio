@@ -174,7 +174,7 @@ export function StyleUps({ styleUps }: StyleUpsProps) {
                     <div
                         ref={canvasRef}
                         className={styles.canvas}
-                        style={{ minHeight: canvasHeight }}
+                        style={{ height: canvasHeight }}
                     >
                         {hasRandomLayouts &&
                             styleUps.map((su, index) => {
