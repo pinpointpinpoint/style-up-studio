@@ -398,14 +398,16 @@ export function getProjectThumbnails(
     const projectTitle = project.title ?? 'project'
     const imageThumbnails = getProjectImageThumbnails(project, options)
 
-    return project.media.flatMap((item, mediaIndex) => {
+    return project.media.flatMap<ProjectThumbnail>((item, mediaIndex) => {
         if (item._type === 'image' || item._type === 'gallery') {
             return imageThumbnails
                 .filter((image) => image.mediaIndex === mediaIndex)
-                .map((image) => ({
-                    ...image,
-                    kind: 'image' as const,
-                }))
+                .map(
+                    (image): ProjectThumbnail => ({
+                        ...image,
+                        kind: 'image',
+                    }),
+                )
         }
 
         if (item._type === 'uploadedVideo') {
@@ -423,7 +425,7 @@ export function getProjectThumbnails(
 
             return [
                 {
-                    kind: 'uploadedVideo' as const,
+                    kind: 'uploadedVideo',
                     key: item._key ?? `uploaded-video-${mediaIndex}`,
                     mediaIndex,
                     url,
@@ -454,7 +456,7 @@ export function getProjectThumbnails(
 
             return [
                 {
-                    kind: 'videoUrl' as const,
+                    kind: 'videoUrl',
                     key: item._key ?? `video-url-${mediaIndex}`,
                     mediaIndex,
                     url,
