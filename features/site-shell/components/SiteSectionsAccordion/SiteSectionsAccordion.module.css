@@ -99,6 +99,7 @@
 }
 
 .panel {
+    background: white;
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
@@ -145,6 +146,10 @@
 }
 
 @media (max-width: 768px) {
+    .deferredSectionSidebar {
+        display: none;
+    }
+
     .header {
         padding: 0 var(--space-md);
         height: var(--mobile-header-height);

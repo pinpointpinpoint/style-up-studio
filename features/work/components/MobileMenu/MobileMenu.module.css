@@ -1,17 +1,46 @@
 .details {
     max-height: 100cqh;
+    overflow: hidden;
+}
+
+.scrollContent {
+    max-height: max(0px, calc(100cqh - var(--mobile-btn-height)));
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
 
 .summary {
     background: white;
+    box-sizing: border-box;
     height: var(--mobile-btn-height);
     border-bottom: 1px solid var(--off-black);
     display: flex;
     align-items: center;
-    padding: 0 var(--space-sm);
+    justify-content: space-between;
+    gap: var(--space-sm);
+    list-style: none;
+    padding: 0 var(--space-md);
     position: sticky;
     top: 0;
     z-index: 3;
+}
+
+.summary::-webkit-details-marker {
+    display: none;
+}
+
+.arrow {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.details[open] > .summary .arrow {
+    transform: rotate(180deg);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .scrollContent {
+        scrollbar-color: var(--off-black) white;
+        scrollbar-width: thin;
+    }
 }

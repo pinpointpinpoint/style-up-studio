@@ -83,7 +83,8 @@
     .workMain {
         flex-direction: column;
     }
-    .sidebarPane {
+    .sidebarPane,
+    .projectDetailLoadingSidebar {
         display: none;
     }
     .mobileMenu {

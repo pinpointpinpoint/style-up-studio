@@ -3,9 +3,25 @@
     border-bottom: 1px solid var(--off-black);
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    list-style: none;
     padding: 0 var(--space-md);
 }
 
 .summary:hover {
     cursor: pointer;
+}
+
+.summary::-webkit-details-marker {
+    display: none;
+}
+
+.arrow {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.details[open] > .summary .arrow {
+    transform: rotate(180deg);
 }
