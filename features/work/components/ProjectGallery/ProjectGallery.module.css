@@ -19,6 +19,7 @@
     justify-content: center;
     outline: solid 1px var(--off-black);
     font-size: var(--font-sm);
+    color: var(--off-black)
 }
 
 .viewMoreButton:disabled {
