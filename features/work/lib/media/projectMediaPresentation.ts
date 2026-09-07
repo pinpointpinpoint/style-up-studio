@@ -352,32 +352,42 @@ export function getProjectImageThumbnails(
     const projectTitle = project.title ?? 'project'
     const preset = `thumbnail-${options.thumbnailHeight}` as const
 
-    return project.media
-        .map((item, mediaIndex) => {
-            const source =
-                item._type === 'gallery' ? item.images?.[0] : item._type === 'image' ? item : null
-            if (!source) return null
+    return project.media.flatMap((item, mediaIndex) => {
+        const sources =
+            item._type === 'gallery'
+                ? item.images ?? []
+                : item._type === 'image'
+                  ? [item]
+                  : []
 
+        return sources.flatMap((source, imageIndex) => {
             const image = toPresentedImage(
                 source,
-                `Gallery thumbnail for ${projectTitle}`,
+                item._type === 'gallery'
+                    ? `Gallery image ${imageIndex + 1} for ${projectTitle}`
+                    : `Project image ${mediaIndex + 1} for ${projectTitle}`,
                 imageUrl,
                 preset,
             )
 
-            if (!image) return null
+            if (!image) return []
 
-            return {
-                key: item._key ?? source.asset?._ref ?? String(mediaIndex),
-                mediaIndex,
-                displayWidth: getThumbnailDisplayWidth(
-                    getSanityAssetAspectRatio(source.asset?._ref),
-                    options,
-                ),
-                ...image,
-            }
+            return [
+                {
+                    key:
+                        source._key ??
+                        source.asset?._ref ??
+                        `${mediaIndex}-${imageIndex}`,
+                    mediaIndex,
+                    displayWidth: getThumbnailDisplayWidth(
+                        getSanityAssetAspectRatio(source.asset?._ref),
+                        options,
+                    ),
+                    ...image,
+                },
+            ]
         })
-        .filter((item): item is ProjectImageThumbnail => Boolean(item))
+    })
 }
 
 export function getProjectThumbnails(
@@ -386,31 +396,33 @@ export function getProjectThumbnails(
 ): ProjectThumbnail[] {
     const imageUrl = options.imageUrl
     const projectTitle = project.title ?? 'project'
-    const imageThumbnailsByIndex = new Map(
-        getProjectImageThumbnails(project, options).map((item) => [item.mediaIndex, item]),
-    )
+    const imageThumbnails = getProjectImageThumbnails(project, options)
 
-    return project.media
-        .map((item, mediaIndex) => {
-            if (item._type === 'image' || item._type === 'gallery') {
-                const image = imageThumbnailsByIndex.get(mediaIndex)
+    return project.media.flatMap((item, mediaIndex) => {
+        if (item._type === 'image' || item._type === 'gallery') {
+            return imageThumbnails
+                .filter((image) => image.mediaIndex === mediaIndex)
+                .map((image) => ({
+                    ...image,
+                    kind: 'image' as const,
+                }))
+        }
 
-                return image ? {...image, kind: 'image' as const} : null
-            }
+        if (item._type === 'uploadedVideo') {
+            if (!item.thumbnail) return []
 
-            if (item._type === 'uploadedVideo') {
-                if (!item.thumbnail) return null
+            const url = getVideoMediaAsset({
+                sourceKind: 'uploadedVideo',
+                sourceUrl: item.fileUrl ?? '',
+                assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
+                sanityThumbnail: item.thumbnail,
+                sanityThumbnailUrl: imageUrl,
+            })
 
-                const url = getVideoMediaAsset({
-                    sourceKind: 'uploadedVideo',
-                    sourceUrl: item.fileUrl ?? '',
-                    assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
-                    sanityThumbnail: item.thumbnail,
-                    sanityThumbnailUrl: imageUrl,
-                })
-                if (!url) return null
+            if (!url) return []
 
-                return {
+            return [
+                {
                     kind: 'uploadedVideo' as const,
                     key: item._key ?? `uploaded-video-${mediaIndex}`,
                     mediaIndex,
@@ -421,25 +433,27 @@ export function getProjectThumbnails(
                             FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
                         options,
                     ),
-                }
-            }
+                },
+            ]
+        }
 
-            if (item._type === 'videoUrl') {
-                if (!item.url) return null
+        if (item._type === 'videoUrl') {
+            if (!item.url) return []
 
-                const url = getVideoMediaAsset({
-                    sourceKind: 'videoUrl',
-                    sourceUrl: item.url,
-                    assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
-                    sanityThumbnail: item.thumbnail,
-                    sanityThumbnailUrl: imageUrl,
-                    providerThumbnailUrl: (videoUrl, providerPreset) =>
-                        options.externalVideoThumbnailUrl?.(videoUrl, providerPreset),
-                })
+            const url = getVideoMediaAsset({
+                sourceKind: 'videoUrl',
+                sourceUrl: item.url,
+                assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
+                sanityThumbnail: item.thumbnail,
+                sanityThumbnailUrl: imageUrl,
+                providerThumbnailUrl: (videoUrl, providerPreset) =>
+                    options.externalVideoThumbnailUrl?.(videoUrl, providerPreset),
+            })
 
-                if (!url) return null
+            if (!url) return []
 
-                return {
+            return [
+                {
                     kind: 'videoUrl' as const,
                     key: item._key ?? `video-url-${mediaIndex}`,
                     mediaIndex,
@@ -450,10 +464,10 @@ export function getProjectThumbnails(
                             FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
                         options,
                     ),
-                }
-            }
+                },
+            ]
+        }
 
-            return null
-        })
-        .filter((item): item is ProjectThumbnail => Boolean(item))
+        return []
+    })
 }

@@ -165,11 +165,6 @@
     grid-column: span 2;
 }
 
-.assetsWrapperExpanded > [data-media-kind='uploadedVideo'],
-.assetsWrapperExpanded > [data-media-kind='videoUrl'] {
-    grid-column: span 3;
-}
-
 @container project-info (max-width: 360px) {
     .assetsWrapperExpanded {
         grid-template-columns: repeat(2, minmax(0, 1fr));
