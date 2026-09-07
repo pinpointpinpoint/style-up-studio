@@ -29,7 +29,7 @@
 
 .titleEmpty {
     font-style: italic;
-    color: var(--dimmed);
+    color: var(--disabled-gray);
 }
 
 .body {
@@ -240,7 +240,7 @@
 }
 
 .assetEmpty {
-    border: 1px solid var(--dimmed);
+    border: 1px solid var(--disabled-gray);
     flex: 0 0 30px;
     height: 30px;
     position: relative;
@@ -249,7 +249,7 @@
 
 .assetEmpty::before,
 .assetEmpty::after {
-    background: var(--dimmed);
+    background: var(--disabled-gray);
     content: '';
     height: 1px;
     left: 50%;
@@ -285,7 +285,7 @@
 }
 
 .headingEmpty {
-    color: var(--dimmed);
+    color: var(--disabled-gray);
 }
 
 .container[data-variant='mobile'] .heading,

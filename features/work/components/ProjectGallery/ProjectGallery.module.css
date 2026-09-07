@@ -21,6 +21,10 @@
     font-size: var(--font-sm);
 }
 
+.viewMoreButton:disabled {
+    color: var(--disabled-gray);
+}
+
 .loadingCell {
     aspect-ratio: 1 / 1;
     background: white;
@@ -39,10 +43,5 @@
 @media (max-width: 900px) {
     .projectGallery {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 576px) {
-    .mobileMenu {
     }
 }
