@@ -44,14 +44,21 @@ export default function VideoControls() {
                     aria-label="Replay"
                     onClick={handleReplay}
                 >
-                    [REPLAY]
+                    <span className={styles.desktopLabel}>[REPLAY]</span>
+                    <span className={styles.mobileIcon} aria-hidden="true">↻</span>
                 </button>
             ) : (
                 <PlayButton
                     className={`${styles.gridBtn} ${styles.playBtn}`}
                     aria-label={paused ? 'Play' : 'Pause'}
                 >
-                    {paused ? '[PLAY]' : '[PAUSE]'}
+                    <span className={styles.desktopLabel}>
+                        {paused ? '[PLAY]' : '[PAUSE]'}
+                    </span>
+
+                    <span className={styles.mobileIcon} aria-hidden="true">
+                        {paused ? '▶' : 'Ⅱ'}
+                    </span>
                 </PlayButton>
             )}
             <TimeDisplay />
@@ -67,14 +74,26 @@ export default function VideoControls() {
                 className={`${styles.gridBtn} ${styles.muteBtn}`}
                 aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
             >
-                {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
+                <span className={styles.desktopLabel}>
+                    {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
+                </span>
+
+                <span className={styles.mobileIcon} aria-hidden="true">
+                    {muted || volume === 0 ? '🔇' : '🔊'}
+                </span>
             </MuteButton>
 
             <FullscreenButton
                 className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
                 aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
-                {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
+                <span className={styles.desktopLabel}>
+                    {fullscreen ? '[EXIT]' : '[FULLSCREEN]'}
+                </span>
+
+                <span className={styles.mobileIcon} aria-hidden="true">
+                    {fullscreen ? '↙' : '↗'}
+                </span>
             </FullscreenButton>
         </div>
     )

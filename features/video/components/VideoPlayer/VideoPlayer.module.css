@@ -243,3 +243,30 @@
 :global([data-media-player][data-layout='video']:not([data-fullscreen])) {
     border-radius: 0;
 }
+
+.mobileIcon {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .desktopLabel {
+        display: none;
+    }
+    .mobileIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 1px;
+    }
+    .gridBtn {
+        min-width: 40px;
+        min-height: 44px;  
+    }
+    .playBtn, .muteBtn, .fullscreenBtn {
+        min-width: 40px;
+        min-height: 44px;
+    }
+    .controls {
+        min-height: 44px;
+    }
+}
