@@ -6,6 +6,7 @@
 
 .playerWrapper {
     align-items: center;
+    container-type: size;
     display: flex;
     height: 100%;
     justify-content: center;
@@ -29,6 +30,10 @@
     position: relative;
     width: 100%;
     border: 1px solid var(--off-black);
+}
+
+.mediaPlayer:not([data-fullscreen]) {
+    width: min(100%, calc(100cqh * 16 / 9));
 }
 
 .mediaPlayer :global([data-media-provider]) {

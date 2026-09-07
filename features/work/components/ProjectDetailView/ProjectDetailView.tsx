@@ -226,6 +226,30 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
             <div className={styles.mediaPane} ref={mediaPaneRef} onScroll={handleMediaScroll}>
                 <div className={styles.mediaList}>
                     {mediaView.media.map((item) => {
+                        if (item.kind === 'gallery') {
+                            return (
+                                <div className={styles.galleryContainer}>
+                                    <div
+                                        key={item.key}
+                                        className={styles.galleryFrame}
+                                        ref={(element) => {
+                                            mediaFrameRefs.current[item.mediaIndex] = element
+                                        }}
+                                    >
+                                        {item.images.map((image) => (
+                                            <ProjectImage
+                                                key={image.key}
+                                                src={image.url}
+                                                srcSet={image.srcSet}
+                                                sizes={image.sizes}
+                                                alt={image.alt}
+                                                eager={image.eager}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                        }
                         if (item.kind === 'image') {
                             return (
                                 <div
@@ -250,7 +274,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                             return (
                                 <div
                                     key={item.key}
-                                    className={styles.mediaFrame}
+                                    className={`${styles.mediaFrame} ${styles.videoFrame}`}
                                     ref={(element) => {
                                         mediaFrameRefs.current[item.mediaIndex] = element
                                     }}
@@ -278,7 +302,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                         return (
                             <div
                                 key={item.key}
-                                className={styles.mediaFrame}
+                                className={`${styles.mediaFrame} ${styles.videoFrame}`}
                                 ref={(element) => {
                                     mediaFrameRefs.current[item.mediaIndex] = element
                                 }}

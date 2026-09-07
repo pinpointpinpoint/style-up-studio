@@ -160,9 +160,48 @@ export default defineType({
             name: 'media',
             title: 'Project Media*',
             description:
-                'Add images, uploaded videos, and video URLs in the exact order they should appear on the project page.',
+                'Add images, galleries, uploaded videos, and video URLs in the exact order they should appear on the project page.',
             type: 'array',
             of: [
+                defineArrayMember({
+                    name: 'gallery',
+                    title: 'Gallery',
+                    type: 'object',
+                    fields: [
+                        defineField({
+                            name: 'images',
+                            title: 'Images',
+                            type: 'array',
+                            of: [
+                                defineArrayMember({
+                                    type: 'image',
+                                    options: {hotspot: true},
+                                    fields: [
+                                        defineField({
+                                            name: 'alt',
+                                            title: 'Alternative text',
+                                            type: 'string',
+                                            description:
+                                                'Describe the image for people using screen readers.',
+                                        }),
+                                    ],
+                                    validation: (Rule) => Rule.required().assetRequired(),
+                                }),
+                            ],
+                            validation: (Rule) => Rule.required().min(1),
+                        }),
+                    ],
+                    preview: {
+                        select: {images: 'images', media: 'images.0'},
+                        prepare({images, media}) {
+                            return {
+                                title: 'Gallery',
+                                subtitle: `${images?.length ?? 0} images`,
+                                media,
+                            }
+                        },
+                    },
+                }),
                 defineArrayMember({
                     name: 'image',
                     title: 'Image',
@@ -270,7 +309,7 @@ export default defineType({
                 rule
                     .required()
                     .min(1)
-                    .error('Add at least one image, uploaded video, or video URL.'),
+                    .error('Add at least one image, gallery, uploaded video, or video URL.'),
             fieldset: 'media',
         }),
         defineField({

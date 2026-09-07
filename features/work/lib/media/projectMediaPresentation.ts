@@ -65,8 +65,16 @@ export type ProjectDetailExternalVideoMedia = {
 
 export type ProjectDetailMedia =
     | (ProjectDetailImageMedia & {kind: 'image'})
+    | ProjectDetailGalleryMedia
     | ProjectDetailUploadedVideoMedia
     | ProjectDetailExternalVideoMedia
+
+export type ProjectDetailGalleryMedia = {
+    kind: 'gallery'
+    key: string
+    mediaIndex: number
+    images: ProjectDetailImageMedia[]
+}
 
 export type ProjectImageThumbnail = ProjectPresentedImage & {
     kind?: 'image'
@@ -265,6 +273,36 @@ export function getProjectDetailMedia(
 
     return project.media
         .map((item, mediaIndex) => {
+            if (item._type === 'gallery') {
+                const images = (item.images ?? []).flatMap((source, imageIndex) => {
+                    const image = toPresentedImage(
+                        source,
+                        source.alt ||
+                            `Gallery image ${imageIndex + 1} for ${project.title ?? 'project'}`,
+                        imageUrl,
+                        'detail',
+                        options.imageSourceSet,
+                    )
+                    return image
+                        ? [
+                              {
+                                  ...image,
+                                  sizes: '(max-width: 768px) 50vw, 25vw',
+                                  key: source._key,
+                                  mediaIndex,
+                                  eager: mediaIndex === 0 && imageIndex === 0,
+                              },
+                          ]
+                        : []
+                })
+                const gallery: ProjectDetailGalleryMedia = {
+                    kind: 'gallery',
+                    key: item._key,
+                    mediaIndex,
+                    images,
+                }
+                return images.length ? gallery : null
+            }
             if (item._type === 'image') {
                 const image = imageMediaByIndex.get(mediaIndex)
 
@@ -316,10 +354,12 @@ export function getProjectImageThumbnails(
 
     return project.media
         .map((item, mediaIndex) => {
-            if (item._type !== 'image') return null
+            const source =
+                item._type === 'gallery' ? item.images?.[0] : item._type === 'image' ? item : null
+            if (!source) return null
 
             const image = toPresentedImage(
-                item,
+                source,
                 `Gallery thumbnail for ${projectTitle}`,
                 imageUrl,
                 preset,
@@ -328,10 +368,10 @@ export function getProjectImageThumbnails(
             if (!image) return null
 
             return {
-                key: item._key ?? item.asset?._ref ?? String(mediaIndex),
+                key: item._key ?? source.asset?._ref ?? String(mediaIndex),
                 mediaIndex,
                 displayWidth: getThumbnailDisplayWidth(
-                    getSanityAssetAspectRatio(item.asset?._ref),
+                    getSanityAssetAspectRatio(source.asset?._ref),
                     options,
                 ),
                 ...image,
@@ -352,7 +392,7 @@ export function getProjectThumbnails(
 
     return project.media
         .map((item, mediaIndex) => {
-            if (item._type === 'image') {
+            if (item._type === 'image' || item._type === 'gallery') {
                 const image = imageThumbnailsByIndex.get(mediaIndex)
 
                 return image ? {...image, kind: 'image' as const} : null

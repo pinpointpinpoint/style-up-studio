@@ -108,6 +108,14 @@ const projectMediaProjection = `
     "title": asset->originalFilename,
     "fileUrl": asset->url,
     url,
+    images[]{
+      _key,
+      _type,
+      asset,
+      crop,
+      hotspot,
+      alt
+    },
     thumbnail{
       asset,
       crop,

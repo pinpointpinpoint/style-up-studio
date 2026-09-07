@@ -55,7 +55,7 @@ function CustomVideoLayout({ src }: { src: string }) {
             {(!started || ended) && <Poster className={styles.poster} />}
             {fallback ? (
                 <div className={styles.playbackFallback}>
-                    <p role="status">Playback is unavailable here.</p>
+                    <p role="status">{fallback.message}</p>
                     <a href={fallback.url} target="_blank" rel="noopener noreferrer">
                         Watch on {fallback.label} ↗
                     </a>
@@ -208,7 +208,7 @@ export default function VideoPlayer({
             >
                 <MediaProvider />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
-                <CustomVideoLayout src={src} />
+                <CustomVideoLayout key={src} src={src} />
             </MediaPlayer>
         </div>
     )
