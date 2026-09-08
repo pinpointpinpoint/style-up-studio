@@ -104,20 +104,20 @@ function ContactDrawerContent({
     <>
       {hasLinks && version === "mobile" ?
         <div>
+          {instagram && (
+            <div className={styles.ig}>
+              <a href={instagram.href} target="_blank" rel="noopener noreferrer">
+                {instagram.label}
+              </a>
+              <ArrowIcon direction='upRight' />
+            </div>
+          )}
           {safeEmailHref &&
               <div className={styles.email}>
                 <a href={safeEmailHref}>{emailLabel}</a>
                 <ArrowIcon direction='upRight' />
               </div>
             }
-            {instagram && (
-              <div className={styles.ig}>
-                <a href={instagram.href} target="_blank" rel="noopener noreferrer">
-                  {instagram.label}
-                </a>
-                <ArrowIcon direction='upRight' />
-              </div>
-            )}
         </div>
         :
         (<div className={styles.contactLinks}>
