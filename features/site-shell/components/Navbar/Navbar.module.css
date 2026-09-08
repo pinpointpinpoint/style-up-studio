@@ -191,6 +191,7 @@
         justify-self: center;
     }
     .infoContent {
+        display: flex;
         position: absolute;
         z-index: 99999;
         background-color: white;
@@ -199,7 +200,29 @@
         width: 100%;
         top: var(--mobile-header-height);
         left: 0;
+        align-items: stretch;
     }
+    .content {
+     
+    }
+    .bio, .email, .ig {
+        height: 44px;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        padding: 0px 15px;
+        border-bottom: solid 1px var(--off-black);
+    }
+    .imgWrapper {
+        align-self: stretch;
+    }
+
+    .imgWrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
     .header, .nav, .drawerInner {
         height: var(--mobile-header-height);
         justify-content: center;

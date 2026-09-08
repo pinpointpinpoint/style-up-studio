@@ -33,7 +33,8 @@ interface ContactDrawerContentProps {
   email?: string
   emailHref: EmailHref
   instagram: InstagramProfile
-  onClose: () => void
+  onClose?: () => void
+  version: string
 }
 
 function AboutDrawerContent({
@@ -92,6 +93,7 @@ function ContactDrawerContent({
   emailHref,
   instagram,
   onClose,
+  version
 }: ContactDrawerContentProps) {
   const emailLabel = email?.trim()
   const safeEmailHref = emailHref && emailLabel ? emailHref : null
@@ -99,15 +101,32 @@ function ContactDrawerContent({
 
   return (
     <>
-      {hasLinks && (
-        <div className={styles.contactLinks}>
-          <div className={styles.contactLinkList}>
-            {safeEmailHref && 
-              <div>
-                <a href={safeEmailHref}>{emailLabel}</a>                
+      {hasLinks && version === "mobile" ?
+        <div>
+          {safeEmailHref &&
+              <div className={styles.email}>
+                <a href={safeEmailHref}>{emailLabel}</a>
                 <ArrowIcon direction='upRight' />
               </div>
-              }
+            }
+            {instagram && (
+              <div className={styles.ig}>
+                <a href={instagram.href} target="_blank" rel="noopener noreferrer">
+                  {instagram.label}
+                </a>
+                <ArrowIcon direction='upRight' />
+              </div>
+            )}
+        </div>
+        :
+        (<div className={styles.contactLinks}>
+          <div className={styles.contactLinkList}>
+            {safeEmailHref &&
+              <div>
+                <a href={safeEmailHref}>{emailLabel}</a>
+                <ArrowIcon direction='upRight' />
+              </div>
+            }
             {instagram && (
               <div>
                 <a href={instagram.href} target="_blank" rel="noopener noreferrer">
@@ -119,7 +138,7 @@ function ContactDrawerContent({
           </div>
           <button onClick={onClose}>[CLOSE]</button>
         </div>
-      )}
+        )}
     </>
   )
 }
@@ -174,7 +193,18 @@ export default function Navbar({ about, contact }: NavbarProps) {
           <details>
             <summary>INFO</summary>
             <div className={styles.infoContent}>
-              <p>{about?.bio}</p>
+              <div className={styles.content}>
+                <p className={styles.bio}>{about?.bio}</p>
+                <ContactDrawerContent
+                  email={contact?.email}
+                  emailHref={emailHref}
+                  instagram={instagram}
+                  version="mobile"
+                />
+              </div>
+              <div className={styles.imgWrapper}>
+                <img src={aboutPreviewUrl}/>
+              </div>
             </div>
           </details>
         </nav>
@@ -203,6 +233,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
               emailHref={emailHref}
               instagram={instagram}
               onClose={closeMenu}
+              version="desktop"
             />
           </NavbarDrawer>
         </div>
