@@ -8,6 +8,7 @@ import getSafeMailto from '@/shared/utils/getSafeMailto'
 import getSafeInstagramProfile from '@/shared/utils/getSafeInstagramProfile'
 import { NavbarDrawer } from './NavbarDrawer'
 import styles from './Navbar.module.css'
+import ArrowIcon from '../ArrowIcon/ArrowIcon'
 
 type MenuKey = 'about' | 'contact'
 type EmailHref = ReturnType<typeof getSafeMailto>
@@ -75,7 +76,7 @@ function AboutDrawerContent({
             {trimmedBio && (
               <>
                 <p className={styles.bio}>
-                    <span className={styles.bioCopy}>{trimmedBio}</span>
+                  <span className={styles.bioCopy}>{trimmedBio}</span>
                 </p>
               </>
             )}
@@ -101,11 +102,19 @@ function ContactDrawerContent({
       {hasLinks && (
         <div className={styles.contactLinks}>
           <div className={styles.contactLinkList}>
-            {safeEmailHref && <a href={safeEmailHref}>{emailLabel}</a>}
+            {safeEmailHref && 
+              <div>
+                <a href={safeEmailHref}>{emailLabel}</a>                
+                <ArrowIcon direction='upRight' />
+              </div>
+              }
             {instagram && (
-              <a href={instagram.href} target="_blank" rel="noopener noreferrer">
-                {instagram.label}
-              </a>
+              <div>
+                <a href={instagram.href} target="_blank" rel="noopener noreferrer">
+                  {instagram.label}
+                </a>
+                <ArrowIcon direction='upRight' />
+              </div>
             )}
           </div>
           <button onClick={onClose}>[CLOSE]</button>
@@ -161,6 +170,14 @@ export default function Navbar({ about, contact }: NavbarProps) {
             />
           </NavbarDrawer>
         </div>
+        <nav className={styles.mobileNav}>
+          <details>
+            <summary>INFO</summary>
+            <div className={styles.infoContent}>
+              <p>{about?.bio}</p>
+            </div>
+          </details>
+        </nav>
         <Link href="/" aria-label="Style Up Studio home">
           <img className={styles.logo} src="/minimal_logo.svg" alt="Style Up Studio" />
         </Link>

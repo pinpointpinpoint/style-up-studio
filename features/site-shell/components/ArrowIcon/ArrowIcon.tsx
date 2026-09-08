@@ -1,10 +1,11 @@
-export type ArrowDirection = 'left' | 'right' | 'up' | 'down'
+export type ArrowDirection = 'left' | 'right' | 'up' | 'down' | 'upRight'
 
 const ROTATION: Record<ArrowDirection, string> = {
     up: '0deg',
     right: '90deg',
     down: '180deg',
     left: '270deg',
+    upRight: '45deg'
 }
 
 interface ArrowIconProps {

@@ -135,6 +135,7 @@
 .bioCopy {
     flex-shrink: 0;
     padding-right: 5px;
+    padding-top: 1.5px;
 }
 
 .contactLinks {
@@ -148,20 +149,62 @@
 
 .contactLinkList {
     display: flex;
+    height: 19px;
     gap: var(--space-md);
 }
 
 .contactLinkList a {
     white-space: nowrap;
-    color: var(--links);
+    color: var(--off-black);
     text-transform: uppercase;
     font-size: var(--font-sm);
+    text-decoration: none;
+    vertical-align: baseline;
+}
+
+.contactLinkList div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding-top: 2px;
+}
+
+.mobileNav {
+    display: none;
 }
 
 @media (max-width: 768px) {
+    .nav {
+        position: relative;
+    }
+    .header nav {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: center;
+    }
+    .mobileNav {
+        display: block;
+        justify-self: start;
+    }
+    .logo {
+        justify-self: center;
+    }
+    .infoContent {
+        position: absolute;
+        z-index: 99999;
+        background-color: white;
+        border-top: solid 1px var(--off-black);
+        border-bottom: solid 1px var(--off-black);
+        width: 100%;
+        top: var(--mobile-header-height);
+        left: 0;
+    }
     .header, .nav, .drawerInner {
         height: var(--mobile-header-height);
         justify-content: center;
+        display: flex;
+        align-items: center;
     }
     .navItem {
         display: none;

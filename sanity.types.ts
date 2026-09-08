@@ -120,7 +120,6 @@ export type Project = {
                   media?: unknown
                   hotspot?: SanityImageHotspot
                   crop?: SanityImageCrop
-                  alt?: string
                   _type: 'image'
                   _key: string
               }>
@@ -569,7 +568,7 @@ export type ProjectBySlugQueryResult = {
                   } | null
                   crop: SanityImageCrop | null
                   hotspot: SanityImageHotspot | null
-                  alt: string | null
+                  alt: null
               }> | null
               thumbnail: null
           }
@@ -726,7 +725,7 @@ export type ProjectsQueryResult = Array<{
                   } | null
                   crop: SanityImageCrop | null
                   hotspot: SanityImageHotspot | null
-                  alt: string | null
+                  alt: null
               }> | null
               thumbnail: null
           }
@@ -883,7 +882,7 @@ export type FeaturedProjectsQueryResult = Array<{
                   } | null
                   crop: SanityImageCrop | null
                   hotspot: SanityImageHotspot | null
-                  alt: string | null
+                  alt: null
               }> | null
               thumbnail: null
           }

@@ -1,6 +1,6 @@
 .sidebarFrame {
-    --work-sidebar-width: clamp(300px, 28vw, 400px);
-
+    /* --work-sidebar-width: min(25vw, 400px); */
+    --work-sidebar-width: calc((100vw - 4px) / 5);
     border-left: 1px solid var(--off-black);
     display: flex;
     flex: 0 0 var(--work-sidebar-width);
@@ -12,6 +12,20 @@
     overflow: hidden;
     scrollbar-width: none;
     width: var(--work-sidebar-width);
+}
+
+
+@media (max-width: 1245px) {
+    .sidebarFrame {
+        --work-sidebar-width: calc((100vw - 2px) / 4);
+    }
+
+}
+
+@media (max-width: 900px) {
+    .sidebarFrame {
+        --work-sidebar-width: calc((100vw - 1px) / 3);
+    }
 }
 
 .stickySidebarFrame {

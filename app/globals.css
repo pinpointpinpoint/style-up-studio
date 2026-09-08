@@ -125,3 +125,8 @@ summary:hover {
 .notFoundLink:first-child {
     border-right: solid 1px var(--off-black);
 }
+
+summary {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
