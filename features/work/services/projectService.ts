@@ -4,18 +4,15 @@ import type {
     ProjectBySlugQueryResult,
     ProjectsQueryResult,
 } from '@/sanity.types'
-import {SANITY_PROJECTS_TAG, SANITY_PUBLIC_TAG} from '../../../sanity/lib/cacheTags'
 import type {Filter, Project, ProjectsQueryInput} from '@/types'
 import {DEFAULT_PROJECT_FILTER} from '../lib/projectFilters'
 
 const DEFAULT_LIMIT = 2
-const PROJECT_SERVICE_TAGS = [SANITY_PUBLIC_TAG, SANITY_PROJECTS_TAG]
 
 export type ProjectServiceFetchArgs = {
     query: string
     stega: false
     params?: Record<string, unknown>
-    tags?: string[]
 }
 
 export type ProjectServiceFetch = <T>(args: ProjectServiceFetchArgs) => Promise<{data: T}>
@@ -60,7 +57,6 @@ export function createProjectService({sanityFetch}: ProjectServiceDependencies) 
             const {data} = await sanityFetch<ProjectsQueryResult | FeaturedProjectsQueryResult>({
                 query,
                 stega: false,
-                tags: PROJECT_SERVICE_TAGS,
                 params: {
                     filterType: filter.type,
                     filterId: 'id' in filter ? filter.id : '',
@@ -80,7 +76,6 @@ export function createProjectService({sanityFetch}: ProjectServiceDependencies) 
             const {data} = await sanityFetch<ProjectBySlugQueryResult>({
                 query: projectBySlugQuery,
                 stega: false,
-                tags: PROJECT_SERVICE_TAGS,
                 params: {slug},
             })
 

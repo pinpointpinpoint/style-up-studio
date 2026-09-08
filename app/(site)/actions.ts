@@ -5,7 +5,6 @@ import {
     type ProjectServiceFetch,
 } from '@/features/work/services/projectService'
 import type {AllStyleUpsQueryResult} from '@/sanity.types'
-import {SANITY_PUBLIC_TAG, SANITY_STYLE_UPS_TAG} from '@/sanity/lib/cacheTags'
 import {sanityFetch} from '@/sanity/lib/fetch'
 import {allStyleUpsQuery} from '@/sanity/lib/queries'
 
@@ -19,8 +18,7 @@ export const getProjectBySlug = projectService.getProjectBySlug
 export async function getStyleUps() {
     const {data} = await sanityFetch<AllStyleUpsQueryResult>({
         query: allStyleUpsQuery,
-        stega: false,
-        tags: [SANITY_PUBLIC_TAG, SANITY_STYLE_UPS_TAG],
+        stega: false
     })
 
     return data

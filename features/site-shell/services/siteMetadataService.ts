@@ -1,5 +1,4 @@
 import type {Metadata} from 'next'
-import {SANITY_PUBLIC_TAG, SANITY_SEO_TAG} from '../../../sanity/lib/cacheTags'
 import {seoSettingsQuery} from '../../../sanity/lib/queries'
 
 type SeoSettings = {
@@ -10,7 +9,6 @@ export type SiteMetadataServiceFetchArgs = {
     name: 'seoSettings'
     query: string
     stega: false
-    tags?: string[]
 }
 
 export type SiteMetadataServiceFetch = <T>(
@@ -36,8 +34,7 @@ export function createSiteMetadataService({
             const {data: settings} = await sanityFetch<SeoSettings>({
                 name: 'seoSettings',
                 query: seoSettingsQuery,
-                stega: false,
-                tags: [SANITY_PUBLIC_TAG, SANITY_SEO_TAG],
+                stega: false
             })
 
             return {

@@ -101,19 +101,11 @@ summary:hover {
 }
 
 .notFoundTitle {
-    border-bottom: 1px solid var(--off-black);
     font-size: var(--font-md);
     font-weight: inherit;
     margin: 0;
     padding: 8px 12px;
     color: var(--off-black);
-}
-
-.notFoundCopy {
-    font-size: var(--font-sm);
-    line-height: 1.35;
-    margin: 0;
-    padding: 18px 12px 24px;
 }
 
 .notFoundActions {
@@ -130,7 +122,6 @@ summary:hover {
     text-decoration: none;
 }
 
-.notFoundLink:hover {
-    background: var(--off-black);
-    color: white;
+.notFoundLink:first-child {
+    border-right: solid 1px var(--off-black);
 }

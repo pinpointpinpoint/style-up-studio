@@ -23,11 +23,6 @@ export default function NotFound() {
                         PAGE NOT FOUND
                     </h1>
 
-                    <p className="notFoundCopy">
-                        This page is not in the archive. It may have moved,
-                        changed names, or never made it to the final edit.
-                    </p>
-
                     <div className="notFoundActions">
                         <Link className="notFoundLink" href="/">
                             [BACK TO WORK]

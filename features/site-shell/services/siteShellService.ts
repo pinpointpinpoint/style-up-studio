@@ -1,9 +1,4 @@
 import type {About, Contact, SidebarFiltersQueryResult} from '@/sanity.types'
-import {
-    SANITY_PROJECTS_TAG,
-    SANITY_PUBLIC_TAG,
-    SANITY_SITE_SHELL_TAG,
-} from '../../../sanity/lib/cacheTags'
 import type {Project, ProjectsQueryInput} from '@/types'
 import {
     aboutSectionQuery,
@@ -19,7 +14,6 @@ export type SiteShellServiceFetchArgs = {
     name: SiteShellReadName
     query: string
     stega: false
-    tags?: string[]
 }
 
 export type SiteShellServiceFetch = <T>(args: SiteShellServiceFetchArgs) => Promise<{data: T}>
@@ -45,20 +39,17 @@ export function createSiteShellService({sanityFetch, getProjects}: SiteShellServ
                     sanityFetch<Pick<About, 'bio' | 'image'> | null>({
                         name: 'about',
                         query: aboutSectionQuery,
-                        stega: false,
-                        tags: [SANITY_PUBLIC_TAG, SANITY_SITE_SHELL_TAG],
+                        stega: false
                     }),
                     sanityFetch<Pick<Contact, 'email' | 'instagram'> | null>({
                         name: 'contact',
                         query: contactSectionQuery,
-                        stega: false,
-                        tags: [SANITY_PUBLIC_TAG, SANITY_SITE_SHELL_TAG],
+                        stega: false
                     }),
                     sanityFetch<SidebarFiltersQueryResult>({
                         name: 'sidebarFilters',
                         query: sidebarFiltersQuery,
-                        stega: false,
-                        tags: [SANITY_PUBLIC_TAG, SANITY_SITE_SHELL_TAG, SANITY_PROJECTS_TAG],
+                        stega: false
                     }),
                     getProjects({
                         filter: DEFAULT_PROJECT_FILTER,
