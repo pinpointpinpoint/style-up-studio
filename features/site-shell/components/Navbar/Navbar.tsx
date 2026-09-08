@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { urlForImage } from '@/sanity/lib/utils'
 import type { About, Contact } from '@/sanity.types'
@@ -9,6 +9,7 @@ import getSafeInstagramProfile from '@/shared/utils/getSafeInstagramProfile'
 import { NavbarDrawer } from './NavbarDrawer'
 import styles from './Navbar.module.css'
 import ArrowIcon from '../ArrowIcon/ArrowIcon'
+import Image from 'next/image'
 
 type MenuKey = 'about' | 'contact'
 type EmailHref = ReturnType<typeof getSafeMailto>
@@ -53,7 +54,7 @@ function AboutDrawerContent({
         <div className={styles.aboutSummary}>
           <button onClick={onClose}>[CLOSE]</button>
           <div className={styles.aboutContent}>
-            {/* {imageUrl && previewUrl && (
+            {imageUrl && previewUrl && (
               <div className={styles.aboutImage}>
                 <Image
                   className={styles.aboutImageThumb}
@@ -73,7 +74,7 @@ function AboutDrawerContent({
                   aria-hidden="true"
                 />
               </div>
-            )} */}
+            )}
             {trimmedBio && (
               <>
                 <p className={styles.bio}>
@@ -147,11 +148,24 @@ export default function Navbar({ about, contact }: NavbarProps) {
   const aboutMenuId = useId()
   const contactMenuId = useId()
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
+  const mobileContentRef = useRef<HTMLDivElement>(null)
+  const [mobileContentHeight, setMobileContentHeight] = useState(0)
   const emailHref = getSafeMailto(contact?.email)
   const instagram = getSafeInstagramProfile(contact?.instagram)
   const aboutImageBuilder = about?.image ? urlForImage(about.image) : undefined
   const aboutImageUrl = aboutImageBuilder?.height(50).url()
   const aboutPreviewUrl = aboutImageBuilder?.height(800).url()
+
+  useEffect(() => {
+    const content = mobileContentRef.current
+    if (!content) return
+
+    const observer = new ResizeObserver(() => {
+      setMobileContentHeight(content.getBoundingClientRect().height)
+    })
+    observer.observe(content)
+    return () => observer.disconnect()
+  }, [])
 
   const closeMenu = useCallback(() => {
     setActiveMenu(null)
@@ -193,7 +207,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
           <details>
             <summary>INFO</summary>
             <div className={styles.infoContent}>
-              <div className={styles.content}>
+              <div ref={mobileContentRef} className={styles.content}>
                 <p className={styles.bio}>{about?.bio}</p>
                 <ContactDrawerContent
                   email={contact?.email}
@@ -203,7 +217,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
                 />
               </div>
               <div className={styles.imgWrapper}>
-                <img src={aboutPreviewUrl}/>
+                <img src={aboutPreviewUrl} alt="" style={{height: mobileContentHeight}} />
               </div>
             </div>
           </details>
