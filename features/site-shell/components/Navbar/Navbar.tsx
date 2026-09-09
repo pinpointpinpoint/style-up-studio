@@ -113,9 +113,10 @@ function ContactDrawerContent({
             </a>
           )}
           {safeEmailHref &&
-              <a href={safeEmailHref}>
+              <a href={safeEmailHref} aria-label={`Email ${emailLabel}`} title={emailLabel}>
                 <div className={styles.email}>
-                  {emailLabel}
+                  <span className={styles.emailAddress}>{emailLabel}</span>
+                  <span className={styles.emailShortLabel} aria-hidden="true">EMAIL</span>
                   <ArrowIcon direction='upRight' />
                 </div>
               </a>
