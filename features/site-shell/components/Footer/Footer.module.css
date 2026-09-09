@@ -4,27 +4,24 @@
     box-sizing: border-box;
     display: grid;
     justify-items: center;
-    min-height: min(200px, 60vh);
-    padding: var(--space-xl);
     background: white;
 }
 
 .logo {
     display: block;
     height: auto;
-    max-width: min(70vw, 520px);
     width: 100%;
+    /* padding: var(--space-xl); */
+    padding: 30px 10px 0 10px;
 }
 
-.links {
+.details {
+    font-size: var(--font-xs);
+    color: var(--hover-gray);
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    justify-content: center;
-    margin-top: var(--space-xl);
-}
-
-.links a {
-    color: inherit;
-    text-decoration: none;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px;
+    width: 100%;
+    padding: 60px 30px 30px 30px;
 }

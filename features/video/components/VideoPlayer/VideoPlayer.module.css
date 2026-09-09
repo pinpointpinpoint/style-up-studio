@@ -184,10 +184,6 @@
     min-width: 9ch;
 }
 
-.muteBtn {
-    min-width: 10ch;
-}
-
 .fullscreenBtn {
     min-width: 14ch;
 }
@@ -262,7 +258,7 @@
         min-width: 40px;
         min-height: 44px;  
     }
-    .playBtn, .muteBtn, .fullscreenBtn {
+    .playBtn, .fullscreenBtn {
         min-width: 40px;
         min-height: 44px;
     }

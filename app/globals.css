@@ -21,6 +21,7 @@
     --links: #218287;
     --hover: #767676;
     --disabled-gray: #AEAEAE;
+    ---hover-gray: #767676;
 
     --header-height: 40px;
     --mobile-btn-height: 44px;

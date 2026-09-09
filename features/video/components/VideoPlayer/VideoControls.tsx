@@ -1,6 +1,5 @@
 import {
     FullscreenButton,
-    MuteButton,
     PlayButton,
     TimeSlider,
     useMediaRemote,
@@ -26,8 +25,6 @@ export default function VideoControls() {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
     const ended = useMediaState('ended')
-    const muted = useMediaState('muted')
-    const volume = useMediaState('volume')
     const fullscreen = useMediaState('fullscreen')
 
     const handleReplay = () => {
@@ -69,20 +66,6 @@ export default function VideoControls() {
                 </TimeSlider.Track>
                 <TimeSlider.Thumb className={styles.sliderThumb} />
             </TimeSlider.Root>
-
-            <MuteButton
-                className={`${styles.gridBtn} ${styles.muteBtn}`}
-                aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
-            >
-                <span className={styles.desktopLabel}>
-                    {muted || volume === 0 ? '[UNMUTE]' : '[MUTE]'}
-                </span>
-
-                <span className={styles.mobileIcon} aria-hidden="true">
-                    {muted || volume === 0 ? '🔇' : '🔊'}
-                </span>
-            </MuteButton>
-
             <FullscreenButton
                 className={`${styles.gridBtn} ${styles.fullscreenBtn}`}
                 aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
