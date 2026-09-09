@@ -2,6 +2,7 @@
     height: var(--header-height);
     width: 100%;
     position: relative;
+    z-index: 100;
 }
 
 .nav {
@@ -114,7 +115,7 @@
     position: absolute;
     top: var(--header-height);
     width: auto;
-    z-index: 40;
+    z-index: 999;
 }
 
 .aboutImage:hover .aboutImageFull {
@@ -231,7 +232,7 @@
         justify-content: space-between;
         font-size: 15px;
     }
-    .email a, .ig a {
+    .mobileNav a {
         text-decoration: none;
         color: var(--off-black);
     }

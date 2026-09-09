@@ -105,18 +105,20 @@ function ContactDrawerContent({
       {hasLinks && version === "mobile" ?
         <div>
           {instagram && (
-            <div className={styles.ig}>
-              <a href={instagram.href} target="_blank" rel="noopener noreferrer">
-                {instagram.label}
-              </a>
-              <ArrowIcon direction='upRight' />
-            </div>
-          )}
-          {safeEmailHref &&
-              <div className={styles.email}>
-                <a href={safeEmailHref}>{emailLabel}</a>
+            <a href={instagram.href} target="_blank" rel="noopener noreferrer">
+              <div className={styles.ig}>
+                  {instagram.label}
                 <ArrowIcon direction='upRight' />
               </div>
+            </a>
+          )}
+          {safeEmailHref &&
+              <a href={safeEmailHref}>
+                <div className={styles.email}>
+                  {emailLabel}
+                  <ArrowIcon direction='upRight' />
+                </div>
+              </a>
             }
         </div>
         :
@@ -148,6 +150,8 @@ export default function Navbar({ about, contact }: NavbarProps) {
   const aboutMenuId = useId()
   const contactMenuId = useId()
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const infoContentRef = useRef<HTMLDivElement>(null)
   const mobileContentRef = useRef<HTMLDivElement>(null)
   const [mobileContentHeight, setMobileContentHeight] = useState(0)
   const emailHref = getSafeMailto(contact?.email)
@@ -155,6 +159,22 @@ export default function Navbar({ about, contact }: NavbarProps) {
   const aboutImageBuilder = about?.image ? urlForImage(about.image) : undefined
   const aboutImageUrl = aboutImageBuilder?.height(50).url()
   const aboutPreviewUrl = aboutImageBuilder?.height(800).url()
+
+  useEffect(() => {
+    if (!isMobileNavOpen) return
+
+    const handleClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof Node &&
+        !infoContentRef.current?.contains(event.target)
+      ) {
+        setIsMobileNavOpen(false)
+      }
+    }
+
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [isMobileNavOpen])
 
   useEffect(() => {
     const content = mobileContentRef.current
@@ -204,9 +224,20 @@ export default function Navbar({ about, contact }: NavbarProps) {
           </NavbarDrawer>
         </div>
         <nav className={styles.mobileNav}>
-          <details>
-            <summary>INFO</summary>
-            <div className={styles.infoContent}>
+          <details
+            open={isMobileNavOpen}
+            onToggle={(event) => setIsMobileNavOpen(event.currentTarget.open)}
+          >
+            <summary
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                setIsMobileNavOpen((isOpen) => !isOpen)
+              }}
+            >
+              {isMobileNavOpen ? '[CLOSE]' : 'INFO'}
+            </summary>
+            <div ref={infoContentRef} className={styles.infoContent}>
               <div ref={mobileContentRef} className={styles.content}>
                 <p className={styles.bio}>{about?.bio}</p>
                 <ContactDrawerContent

@@ -23,9 +23,10 @@ export type StyleUpItem = {
 
 type StyleUpsProps = {
     styleUps: StyleUpItem[] | null
+    onHoverNameChange?: (name: string | null) => void
 }
 
-export function StyleUps({ styleUps }: StyleUpsProps) {
+export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
     const [magnifier, setMagnifier] = useState<{
         item: StyleUpItem
         left: number
@@ -194,11 +195,15 @@ export function StyleUps({ styleUps }: StyleUpsProps) {
                                             transform: `translate(${layout.x}px, ${layout.y}px) translate(-50%, -50%)`,
                                         }}
                                         onMouseEnter={() => bringToFront(su._id)}
+                                        onPointerEnter={() => onHoverNameChange?.(su.name?.trim() || null)}
                                         onPointerDown={handlePointerDown(su)}
                                         onPointerUp={handlePointerUp}
                                         onPointerCancel={handlePointerUp}
                                         onPointerMove={handlePointerMove(su)}
-                                        onPointerLeave={() => setMagnifier(null)}
+                                        onPointerLeave={() => {
+                                            setMagnifier(null)
+                                            onHoverNameChange?.(null)
+                                        }}
                                     >
                                         {su.image && (
                                             <img

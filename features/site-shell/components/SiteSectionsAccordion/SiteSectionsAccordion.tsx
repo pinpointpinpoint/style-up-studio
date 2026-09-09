@@ -82,6 +82,7 @@ function SiteSectionsAccordionView({
     const styleUpsHeight = activeSection === 'style-ups' ? OPEN_HEIGHT : CLOSED_HEIGHT
     const isActiveProjectDetail = activeSection === 'work' && isProjectDetail
     const [styleUps, setStyleUps] = useState<StyleUpItem[] | null>(null)
+    const [hoveredStyleUpName, setHoveredStyleUpName] = useState<string | null>(null)
     const [isStyleUpsLoading, setIsStyleUpsLoading] = useState(false)
     const styleUpsRequestRef = useRef<Promise<void> | null>(null)
     const shouldMountStyleUps =
@@ -189,11 +190,19 @@ function SiteSectionsAccordionView({
             </SiteSectionPanel>
             <SiteSectionPanel
                 title="STYLE UPS"
+                contextContent={
+                    activeSection === 'style-ups' && hoveredStyleUpName ? (
+                        <span className={styles.projectHeaderContext}>
+                            <span className={styles.projectHeaderSeparator}>/</span>
+                            <span className={styles.projectHeaderTitle}>{hoveredStyleUpName}</span>
+                        </span>
+                    ) : undefined
+                }
                 route={STYLE_UPS_ROUTE}
                 active={activeSection === 'style-ups'}
                 current={routeSection === 'style-ups'}
                 interactive={activeSection === 'work'}
-                fullHeaderAction
+                fullHeaderAction={activeSection === 'work'}
                 height={styleUpsHeight}
                 arrowDirection={activeSection === 'work' ? 'up' : undefined}
                 onNavigate={handleStyleUpsNavigation}
@@ -217,7 +226,10 @@ function SiteSectionsAccordionView({
                             </div>
                         }
                     >
-                        <DeferredStyleUps styleUps={styleUps} />
+                        <DeferredStyleUps
+                            styleUps={styleUps}
+                            onHoverNameChange={setHoveredStyleUpName}
+                        />
                     </Suspense>
                 )}
             </SiteSectionPanel>

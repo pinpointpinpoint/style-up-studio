@@ -90,7 +90,7 @@
     .mobileMenu {
         display: block;
         position: sticky;
-        z-index: 999;
+        z-index: 99;
         background: white;
         width: 100%;
         top: 0;
