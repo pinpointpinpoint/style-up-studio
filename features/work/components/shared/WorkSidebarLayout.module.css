@@ -1,6 +1,4 @@
 .sidebarFrame {
-    /* --work-sidebar-width: min(25vw, 400px); */
-    /* --work-sidebar-width: calc((100vw - 4px) / 4); */
     --work-sidebar-width: calc(100vw / 4);
     border-left: 1px solid var(--off-black);
     display: flex;
@@ -16,17 +14,11 @@
 }
 
 
-/* @media (max-width: 1245px) {
+@media (max-width: 992px) {
     .sidebarFrame {
         --work-sidebar-width: calc(100vw / 3);
     }
-} */
-
-/* @media (max-width: 900px) {
-    .sidebarFrame {
-        --work-sidebar-width: calc((100vw - 1px) / 3);
-    }
-} */
+}
 
 .stickySidebarFrame {
     align-self: flex-start;
