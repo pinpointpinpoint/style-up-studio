@@ -10,6 +10,7 @@ import {
     getStyleUpCanvasHeight,
     getStyleUpLoadMoreLayout,
     moveStyleUpDrag,
+    reconcileStyleUpCanvasSession,
     startStyleUpDrag,
 } from '@/features/style-ups/lib/styleUpCanvasSession'
 import SectionFooterScroll from '@/features/site-shell/components/SectionFooterScroll/SectionFooterScroll'
@@ -17,16 +18,21 @@ import styles from './StyleUps.module.css'
 
 export type StyleUpItem = {
     _id: string
+    _createdAt: string
     name?: string | null
     image?: SanityImageSource | null
 }
 
 type StyleUpsProps = {
     styleUps: StyleUpItem[] | null
+    hasMore: boolean
+    isLoading: boolean
+    loadError: boolean
+    onLoadMore: () => void
     onHoverNameChange?: (name: string | null) => void
 }
 
-export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
+export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, onHoverNameChange }: StyleUpsProps) {
     const [magnifier, setMagnifier] = useState<{
         item: StyleUpItem
         left: number
@@ -45,14 +51,15 @@ export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
     const hasCurrentSession =
         (styleUps?.length ?? 0) === sessionStyleUpIds.length &&
         (styleUps ?? []).every((styleUp) => session.layouts[styleUp._id])
-    const fallbackSession = useMemo(() => createStyleUpCanvasSession({ styleUps }), [styleUps])
+    const fallbackSession = useMemo(
+        () => reconcileStyleUpCanvasSession(session, styleUps),
+        [session, styleUps],
+    )
     const activeSession = hasCurrentSession ? session : fallbackSession
 
-    if (!styleUps || styleUps.length === 0) return null
-
-    const canvasHeight = getStyleUpCanvasHeight(styleUps.length)
-    const hasRandomLayouts = styleUps.every((styleUp) => activeSession.layouts[styleUp._id])
-    const loadMoreLayout = getStyleUpLoadMoreLayout(styleUps.length)
+    const canvasHeight = getStyleUpCanvasHeight(styleUps?.length ?? 0)
+    const hasRandomLayouts = styleUps?.every((styleUp) => activeSession.layouts[styleUp._id])
+    const loadMoreLayout = getStyleUpLoadMoreLayout(styleUps?.length ?? 0)
     const getLayout = (styleUp: StyleUpItem) => activeSession.layouts[styleUp._id]
 
     const bringToFront = (id: string) => {
@@ -168,6 +175,8 @@ export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
         return () => observer.disconnect()
     }, [])
 
+    if (!styleUps || styleUps.length === 0) return null
+
     return (
         <SectionFooterScroll>
             <div className={styles.main}>
@@ -231,8 +240,10 @@ export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
                                     </div>
                                 )
                             })}
-                        <button
+                        {hasMore && <button
                             type="button"
+                            onClick={onLoadMore}
+                            disabled={isLoading}
                             className={styles.loadMoreCard}
                             style={{
                                 left: `${loadMoreLayout.left}%`,
@@ -242,8 +253,8 @@ export function StyleUps({ styleUps, onHoverNameChange }: StyleUpsProps) {
                                 transform: 'translate(-50%, -50%)',
                             }}
                         >
-                            LOAD MORE
-                        </button>
+                            {isLoading ? '[LOADING...]' : loadError ? '[RETRY LOAD MORE]' : 'LOAD MORE'}
+                        </button>}
                     </div>
                 </div>
                 <aside className={styles.sidebar} ref={sidebarRef}>

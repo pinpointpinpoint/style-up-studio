@@ -88,8 +88,12 @@ export const sidebarFiltersQuery = defineQuery(`
 `)
 
 export const allStyleUpsQuery = defineQuery(`
-*[_type == "styleUp"] | order(_createdAt desc) {
+*[_type == "styleUp" && (
+  !defined($cursorDate) || $cursorId == "" ||
+  _createdAt < $cursorDate || (_createdAt == $cursorDate && _id < $cursorId)
+)] | order(_createdAt desc, _id desc) [0...$limit] {
   _id,
+  _createdAt,
   name,
   image{
     asset,

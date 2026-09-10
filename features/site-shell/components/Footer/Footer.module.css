@@ -11,7 +11,7 @@
     display: block;
     height: auto;
     width: 100%;
-    padding: 5px 30px;
+    padding: 30px;
     /* border-bottom: solid 1px var(--off-black); */
 }
 
@@ -20,8 +20,8 @@
     color: var(--hover-gray);
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 5px;
     width: 100%;
-    padding: 30px;
+    padding: 0 30px 30px 30px;
 }

@@ -93,6 +93,10 @@
     outline-offset: 4px;
 }
 
+.loadMoreCard:disabled {
+    cursor: wait;
+}
+
 .magnifierLens {
     position: absolute;
     background: var(--links);

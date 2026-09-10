@@ -106,6 +106,26 @@ export function bringStyleUpToFront(
     }
 }
 
+export function reconcileStyleUpCanvasSession(
+    session: StyleUpCanvasSession,
+    styleUps: StyleUpCanvasItem[] | null,
+): StyleUpCanvasSession {
+    const nextSession = createStyleUpCanvasSession({styleUps})
+
+    for (const item of styleUps ?? []) {
+        if (session.layouts[item._id]) {
+            nextSession.layouts[item._id] = session.layouts[item._id]
+        }
+        if (session.zIndexes[item._id] !== undefined) {
+            nextSession.zIndexes[item._id] = session.zIndexes[item._id]
+        }
+    }
+
+    nextSession.nextZIndex = Math.max(session.nextZIndex, nextSession.nextZIndex)
+    nextSession.drag = session.drag && nextSession.layouts[session.drag.id] ? session.drag : null
+    return nextSession
+}
+
 export function startStyleUpDrag(
     session: StyleUpCanvasSession,
     {

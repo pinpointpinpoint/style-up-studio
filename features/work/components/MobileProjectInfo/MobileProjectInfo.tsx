@@ -18,7 +18,7 @@ export function MobileProjectInfo({
     return (
         <details className={styles.details}>
             <summary className={styles.summary}>
-                <span>[INFO]</span>
+                <span>[PROJECT INFO]</span>
                 <span className={styles.arrow} aria-hidden="true">
                     <ArrowIcon direction="down" />
                 </span>

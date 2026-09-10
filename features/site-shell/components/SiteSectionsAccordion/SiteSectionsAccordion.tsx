@@ -14,6 +14,7 @@ import {
 } from 'react'
 import {getStyleUps} from '@/app/(site)/actions'
 import type {StyleUpItem} from '@/features/style-ups/components/StyleUps/StyleUps'
+import {STYLE_UPS_PAGE_SIZE} from '@/features/style-ups/lib/constants'
 import {WorkSection} from '@/features/work/components/WorkSection/WorkSection'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
 import {
@@ -84,6 +85,8 @@ function SiteSectionsAccordionView({
     const [styleUps, setStyleUps] = useState<StyleUpItem[] | null>(null)
     const [hoveredStyleUpName, setHoveredStyleUpName] = useState<string | null>(null)
     const [isStyleUpsLoading, setIsStyleUpsLoading] = useState(false)
+    const [hasMoreStyleUps, setHasMoreStyleUps] = useState(true)
+    const [styleUpsLoadError, setStyleUpsLoadError] = useState(false)
     const styleUpsRequestRef = useRef<Promise<void> | null>(null)
     const shouldMountStyleUps =
         activeSection === 'style-ups' || isStyleUpsLoading || styleUps !== null
@@ -120,6 +123,7 @@ function SiteSectionsAccordionView({
         styleUpsRequestRef.current = getStyleUps()
             .then((nextStyleUps) => {
                 setStyleUps(nextStyleUps as StyleUpItem[])
+                setHasMoreStyleUps(nextStyleUps.length >= STYLE_UPS_PAGE_SIZE)
             })
             .catch(() => {
                 setStyleUps([])
@@ -129,6 +133,27 @@ function SiteSectionsAccordionView({
                 setIsStyleUpsLoading(false)
             })
     }, [styleUps])
+
+    const loadMoreStyleUps = useCallback(() => {
+        const lastStyleUp = styleUps?.at(-1)
+        if (!lastStyleUp || !hasMoreStyleUps || styleUpsRequestRef.current) return
+
+        setIsStyleUpsLoading(true)
+        setStyleUpsLoadError(false)
+        styleUpsRequestRef.current = getStyleUps({
+            cursor: {id: lastStyleUp._id, createdAt: lastStyleUp._createdAt},
+            limit: STYLE_UPS_PAGE_SIZE,
+        })
+            .then((nextStyleUps) => {
+                setStyleUps((current) => [...(current ?? []), ...nextStyleUps])
+                setHasMoreStyleUps(nextStyleUps.length >= STYLE_UPS_PAGE_SIZE)
+            })
+            .catch(() => setStyleUpsLoadError(true))
+            .finally(() => {
+                styleUpsRequestRef.current = null
+                setIsStyleUpsLoading(false)
+            })
+    }, [styleUps, hasMoreStyleUps])
 
     useEffect(() => {
         router.prefetch(WORK_HOME_ROUTE)
@@ -228,6 +253,10 @@ function SiteSectionsAccordionView({
                     >
                         <DeferredStyleUps
                             styleUps={styleUps}
+                            hasMore={hasMoreStyleUps}
+                            isLoading={isStyleUpsLoading}
+                            loadError={styleUpsLoadError}
+                            onLoadMore={loadMoreStyleUps}
                             onHoverNameChange={setHoveredStyleUpName}
                         />
                     </Suspense>
