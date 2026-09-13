@@ -202,17 +202,19 @@
 @media (max-width: 528px) {
     .nav {
         position: relative;
-    }
-    .header nav {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         align-items: center;
     }
     .mobileNav {
         display: block;
+        grid-column: 1;
+        grid-row: 1;
         justify-self: start;
     }
-    .logo {
+    .logoLink {
+        grid-column: 2;
+        grid-row: 1;
         justify-self: center;
     }
     .infoContent {
@@ -288,7 +290,7 @@
         width: auto;
         display: block;
     }
-    .header, .nav, .drawerInner {
+    .header, .drawerInner {
         height: var(--mobile-header-height);
         justify-content: center;
         display: flex;

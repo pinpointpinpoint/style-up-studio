@@ -285,7 +285,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
             </div>
           </details>
         </nav>
-        <Link href="/" aria-label="Style Up Studio home">
+        <Link href="/" aria-label="Style Up Studio home" className={styles.logoLink}>
           <img className={styles.logo} src="/minimal_logo.svg" alt="Style Up Studio" />
         </Link>
         <div className={styles.navItem}>
