@@ -8,7 +8,7 @@ export default function Footer() {
             <div className={styles.details}>
                 <span>©2026 Angie Jayasinghe</span>
                 {/* <span>·</span> */}
-                <span>Site Credits <a href="https://pinpointpinpoint.com" target='_blank'></a></span>
+                <a href="https://pinpointpinpoint.com" target='_blank'>Site Credits</a>
             </div>            
         </footer>
     )
