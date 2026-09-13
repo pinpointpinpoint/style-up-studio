@@ -25,6 +25,11 @@
     padding: 30px;
 }
 
+.details a {
+    color: black;
+    text-decoration: none;
+}
+
 @media (max-width: 768px) {
     .footer {
         gap: 20px;

@@ -1,8 +1,23 @@
 .header {
+    flex-shrink: 0;
     height: var(--header-height);
     width: 100%;
     position: relative;
     z-index: 100;
+    margin-top: 0;
+    transition: margin-top 180ms ease;
+}
+
+@media (max-width: 768px) {
+    .header[data-hidden='true']:not(:has(:focus-visible)) {
+        margin-top: calc(-1 * var(--header-height));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header {
+        transition: none;
+    }
 }
 
 .nav {
@@ -217,6 +232,9 @@
         flex: 1;
         min-width: 0;
     }
+    .infoContent[data-ready='false'] {
+        visibility: hidden;
+    }
     .bio, .email, .ig {
         height: 44px;
         display: flex;
@@ -266,6 +284,7 @@
     }
 
     .imgWrapper img {
+        height: 0;
         width: auto;
         display: block;
     }

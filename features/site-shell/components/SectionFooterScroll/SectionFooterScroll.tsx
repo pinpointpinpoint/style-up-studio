@@ -10,7 +10,7 @@ type SectionFooterScrollProps = {
 const SectionFooterScroll = forwardRef<HTMLDivElement, SectionFooterScrollProps>(
     function SectionFooterScroll({children, className}, ref) {
         return (
-            <div ref={ref} className={`${styles.scroll} ${className ?? ''}`}>
+            <div ref={ref} data-section-scroll className={`${styles.scroll} ${className ?? ''}`}>
                 {children}
                 <Footer />
             </div>

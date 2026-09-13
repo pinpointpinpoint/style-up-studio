@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { urlForImage } from '@/sanity/lib/utils'
 import type { About, Contact } from '@/sanity.types'
@@ -10,6 +10,7 @@ import { NavbarDrawer } from './NavbarDrawer'
 import styles from './Navbar.module.css'
 import ArrowIcon from '../ArrowIcon/ArrowIcon'
 import Image from 'next/image'
+import {useNavbarScrollVisibility} from './useNavbarScrollVisibility'
 
 type MenuKey = 'about' | 'contact'
 type EmailHref = ReturnType<typeof getSafeMailto>
@@ -148,13 +149,14 @@ function ContactDrawerContent({
 }
 
 export default function Navbar({ about, contact }: NavbarProps) {
+  const {isHidden, showNavbar} = useNavbarScrollVisibility()
   const aboutMenuId = useId()
   const contactMenuId = useId()
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const infoContentRef = useRef<HTMLDivElement>(null)
   const mobileContentRef = useRef<HTMLDivElement>(null)
-  const [mobileContentHeight, setMobileContentHeight] = useState(0)
+  const mobileImageRef = useRef<HTMLImageElement>(null)
   const emailHref = getSafeMailto(contact?.email)
   const instagram = getSafeInstagramProfile(contact?.instagram)
   const aboutImageBuilder = about?.image ? urlForImage(about.image) : undefined
@@ -177,16 +179,41 @@ export default function Navbar({ about, contact }: NavbarProps) {
     return () => document.removeEventListener('click', handleClick)
   }, [isMobileNavOpen])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const panel = infoContentRef.current
     const content = mobileContentRef.current
-    if (!content) return
+    const image = mobileImageRef.current
+    if (!panel || !content) return
 
-    const observer = new ResizeObserver(() => {
-      setMobileContentHeight(content.getBoundingClientRect().height)
-    })
+    panel.dataset.ready = 'false'
+    if (!isMobileNavOpen) return
+
+    const updateLayout = () => {
+      if (image && !image.complete) return
+
+      // Image width depends on its height, which can change how the bio wraps.
+      // Resolve those measurements together before revealing the panel.
+      if (image) {
+        for (let pass = 0; pass < 32; pass++) {
+          const height = content.getBoundingClientRect().height
+          if (Math.abs(image.getBoundingClientRect().height - height) < 0.5) break
+          image.style.height = `${height}px`
+        }
+      }
+      panel.dataset.ready = 'true'
+    }
+
+    updateLayout()
+    const observer = new ResizeObserver(updateLayout)
     observer.observe(content)
-    return () => observer.disconnect()
-  }, [])
+    image?.addEventListener('load', updateLayout)
+    image?.addEventListener('error', updateLayout)
+    return () => {
+      observer.disconnect()
+      image?.removeEventListener('load', updateLayout)
+      image?.removeEventListener('error', updateLayout)
+    }
+  }, [isMobileNavOpen, aboutPreviewUrl])
 
   const closeMenu = useCallback(() => {
     setActiveMenu(null)
@@ -197,7 +224,11 @@ export default function Navbar({ about, contact }: NavbarProps) {
   }, [])
 
   return (
-    <header className={styles.header}>
+    <header
+      className={styles.header}
+      data-hidden={isHidden && !activeMenu && !isMobileNavOpen}
+      onFocusCapture={showNavbar}
+    >
       <nav aria-label="Site navigation" className={styles.nav}>
         <div className={styles.navItem}>
           <button
@@ -238,7 +269,7 @@ export default function Navbar({ about, contact }: NavbarProps) {
             >
               {isMobileNavOpen ? '[CLOSE]' : 'INFO'}
             </summary>
-            <div ref={infoContentRef} className={styles.infoContent}>
+            <div ref={infoContentRef} className={styles.infoContent} data-ready="false">
               <div ref={mobileContentRef} className={styles.content}>
                 <p className={styles.bio}>{about?.bio}</p>
                 <ContactDrawerContent
@@ -248,9 +279,9 @@ export default function Navbar({ about, contact }: NavbarProps) {
                   version="mobile"
                 />
               </div>
-              <div className={styles.imgWrapper}>
-                <img src={aboutPreviewUrl} alt="" style={{height: mobileContentHeight}} />
-              </div>
+              {aboutPreviewUrl && <div className={styles.imgWrapper}>
+                <img ref={mobileImageRef} src={aboutPreviewUrl} alt="" />
+              </div>}
             </div>
           </details>
         </nav>
