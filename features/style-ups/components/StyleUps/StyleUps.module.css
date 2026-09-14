@@ -1,10 +1,9 @@
 .sidebar {
-    --styleups-sidebar-width: clamp(300px, 28vw, 400px);
     border-left: 1px solid var(--off-black);
     display: flex;
     flex: 0 0 var(--styleups-sidebar-width);
     flex-direction: column;
-    height: calc(100vh - var(--header-height) * 3);
+    height: 100%;
     max-width: var(--styleups-sidebar-width);
     min-width: var(--styleups-sidebar-width);
     width: var(--styleups-sidebar-width);
@@ -14,6 +13,7 @@
     position: sticky;
     top: 0;
     align-self: flex-start;
+    background-color: white;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -21,6 +21,9 @@
 }
 
 .main {
+    --styleups-sidebar-width: clamp(300px, 28vw, 400px);
+    height: calc(100dvh - var(--header-height) - var(--section-header-height) * 2);
+    position: relative;
     display: flex;
     flex-shrink: 0;
     align-items: flex-start;
@@ -30,15 +33,14 @@
 }
 
 .styleUps {
+    position: relative;
     isolation: isolate;
-    padding: var(--space-xl);
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.canvas {
-    position: relative;
-    width: 100%;
+.card {
+    transform: translate(-50%, -50%);
 }
 
 .card {
@@ -47,7 +49,6 @@
     position: absolute;
     touch-action: none;
     user-select: none;
-    will-change: transform;
 }
 
 .card:active {
@@ -61,40 +62,19 @@
 
 .card img {
     display: block;
-    border: 1px solid var(--off-black);
-    box-shadow: 0 0 0 0 white;
     height: auto;
     pointer-events: none;
     user-select: none;
     width: 100%;
+    border: solid 1px var(--off-black);
 }
 
-.loadMoreCard {
-    -webkit-appearance: none;
-    align-items: center;
-    appearance: none;
-    aspect-ratio: 1 / 1;
-    background: white;
-    border: 1px solid var(--off-black);
-    border-radius: 0;
-    color: inherit;
-    cursor: pointer;
-    display: flex;
-    font: inherit;
-    justify-content: center;
-    line-height: 1;
-    padding: var(--space-sm);
+.card::after {
+    content: '';
     position: absolute;
-    text-align: center;
-}
-
-.loadMoreCard:focus-visible {
-    outline: 2px solid var(--off-black);
-    outline-offset: 4px;
-}
-
-.loadMoreCard:disabled {
-    cursor: wait;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .magnifierLens {
@@ -119,8 +99,90 @@
     justify-content: center;
 }
 
+
+
+.card {
+    left: calc(var(--card-offset-x) * var(--canvas-scale, 1.2));
+    top: calc(var(--card-offset-y) * var(--canvas-scale, 1.2));
+    width: calc(180px * var(--canvas-scale, 1.2));
+}
+
+.loadStatus {
+    display: block;
+    position: absolute;
+    bottom: 70px;
+    right: calc(var(--styleups-sidebar-width) + var(--space-md));
+    z-index: 2;
+    background: white;
+    font-size: var(--font-sm);
+}
+
+.loadStatus:empty {
+    display: none;
+}
+
+.loadStatus button {
+    min-height: 44px;
+    padding: 0 12px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+
+.styleUps {
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: contain;
+    cursor: grab;
+}
+
+.styleUps:active {
+    cursor: grabbing;
+}
+
+.canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+    /* Size cards directly so zoom doesn't stretch a rasterized canvas layer. */
+    transform: translate(var(--canvas-x, 0px), var(--canvas-y, 0px));
+}
+
+
+.canvasControls {
+    display: flex;
+    position: absolute;
+    right: calc(var(--styleups-sidebar-width) + var(--space-md));
+    bottom: var(--space-md);
+    z-index: 2;
+    background: white;
+    border: 1px solid var(--off-black);
+}
+
+.canvasControls button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    color: var(--off-black);
+    font: inherit;
+    cursor: pointer;
+}
+
+.canvasControls button + button {
+    border-left: 1px solid var(--off-black);
+}
+
 @media (max-width: 768px) {
-    .sidebar {
+    .main {
+        --styleups-sidebar-width: 0px;
+        height: calc(100dvh - var(--mobile-header-height) - var(--section-header-height) * 2);
+    }
+
+    .sidebar, .magnifierLens {
         display: none;
     }
 }

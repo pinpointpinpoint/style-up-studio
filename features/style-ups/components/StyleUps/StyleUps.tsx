@@ -2,19 +2,12 @@
 
 import { urlFor } from '@/sanity/lib/utils'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
-import { type PointerEvent as ReactPointerEvent, useEffect, useMemo, useRef, useState } from 'react'
-import {
-    bringStyleUpToFront,
-    createStyleUpCanvasSession,
-    endStyleUpDrag,
-    getStyleUpCanvasHeight,
-    getStyleUpLoadMoreLayout,
-    moveStyleUpDrag,
-    reconcileStyleUpCanvasSession,
-    startStyleUpDrag,
-} from '@/features/style-ups/lib/styleUpCanvasSession'
+import { type CSSProperties, type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {getMagnifierGeometry} from '@/features/style-ups/lib/magnifierGeometry'
+import {createCanvasTile, getCanvasLayout, getRepeatingCanvasCells, isNearCanvasEdge} from '@/features/style-ups/lib/repeatingCanvas'
 import SectionFooterScroll from '@/features/site-shell/components/SectionFooterScroll/SectionFooterScroll'
 import styles from './StyleUps.module.css'
+import {useStyleUpCanvasGestures} from './useStyleUpCanvasGestures'
 
 export type StyleUpItem = {
     _id: string
@@ -32,131 +25,72 @@ type StyleUpsProps = {
     onHoverNameChange?: (name: string | null) => void
 }
 
+const IMAGE_SIZE = 3240
+
+function imageUrl(image: SanityImageSource) {
+    return urlFor(image).width(IMAGE_SIZE).height(IMAGE_SIZE).fit('crop').quality(90).auto('format').url()
+}
+
 export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, onHoverNameChange }: StyleUpsProps) {
     const [magnifier, setMagnifier] = useState<{
         item: StyleUpItem
-        left: number
-        top: number
-        width: number
-        height: number
-        cardWidth: number
-        cardHeight: number
+        cellKey: string
+        geometry: ReturnType<typeof getMagnifierGeometry>
+    } | null>(null)
+    const hoveredCard = useRef<{
+        item: StyleUpItem; cellKey: string; element: HTMLDivElement; clientX: number; clientY: number
     } | null>(null)
     const sidebarRef = useRef<HTMLElement | null>(null)
     const [sidebarAspectRatio, setSidebarAspectRatio] = useState(1)
     const styleUpsRef = useRef<HTMLDivElement | null>(null)
     const canvasRef = useRef<HTMLDivElement | null>(null)
-    const [session, setSession] = useState(() => createStyleUpCanvasSession({ styleUps }))
-    const sessionStyleUpIds = Object.keys(session.layouts)
-    const hasCurrentSession =
-        (styleUps?.length ?? 0) === sessionStyleUpIds.length &&
-        (styleUps ?? []).every((styleUp) => session.layouts[styleUp._id])
-    const fallbackSession = useMemo(
-        () => reconcileStyleUpCanvasSession(session, styleUps),
-        [session, styleUps],
+    const imageSources = useMemo(() => new Map((styleUps ?? []).map(item => [
+        item._id, item.image ? imageUrl(item.image) : undefined,
+    ])), [styleUps])
+    const count = styleUps?.length ?? 0
+    const extent = useMemo(() => getCanvasLayout(count), [count])
+    const tile = useMemo(() => hasMore ? null : createCanvasTile(count), [hasMore, count])
+    const {zoomIn, zoomOut, visibleView} = useStyleUpCanvasGestures(
+        styleUpsRef, canvasRef, hasMore ? extent : null,
     )
-    const activeSession = hasCurrentSession ? session : fallbackSession
+    const cells = useMemo(() => getRepeatingCanvasCells(
+        visibleView, visibleView.width, visibleView.height, count, tile,
+    ), [visibleView, count, tile])
+    const nearEdge = isNearCanvasEdge(visibleView, visibleView.width, visibleView.height, extent)
 
-    const canvasHeight = getStyleUpCanvasHeight(styleUps?.length ?? 0)
-    const hasRandomLayouts = styleUps?.every((styleUp) => activeSession.layouts[styleUp._id])
-    const loadMoreLayout = getStyleUpLoadMoreLayout(styleUps?.length ?? 0)
-    const getLayout = (styleUp: StyleUpItem) => activeSession.layouts[styleUp._id]
+    const lastLoadView = useRef<string | null>(null)
+    const viewKey = `${visibleView.x}:${visibleView.y}:${visibleView.scale}:${visibleView.width}:${visibleView.height}`
 
-    const bringToFront = (id: string) => {
-        setSession((currentSession) =>
-            bringStyleUpToFront(hasCurrentSession ? currentSession : fallbackSession, id),
-        )
-    }
-
-    const LENS_WIDTH = 30
-
-    const backgroundX = magnifier
-        ? (magnifier.left / (magnifier.cardWidth - magnifier.width)) * 100
-        : 0
-
-    const backgroundY = magnifier
-        ? (magnifier.top / (magnifier.cardHeight - magnifier.height)) * 100
-        : 0
-
-    const handlePointerDown =
-        (styleUp: StyleUpItem) => (event: ReactPointerEvent<HTMLDivElement>) => {
-            const layout = getLayout(styleUp)
-            const styleUpsElement = styleUpsRef.current
-            const canvasElement = canvasRef.current
-
-            if (!layout || !styleUpsElement || !canvasElement) return
-
-            const styleUpsRect = styleUpsElement.getBoundingClientRect()
-            const canvasRect = canvasElement.getBoundingClientRect()
-            const cardRect = event.currentTarget.getBoundingClientRect()
-
-            setSession((currentSession) =>
-                startStyleUpDrag(
-                    bringStyleUpToFront(
-                        hasCurrentSession ? currentSession : fallbackSession,
-                        styleUp._id,
-                    ),
-                    {
-                        id: styleUp._id,
-                        clientX: event.clientX,
-                        clientY: event.clientY,
-                        bounds: {
-                            canvasWidth: canvasRect.width,
-                            canvasHeight: canvasRect.height,
-                            cardWidth: cardRect.width,
-                            cardHeight: cardRect.height,
-                            boundaryLeft: styleUpsRect.left - canvasRect.left,
-                            boundaryTop: styleUpsRect.top - canvasRect.top,
-                            boundaryRight: styleUpsRect.right - canvasRect.left,
-                            boundaryBottom: styleUpsRect.bottom - canvasRect.top,
-                        },
-                    },
-                ),
-            )
-            event.currentTarget.setPointerCapture(event.pointerId)
+    const updateMagnifier = useCallback(() => {
+        const hovered = hoveredCard.current
+        if (!hovered) return
+        const rect = hovered.element.getBoundingClientRect()
+        const x = hovered.clientX - rect.left
+        const y = hovered.clientY - rect.top
+        if (!hovered.element.isConnected || !rect.width || !rect.height
+            || x < 0 || y < 0 || x > rect.width || y > rect.height) {
+            setMagnifier(null)
+            return
         }
-
-    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+        setMagnifier({
+            item: hovered.item,
+            cellKey: hovered.cellKey,
+            geometry: getMagnifierGeometry(x, y, rect.width, rect.height, sidebarAspectRatio),
+        })
+    }, [sidebarAspectRatio])
 
     const handlePointerMove =
-        (styleUp: StyleUpItem) => (event: ReactPointerEvent<HTMLDivElement>) => {
-            setSession((currentSession) =>
-                moveStyleUpDrag(currentSession, {
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                }),
-            )
-
-            const rect = event.currentTarget.getBoundingClientRect()
-
-            const lensWidth = rect.width * (LENS_WIDTH / 100)
-            const lensHeight = lensWidth / sidebarAspectRatio
-
-            const pointerX = event.clientX - rect.left
-            const pointerY = event.clientY - rect.top
-
-            const left = clamp(pointerX - lensWidth / 2, 0, rect.width - lensWidth)
-
-            const top = clamp(pointerY - lensHeight / 2, 0, rect.height - lensHeight)
-
-            setMagnifier({
-                item: styleUp,
-                left,
-                top,
-                width: lensWidth,
-                height: lensHeight,
-                cardWidth: rect.width,
-                cardHeight: rect.height,
-            })
+        (item: StyleUpItem, cellKey: string) => (event: ReactPointerEvent<HTMLDivElement>) => {
+            hoveredCard.current = {item, cellKey, element: event.currentTarget,
+                clientX: event.clientX, clientY: event.clientY}
+            updateMagnifier()
         }
 
-    const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-        setSession(endStyleUpDrag)
-
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-            event.currentTarget.releasePointerCapture(event.pointerId)
-        }
-    }
+    useEffect(() => {
+        // Wheel/pinch zoom can resize a card while the pointer stays stationary.
+        const frame = requestAnimationFrame(updateMagnifier)
+        return () => cancelAnimationFrame(frame)
+    }, [viewKey, updateMagnifier])
 
     useEffect(() => {
         const sidebar = sidebarRef.current
@@ -175,100 +109,85 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
         return () => observer.disconnect()
     }, [])
 
+    useEffect(() => {
+        if (hasMore && !isLoading && !loadError && nearEdge
+            && lastLoadView.current !== viewKey && !styleUpsRef.current?.closest('[inert]')) {
+            lastLoadView.current = viewKey
+            onLoadMore()
+        }
+    }, [hasMore, isLoading, loadError, onLoadMore, count, nearEdge, viewKey])
+
     if (!styleUps || styleUps.length === 0) return null
 
     return (
         <SectionFooterScroll>
             <div className={styles.main}>
-                <div ref={styleUpsRef} className={styles.styleUps}>
+                <div ref={styleUpsRef} className={styles.styleUps} role="region" aria-label="Style Ups canvas">
                     <div
                         ref={canvasRef}
                         className={styles.canvas}
-                        style={{ height: canvasHeight }}
                     >
-                        {hasRandomLayouts &&
-                            styleUps.map((su, index) => {
-                                const layout = getLayout(su)
-
-                                if (!layout) return null
+                        {cells.map((cell) => {
+                                const su = styleUps[cell.itemIndex]
 
                                 return (
                                     <div
-                                        key={su._id}
+                                        key={cell.key}
                                         className={styles.card}
                                         style={{
-                                            left: `${layout.left}%`,
-                                            top: `${layout.top}%`,
-                                            width: `${layout.width}%`,
-                                            zIndex: activeSession.zIndexes[su._id] ?? index + 1,
-                                            transform: `translate(${layout.x}px, ${layout.y}px) translate(-50%, -50%)`,
-                                        }}
-                                        onMouseEnter={() => bringToFront(su._id)}
+                                            '--card-offset-x': `${cell.x}px`,
+                                            '--card-offset-y': `${cell.y}px`,
+                                        } as CSSProperties}
                                         onPointerEnter={() => onHoverNameChange?.(su.name?.trim() || null)}
-                                        onPointerDown={handlePointerDown(su)}
-                                        onPointerUp={handlePointerUp}
-                                        onPointerCancel={handlePointerUp}
-                                        onPointerMove={handlePointerMove(su)}
+                                        onPointerMove={handlePointerMove(su, cell.key)}
                                         onPointerLeave={() => {
+                                            hoveredCard.current = null
                                             setMagnifier(null)
                                             onHoverNameChange?.(null)
                                         }}
                                     >
                                         {su.image && (
                                             <img
-                                                src={urlFor(su.image)
-                                                    .width(900)
-                                                    .height(900)
-                                                    .fit('crop')
-                                                    .url()}
+                                                src={imageSources.get(su._id)}
+                                                decoding="async"
                                                 alt={`Style up image for ${su.name ?? 'style up'}`}
                                                 draggable={false}
                                             />
                                         )}
 
-                                        {magnifier?.item._id === su._id && (
+                                        {magnifier?.cellKey === cell.key && (
                                             <div
                                                 className={styles.magnifierLens}
                                                 style={{
-                                                    left: magnifier.left,
-                                                    top: magnifier.top,
-                                                    width: magnifier.width,
-                                                    height: magnifier.height,
+                                                    left: `${magnifier.geometry.left * 100}%`,
+                                                    top: `${magnifier.geometry.top * 100}%`,
+                                                    width: `${magnifier.geometry.width * 100}%`,
+                                                    height: `${magnifier.geometry.height * 100}%`,
                                                 }}
                                             />
                                         )}
                                     </div>
                                 )
                             })}
-                        {hasMore && <button
-                            type="button"
-                            onClick={onLoadMore}
-                            disabled={isLoading}
-                            className={styles.loadMoreCard}
-                            style={{
-                                left: `${loadMoreLayout.left}%`,
-                                top: `${loadMoreLayout.top}%`,
-                                width: `${loadMoreLayout.width}%`,
-                                zIndex: activeSession.nextZIndex + 1,
-                                transform: 'translate(-50%, -50%)',
-                            }}
-                        >
-                            {isLoading ? '[LOADING...]' : loadError ? '[RETRY LOAD MORE]' : 'LOAD MORE'}
-                        </button>}
                     </div>
+                </div>
+                <div className={styles.loadStatus} role="status">
+                    {isLoading ? 'LOADING…' : loadError ? (
+                        <>Couldn’t load more. <button type="button" onClick={onLoadMore}>RETRY</button></>
+                    ) : null}
+                </div>
+                <div className={styles.canvasControls} role="group" aria-label="Canvas zoom">
+                    <button type="button" onClick={zoomOut} aria-label="Zoom out">−</button>
+                    <button type="button" onClick={zoomIn} aria-label="Zoom in">+</button>
                 </div>
                 <aside className={styles.sidebar} ref={sidebarRef}>
                     {magnifier?.item.image ? (
                         <div
                             className={styles.zoomPreview}
                             style={{
-                                backgroundImage: `url(${urlFor(magnifier.item.image)
-                                    .width(1600)
-                                    .height(1600)
-                                    .fit('crop')
-                                    .url()})`,
-                                backgroundSize: `${10000 / LENS_WIDTH}% auto`,
-                                backgroundPosition: `${backgroundX}% ${backgroundY}%`,
+                                backgroundImage: `url(${imageUrl(magnifier.item.image)})`,
+                                backgroundSize: `${magnifier.geometry.backgroundSize}% auto`,
+                                backgroundPosition: `${magnifier.geometry.backgroundX}% ${magnifier.geometry.backgroundY}%`,
                             }}
                         />
                     ) : (

@@ -1,1 +1,1 @@
-export const STYLE_UPS_PAGE_SIZE = 19
+export const STYLE_UPS_PAGE_SIZE = 30

@@ -198,6 +198,8 @@ export type StyleUpDragBounds = {
     canvasHeight: number
     cardWidth: number
     cardHeight: number
+    centerX?: number
+    centerY?: number
     boundaryLeft?: number
     boundaryTop?: number
     boundaryRight?: number
@@ -211,14 +213,14 @@ export function getStyleUpDragOffsetBounds(
         canvasHeight,
         cardWidth,
         cardHeight,
+        centerX = (layout.left / 100) * canvasWidth,
+        centerY = (layout.top / 100) * canvasHeight,
         boundaryLeft = 0,
         boundaryTop = 0,
         boundaryRight = canvasWidth,
         boundaryBottom = canvasHeight,
     }: StyleUpDragBounds,
 ) {
-    const centerX = (layout.left / 100) * canvasWidth
-    const centerY = (layout.top / 100) * canvasHeight
     const halfCardWidth = cardWidth / 2
     const halfCardHeight = cardHeight / 2
 
@@ -253,6 +255,27 @@ export function getStyleUpLoadMoreLayout(count: number): StyleUpLayout {
         x: 0,
         y: 0,
     }
+}
+
+export function getStyleUpMobilePosition(id: string, index: number) {
+    const random = createSeededRandom(`${id}:${index}`)
+    const ring = Math.ceil((Math.sqrt(index + 1) - 1) / 2)
+    const side = ring * 2
+    const offset = (side + 1) ** 2 - 1 - index
+    let x = 0
+    let y = 0
+    if (ring > 0) {
+        if (offset < side) { x = ring - offset; y = ring }
+        else if (offset < side * 2) { x = -ring; y = ring - (offset - side) }
+        else if (offset < side * 3) { x = -ring + (offset - side * 2); y = -ring }
+        else { x = ring; y = -ring + (offset - side * 3) }
+    }
+    return {x: x * 260 + (random() - 0.5) * 60, y: y * 260 + (random() - 0.5) * 60}
+}
+
+export function getStyleUpMobileCanvasSize(count: number) {
+    const ring = Math.ceil((Math.sqrt(Math.max(1, count)) - 1) / 2)
+    return (ring * 2 + 1) * 260 + 120
 }
 
 function createDistributedLayouts(
