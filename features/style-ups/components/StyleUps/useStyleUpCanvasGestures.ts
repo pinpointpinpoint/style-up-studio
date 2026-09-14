@@ -19,8 +19,9 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         if (!viewport || !canvas) return
 
         const mobile = window.matchMedia('(max-width: 768px)')
+        const initialScale = window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 0.9 : 1.2
         const maxScale = () => mobile.matches ? 6 : 3
-        let view: CanvasView = {x: 0, y: 0, scale: 1.2}
+        let view: CanvasView = {x: 0, y: 0, scale: initialScale}
         const pointers = new Map<number, CanvasPoint>()
         let moved = false
         let origin: CanvasPoint | null = null
@@ -36,7 +37,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             canvas.style.setProperty('--canvas-scale', String(view.scale))
         }
         const reset = () => {
-            paint({x: viewport.clientWidth / 2, y: viewport.clientHeight / 2, scale: 1.2})
+            paint({x: viewport.clientWidth / 2, y: viewport.clientHeight / 2, scale: initialScale})
         }
         const zoomAt = (factor: number, center: CanvasPoint) => {
             paint(moveCanvasView(view,

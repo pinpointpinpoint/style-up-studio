@@ -138,7 +138,9 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
                                             '--card-offset-x': `${cell.x}px`,
                                             '--card-offset-y': `${cell.y}px`,
                                         } as CSSProperties}
-                                        onPointerEnter={() => onHoverNameChange?.(su.name?.trim() || null)}
+                                        onPointerEnter={(event) => onHoverNameChange?.(
+                                            event.pointerType === 'mouse' ? su.name?.trim() || null : null,
+                                        )}
                                         onPointerMove={handlePointerMove(su, cell.key)}
                                         onPointerLeave={() => {
                                             hoveredCard.current = null
