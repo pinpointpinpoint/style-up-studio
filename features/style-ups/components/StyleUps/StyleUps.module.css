@@ -191,4 +191,8 @@
     .sidebar, .magnifierLens {
         display: none;
     }
+
+    .canvasControls {
+        right: 15px;
+    }
 }

@@ -325,18 +325,41 @@ export default defineType({
                 accept: 'video/mp4',
                 storeOriginalFilename: true,
             },
-            validation: (Rule) =>
-                Rule.custom((file, context) => {
-                    const projectFormat = (
-                        context.document as {projectFormat?: 'photo' | 'video'} | undefined
-                    )?.projectFormat
+validation: (Rule) =>
+    Rule.custom(async (file, context) => {
+        const projectFormat = (
+            context.document as {
+                projectFormat?: 'photo' | 'video'
+            } | undefined
+        )?.projectFormat
 
-                    if (projectFormat === 'video' && !file?.asset?._ref) {
-                        return 'Add a 3-5 second preview clip for video projects.'
-                    }
+        if (projectFormat === 'video' && !file?.asset?._ref) {
+            return 'Add a 3–5 second preview clip for video projects.'
+        }
 
-                    return true
-                }),
+        if (!file?.asset?._ref) {
+            return true
+        }
+
+        const client = context.getClient({
+            apiVersion: '2025-01-01',
+        })
+
+        const asset = await client.fetch<{size?: number}>(
+            `*[_id == $id][0]{size}`,
+            {
+                id: file.asset._ref,
+            },
+        )
+
+        const maxSize = 3 * 1024 * 1024
+
+        if (asset?.size && asset.size > maxSize) {
+            return 'Preview clip must be under 3 MB.'
+        }
+
+        return true
+    }),
             fieldset: 'media',
         }),
         defineField({
