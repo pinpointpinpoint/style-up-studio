@@ -205,6 +205,7 @@ export default function VideoPlayer({
                 playsInline
                 className={styles.mediaPlayer}
                 onPlay={handlePlay}
+                preload="metadata"
             >
                 <MediaProvider />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
