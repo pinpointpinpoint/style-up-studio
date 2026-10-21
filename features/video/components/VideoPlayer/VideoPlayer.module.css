@@ -315,18 +315,24 @@
         left: 0;
         right: 0;
         border: 0;
+        height: 5px;
         pointer-events: auto;
     }
 
     .sliderTrack {
-        top: auto;
-        height: 2px;
         background: white;
         height: 5px;
         border-top: solid 1px var(--off-black);
     }
 
+    .sliderBuffer {
+        height: 5px;
+        background: transparent;
+        border-top: solid 1px var(--off-black);
+    }
+
     .sliderFill {
+        height: 5px;
         background: var(--off-black);
     }
 }
