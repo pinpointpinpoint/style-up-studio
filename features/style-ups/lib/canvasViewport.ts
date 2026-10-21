@@ -1,6 +1,30 @@
 export type CanvasPoint = {x: number; y: number}
 export type CanvasView = CanvasPoint & {scale: number}
 
+export function softenCanvasEdge(view: CanvasView, bounded: CanvasView): CanvasView {
+    const soften = (distance: number) => 100 * distance / (100 + Math.abs(distance))
+    return {...view, x: bounded.x + soften(view.x - bounded.x), y: bounded.y + soften(view.y - bounded.y)}
+}
+
+// Velocity is measured in pixels per millisecond; the spring returns overscroll to bounds.
+export function stepCanvasMomentum(view: CanvasView, velocity: CanvasPoint, bounded: CanvasView, elapsed: number) {
+    const dt = Math.min(32, Math.max(0, elapsed))
+    const axis = (position: number, speed: number, target: number) => {
+        const outside = Math.abs(target - position) > 0.1
+        const nextSpeed = (speed + (target - position) * 0.0003 * dt)
+            * Math.exp(-(outside ? 0.018 : 0.0045) * dt)
+        return {position: position + nextSpeed * dt, speed: nextSpeed}
+    }
+    const x = axis(view.x, velocity.x, bounded.x)
+    const y = axis(view.y, velocity.y, bounded.y)
+    return {
+        view: {...view, x: x.position, y: y.position},
+        velocity: {x: x.speed, y: y.speed},
+        settled: Math.hypot(x.speed, y.speed) < 0.015
+            && Math.hypot(view.x - bounded.x, view.y - bounded.y) < 0.5,
+    }
+}
+
 export function resizeCanvasView(view: CanvasView, before: {width: number; height: number}, after: {width: number; height: number}): CanvasView {
     return {
         ...view,

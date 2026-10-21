@@ -11,6 +11,7 @@ import styles from './Navbar.module.css'
 import ArrowIcon from '../ArrowIcon/ArrowIcon'
 import Image from 'next/image'
 import {useNavbarScrollVisibility} from './useNavbarScrollVisibility'
+import {useSiteRouteSelection} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 
 type MenuKey = 'about' | 'contact'
 type EmailHref = ReturnType<typeof getSafeMailto>
@@ -149,6 +150,7 @@ function ContactDrawerContent({
 }
 
 export default function Navbar({ about, contact }: NavbarProps) {
+  const {handleSectionNavigation} = useSiteRouteSelection()
   const {isHidden, showNavbar} = useNavbarScrollVisibility()
   const aboutMenuId = useId()
   const contactMenuId = useId()
@@ -285,7 +287,17 @@ export default function Navbar({ about, contact }: NavbarProps) {
             </div>
           </details>
         </nav>
-        <Link href="/" aria-label="Style Up Studio home" className={styles.logoLink}>
+        <Link
+          href="/"
+          aria-label="Style Up Studio — back to Work"
+          className={styles.logoLink}
+          onClick={(event) => {
+            handleSectionNavigation('work')(event)
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+            setActiveMenu(null)
+            setIsMobileNavOpen(false)
+          }}
+        >
           <img className={styles.logo} src="/minimal_logo.svg" alt="Style Up Studio" />
         </Link>
         <div className={styles.navItem}>

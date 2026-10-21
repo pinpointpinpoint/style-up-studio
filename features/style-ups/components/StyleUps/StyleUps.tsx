@@ -85,6 +85,7 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
 
     const handlePointerMove =
         (item: StyleUpItem, cellKey: string) => (event: ReactPointerEvent<HTMLDivElement>) => {
+            if (event.pointerType !== 'mouse') return
             hoveredCard.current = {item, cellKey, element: event.currentTarget,
                 clientX: event.clientX, clientY: event.clientY}
             updateMagnifier()

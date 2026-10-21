@@ -1,7 +1,7 @@
 'use client'
 
 import {useEffect, useRef, useState, type RefObject} from 'react'
-import {boundStyleUpCanvasView, moveCanvasView, type CanvasBounds, type CanvasPoint, type CanvasView} from '../../lib/canvasViewport'
+import {boundStyleUpCanvasView, moveCanvasView, softenCanvasEdge, stepCanvasMomentum, type CanvasBounds, type CanvasPoint, type CanvasView} from '../../lib/canvasViewport'
 
 export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement | null>, canvasRef: RefObject<HTMLDivElement | null>, extent: CanvasBounds | null) {
     const [visibleView, setVisibleView] = useState({x: 0, y: 0, scale: 1.2, width: 0, height: 0})
@@ -19,6 +19,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         if (!viewport || !canvas) return
 
         const mobile = window.matchMedia('(max-width: 768px)')
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
         const initialScale = window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 0.9 : 1.2
         const maxScale = () => mobile.matches ? 6 : 3
         let view: CanvasView = {x: 0, y: 0, scale: initialScale}
@@ -26,20 +27,48 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         let moved = false
         let origin: CanvasPoint | null = null
         let safariScale: number | null = null
+        let momentumFrame = 0
+        let velocity = {x: 0, y: 0}
+        let lastMoveTime = 0
+        let rawView = view
+        const stopMomentum = () => {
+            cancelAnimationFrame(momentumFrame)
+            momentumFrame = 0
+            velocity = {x: 0, y: 0}
+        }
         let viewportSize = {width: viewport.clientWidth, height: viewport.clientHeight}
-        const paint = (next: CanvasView) => {
-            view = bounds.current === null ? next : boundStyleUpCanvasView(
+        const constrain = (next: CanvasView) => bounds.current === null ? next : boundStyleUpCanvasView(
                 next, viewport.clientWidth, viewport.clientHeight, bounds.current,
             )
+        const paint = (next: CanvasView, allowOverscroll = false) => {
+            view = allowOverscroll ? next : constrain(next)
             setVisibleView({...view, width: viewport.clientWidth, height: viewport.clientHeight})
             canvas.style.setProperty('--canvas-x', `${view.x}px`)
             canvas.style.setProperty('--canvas-y', `${view.y}px`)
             canvas.style.setProperty('--canvas-scale', String(view.scale))
         }
+        const release = () => {
+            let previousTime = performance.now()
+            const animate = (time: number) => {
+                if (reducedMotion.matches || viewport.closest('[inert]')) {
+                    stopMomentum()
+                    paint(view)
+                    return
+                }
+                const next = stepCanvasMomentum(view, velocity, constrain(view), time - previousTime)
+                previousTime = time
+                velocity = next.velocity
+                paint(next.view, !next.settled)
+                momentumFrame = next.settled ? 0 : requestAnimationFrame(animate)
+            }
+            momentumFrame = requestAnimationFrame(animate)
+        }
         const reset = () => {
+            stopMomentum()
             paint({x: viewport.clientWidth / 2, y: viewport.clientHeight / 2, scale: initialScale})
         }
         const zoomAt = (factor: number, center: CanvasPoint) => {
+            stopMomentum()
             paint(moveCanvasView(view,
                 [{x: center.x - 50, y: center.y}, {x: center.x + 50, y: center.y}],
                 [{x: center.x - 50 * factor, y: center.y}, {x: center.x + 50 * factor, y: center.y}],
@@ -51,11 +80,12 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         })
         const constrainZoom = () => zoom(1)
         mobile.addEventListener('change', constrainZoom)
-        controls.current = {zoom, reset, refresh: () => paint(view)}
+        controls.current = {zoom, reset, refresh: () => paint(view, pointers.size > 0 || momentumFrame !== 0)}
         const wheel = (event: WheelEvent) => {
             event.preventDefault()
             event.stopPropagation()
             if (safariScale !== null) return
+            stopMomentum()
             const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1
             if (!event.ctrlKey) {
                 paint({
@@ -97,6 +127,9 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             if (event.button !== 0) return
             event.stopPropagation()
             if (pointers.size >= 2) return
+            stopMomentum()
+            rawView = view
+            lastMoveTime = performance.now()
             if (pointers.size === 0) {
                 moved = false
                 origin = point(event)
@@ -117,14 +150,37 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             pointers.set(event.pointerId, next)
             if (origin && Math.hypot(next.x - origin.x, next.y - origin.y) > 5) moved = true
             if (moved && !viewport.hasPointerCapture(event.pointerId)) viewport.setPointerCapture(event.pointerId)
-            paint(moveCanvasView(view, before, [...pointers.values()], maxScale()))
+            const time = performance.now()
+            const elastic = event.pointerType === 'touch' && pointers.size === 1 && !reducedMotion.matches
+            const previousView = view
+            rawView = moveCanvasView(elastic ? rawView : view, before, [...pointers.values()], maxScale())
+            paint(elastic ? softenCanvasEdge(rawView, constrain(rawView)) : rawView, elastic)
+            const elapsed = Math.max(1, time - lastMoveTime)
+            velocity = elastic ? {
+                x: Math.max(-3, Math.min(3, (view.x - previousView.x) / elapsed)),
+                y: Math.max(-3, Math.min(3, (view.y - previousView.y) / elapsed)),
+            } : {x: 0, y: 0}
+            lastMoveTime = time
         }
         const up = (event: PointerEvent) => {
+            if (!pointers.has(event.pointerId)) return
             event.stopPropagation()
             pointers.delete(event.pointerId)
             if (event.type === 'pointercancel') moved = true
             if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId)
             origin = pointers.values().next().value ?? null
+            rawView = view
+            if (pointers.size === 0) {
+                if (event.pointerType === 'touch' && !reducedMotion.matches) {
+                    if (event.type !== 'pointerup' || performance.now() - lastMoveTime > 80) velocity = {x: 0, y: 0}
+                    release()
+                } else {
+                    paint(view)
+                }
+            } else {
+                velocity = {x: 0, y: 0}
+                lastMoveTime = performance.now()
+            }
         }
         const click = (event: MouseEvent) => {
             if (moved && event.detail !== 0) {
@@ -139,6 +195,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
                 ArrowUp: {x: 0, y: 60}, ArrowDown: {x: 0, y: -60},
             }
             if (moves[event.key]) {
+                stopMomentum()
                 event.preventDefault()
                 paint({...view, x: view.x + moves[event.key].x, y: view.y + moves[event.key].y})
             }
@@ -154,6 +211,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         }
         breakpoint()
         const observer = new ResizeObserver(() => {
+            stopMomentum()
             const nextSize = {width: viewport.clientWidth, height: viewport.clientHeight}
             paint({...view, x: view.x + (nextSize.width - viewportSize.width) / 2,
                 y: view.y + (nextSize.height - viewportSize.height) / 2})
@@ -172,6 +230,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         viewport.addEventListener('gesturechange', gesture, {passive: false})
         viewport.addEventListener('gestureend', gesture, {passive: false})
         return () => {
+            stopMomentum()
             mobile.removeEventListener('change', constrainZoom)
             observer.disconnect()
             viewport.removeEventListener('pointerdown', down, true)

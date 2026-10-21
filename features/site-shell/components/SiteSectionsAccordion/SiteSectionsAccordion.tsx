@@ -18,7 +18,6 @@ import {STYLE_UPS_PAGE_SIZE} from '@/features/style-ups/lib/constants'
 import {WorkSection} from '@/features/work/components/WorkSection/WorkSection'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
 import {
-    SiteRouteSelectionProvider,
     useSiteRouteSelection,
 } from '@/features/site-shell/routing/SiteRouteSelectionProvider'
 import DelayedLoadingMessage from '@/shared/components/DelayedLoadingMessage/DelayedLoadingMessage'
@@ -44,25 +43,6 @@ type SiteSectionsAccordionProps = {
 }
 
 export default function SiteSectionsAccordion({
-    children,
-    initialProjects,
-    initialFilter,
-    sidebarFilters,
-}: SiteSectionsAccordionProps) {
-    return (
-        <SiteRouteSelectionProvider>
-            <SiteSectionsAccordionView
-                initialProjects={initialProjects}
-                initialFilter={initialFilter}
-                sidebarFilters={sidebarFilters}
-            >
-                {children}
-            </SiteSectionsAccordionView>
-        </SiteRouteSelectionProvider>
-    )
-}
-
-function SiteSectionsAccordionView({
     children,
     initialProjects,
     initialFilter,

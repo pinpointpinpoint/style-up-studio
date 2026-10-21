@@ -1,6 +1,35 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {boundCanvasView, moveCanvasView, resizeCanvasView} from './canvasViewport.ts'
+import {boundCanvasView, moveCanvasView, resizeCanvasView, softenCanvasEdge, stepCanvasMomentum} from './canvasViewport.ts'
+
+test('edge resistance allows a limited pull beyond the boundary', () => {
+    const bounded = {x: 0, y: 0, scale: 1}
+    assert.deepEqual(softenCanvasEdge(bounded, bounded), bounded)
+    const pulled = softenCanvasEdge({x: 200, y: -200, scale: 1}, bounded)
+    assert.ok(pulled.x > 0 && pulled.x < 100)
+    assert.equal(pulled.y, -pulled.x)
+})
+
+test('a released swipe glides then settles, including at a canvas edge', () => {
+    for (const constrained of [false, true]) {
+        let view = {x: 0, y: 0, scale: 1}
+        let velocity = {x: 1.5, y: -0.8}
+        let settled = false
+        for (let frame = 0; frame < 600; frame++) {
+            const bounded = constrained ? {...view, x: 0, y: 0} : view
+            const next = stepCanvasMomentum(view, velocity, bounded, 16)
+            view = next.view
+            velocity = next.velocity
+            assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y))
+            if (frame === 0) assert.ok(view.x > 0)
+            if (next.settled) { settled = true; break }
+        }
+        assert.ok(settled)
+        if (constrained) assert.ok(Math.hypot(view.x, view.y) < 0.5)
+        else assert.ok(view.x > 100)
+        assert.equal(view.scale, 1)
+    }
+})
 
 test('one pointer pans without changing scale', () => {
     assert.deepEqual(moveCanvasView({x: -100, y: -200, scale: 0.9},
