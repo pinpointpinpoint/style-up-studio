@@ -63,7 +63,7 @@ function CustomVideoLayout({ src }: { src: string }) {
             ) : (
                 <VideoFrameToggle />
             )}
-            <VideoControls />
+            {!fallback && <VideoControls />}
         </>
     )
 }

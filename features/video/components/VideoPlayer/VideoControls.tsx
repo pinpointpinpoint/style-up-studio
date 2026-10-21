@@ -62,6 +62,7 @@ export default function VideoControls() {
 
             <TimeSlider.Root className={styles.progressTrack}>
                 <TimeSlider.Track className={styles.sliderTrack}>
+                    <div className={styles.sliderBuffer} aria-hidden="true" />
                     <TimeSlider.TrackFill className={styles.sliderFill} />
                 </TimeSlider.Track>
                 <TimeSlider.Thumb className={styles.sliderThumb} />
@@ -75,7 +76,10 @@ export default function VideoControls() {
                 </span>
 
                 <span className={styles.mobileIcon} aria-hidden="true">
-                    {fullscreen ? '↙' : '↗'}
+                    <img
+                        src={fullscreen ? '/exit_fullscreen.svg' : '/fullscreen.svg'}
+                        alt=""
+                    />
                 </span>
             </FullscreenButton>
         </div>
