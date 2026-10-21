@@ -26,9 +26,10 @@ type StyleUpsProps = {
 }
 
 const IMAGE_SIZE = 3240
+const THUMBNAIL_SIZES = [320, 480, 640, 1080, 1620, 2160]
 
-function imageUrl(image: SanityImageSource) {
-    return urlFor(image).width(IMAGE_SIZE).height(IMAGE_SIZE).fit('crop').quality(90).auto('format').url()
+function imageUrl(image: SanityImageSource, size = IMAGE_SIZE) {
+    return urlFor(image).width(size).height(size).fit('crop').quality(size === IMAGE_SIZE ? 90 : 80).auto('format').url()
 }
 
 export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, onHoverNameChange }: StyleUpsProps) {
@@ -45,7 +46,10 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
     const styleUpsRef = useRef<HTMLDivElement | null>(null)
     const canvasRef = useRef<HTMLDivElement | null>(null)
     const imageSources = useMemo(() => new Map((styleUps ?? []).map(item => [
-        item._id, item.image ? imageUrl(item.image) : undefined,
+        item._id, item.image ? {
+            src: imageUrl(item.image, 480),
+            srcSet: THUMBNAIL_SIZES.map(size => `${imageUrl(item.image!, size)} ${size}w`).join(', '),
+        } : undefined,
     ])), [styleUps])
     const count = styleUps?.length ?? 0
     const extent = useMemo(() => getCanvasLayout(count), [count])
@@ -150,7 +154,12 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
                                     >
                                         {su.image && (
                                             <img
-                                                src={imageSources.get(su._id)}
+                                                src={imageSources.get(su._id)?.src}
+                                                srcSet={imageSources.get(su._id)?.srcSet}
+                                                sizes={`${Math.ceil(180 * visibleView.scale)}px`}
+                                                width={480}
+                                                height={480}
+                                                loading="lazy"
                                                 decoding="async"
                                                 alt={`Style up image for ${su.name ?? 'style up'}`}
                                                 draggable={false}
