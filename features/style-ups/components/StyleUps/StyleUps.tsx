@@ -125,7 +125,7 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
     if (!styleUps || styleUps.length === 0) return null
 
     return (
-        <SectionFooterScroll>
+        <SectionFooterScroll showFooter={false}>
             <div className={styles.main}>
                 <div ref={styleUpsRef} className={styles.styleUps} role="region" aria-label="Style Ups canvas">
                     <div

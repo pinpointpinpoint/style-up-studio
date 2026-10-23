@@ -7,9 +7,9 @@ import type {
 const PROJECT_CARD_IMAGE_WIDTHS = [600, 900, 1200, 1600]
 const PROJECT_CARD_IMAGE_SIZES =
     '(max-width: 600px) 100vw, (max-width: 1000px) 50vw, (max-width: 1245px) 33vw, 25vw'
-const PROJECT_DETAIL_IMAGE_WIDTHS = [900, 1200, 1600, 1800, 2200]
+const PROJECT_DETAIL_IMAGE_WIDTHS = [400, 600, 800, 1200, 1600, 2200]
 const PROJECT_DETAIL_IMAGE_SIZES =
-    '(max-width: 700px) 100vw, calc(100vw - clamp(300px, 28vw, 400px))'
+    '(max-width: 768px) calc(100vw - 10px), (max-width: 992px) 67vw, 75vw'
 
 export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset) => {
     if (preset === 'card') {
@@ -17,7 +17,7 @@ export const getSanityProjectImageUrl: ProjectImageUrlResolver = (source, preset
     }
 
     if (preset === 'detail') {
-        return urlForImage(source)?.width(1800).quality(85).url()
+        return urlForImage(source)?.width(1200).quality(80).url()
     }
 
     if (preset === 'video-poster') {
@@ -44,7 +44,7 @@ export const getSanityProjectImageSourceSet: ProjectImageSourceSetResolver = (so
     const sizes = preset === 'card' ? PROJECT_CARD_IMAGE_SIZES : PROJECT_DETAIL_IMAGE_SIZES
     const srcSet = widths.map((width) => {
         const builder = urlForImage(source)?.width(width)
-        const url = preset === 'card' ? builder?.height(width).url() : builder?.quality(85).url()
+        const url = preset === 'card' ? builder?.height(width).url() : builder?.quality(80).url()
 
         return url ? `${url} ${width}w` : null
     })

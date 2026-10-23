@@ -18,8 +18,6 @@ import type {Project} from '@/types'
 import styles from './ProjectDetailView.module.css'
 import {
     createProjectDetailMediaView,
-    getProjectDetailMediaScrollTarget,
-    selectProjectDetailMedia,
 } from '../../lib/media/projectDetailMediaView'
 import {
     getSanityProjectImageSourceSet,
@@ -38,21 +36,26 @@ type ProjectDetailViewProps = {
 
 type ProjectImageProps = {
     src: string
+    width?: number
+    height?: number
     alt: string
     eager: boolean
     srcSet?: string
     sizes?: string
 }
 
-function ProjectImage({src, alt, eager, srcSet, sizes}: ProjectImageProps) {
+function ProjectImage({src, alt, eager, srcSet, sizes, width, height}: ProjectImageProps) {
     return (
         <img
             src={src}
             srcSet={srcSet}
             sizes={sizes}
+            width={width}
+            height={height}
             alt={alt}
             className={styles.image}
             loading={eager ? 'eager' : 'lazy'}
+            fetchPriority={eager ? 'high' : 'auto'}
             decoding="async"
         />
     )
@@ -73,8 +76,6 @@ function VideoPlayerLoading({poster, title}: {poster?: string; title?: string}) 
 
 export default function ProjectDetailView({project, scrollContainerRef}: ProjectDetailViewProps) {
     const mediaPaneRef = useRef<HTMLDivElement | null>(null)
-    const mediaFrameRefs = useRef<Record<number, HTMLDivElement | null>>({})
-    const galleryImageRefs = useRef<Record<number, Record<string, HTMLDivElement>>>({})
     const [selectedMedia, setSelectedMedia] = useState<{
         projectId: string
         mediaIndex: number
@@ -102,63 +103,43 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
     const activeImageKey = selectedMedia?.projectId === project._id && selectedMedia.imageKey
         ? selectedMedia.imageKey
         : activeItem?.kind === 'gallery' ? activeItem.images[0]?.key : undefined
-    const handleAssetSelect = useCallback(
-        (mediaIndex: number, imageKey?: string) => {
-            const selection = selectProjectDetailMedia(
-                {
-                    ...mediaView,
-                    activeMediaIndex,
-                },
-                mediaIndex,
-            )
-
-            const imageFrame = imageKey ? galleryImageRefs.current[mediaIndex]?.[imageKey] : undefined
-            const target = imageFrame ?? mediaFrameRefs.current[selection.scrollTargetMediaIndex]
-            target?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            })
-        },
-        [activeMediaIndex, mediaView],
-    )
-
-    const handleMediaScroll = useCallback(() => {
-        const scrollContainer = scrollContainerRef?.current ?? mediaPaneRef.current
-
-        if (!scrollContainer) return
-
-        const paneRect = scrollContainer.getBoundingClientRect()
-        const next = getProjectDetailMediaScrollTarget({
-            paneRect,
-            frameRects: Object.entries(mediaFrameRefs.current).flatMap(([index, element]) => {
-                const mediaIndex = Number(index)
-                const images = Object.entries(galleryImageRefs.current[mediaIndex] ?? {})
-                const frames = images.length ? images : element ? [[undefined, element] as const] : []
-                return frames.map(([imageKey, frame]) => {
-                    const rect = frame.getBoundingClientRect()
-                    return {mediaIndex, imageKey, top: rect.top, height: rect.height}
-                })
-            }),
-        })
-
-        if (next && (next.mediaIndex !== activeMediaIndex || next.imageKey !== activeImageKey)) {
-            setSelectedMedia({
-                projectId: project._id,
-                mediaIndex: next.mediaIndex,
-                imageKey: next.imageKey,
-            })
-        }
-    }, [activeMediaIndex, activeImageKey, project._id, scrollContainerRef])
+    const handleAssetSelect = useCallback((mediaIndex: number, imageKey?: string) => {
+        const frames = mediaPaneRef.current?.querySelectorAll<HTMLElement>('[data-media-index]')
+        const target = Array.from(frames ?? []).find(frame =>
+            Number(frame.dataset.mediaIndex) === mediaIndex
+            && (!frame.dataset.imageKey || frame.dataset.imageKey === imageKey),
+        )
+        target?.scrollIntoView({behavior: 'smooth', block: 'center'})
+    }, [])
 
     useEffect(() => {
-        const scrollContainer = scrollContainerRef?.current
+        const frames = mediaPaneRef.current?.querySelectorAll<HTMLElement>('[data-media-index]')
+        if (!frames?.length) return
 
-        if (!scrollContainer) return
+        // The browser tracks visibility; no layout measurements on scroll.
+        const visibility = new Map<Element, number>()
+        const observer = new IntersectionObserver(entries => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) visibility.set(entry.target, entry.intersectionRatio)
+                else visibility.delete(entry.target)
+            }
+            const active = [...visibility].sort((a, b) => b[1] - a[1])[0]?.[0] as HTMLElement | undefined
+            if (!active) return
 
-        scrollContainer.addEventListener('scroll', handleMediaScroll, {passive: true})
-
-        return () => scrollContainer.removeEventListener('scroll', handleMediaScroll)
-    }, [handleMediaScroll, scrollContainerRef])
+            const mediaIndex = Number(active.dataset.mediaIndex)
+            const imageKey = active.dataset.imageKey
+            setSelectedMedia(current =>
+                current?.projectId === project._id && current.mediaIndex === mediaIndex && current.imageKey === imageKey
+                    ? current
+                    : {projectId: project._id, mediaIndex, imageKey},
+            )
+        }, {
+            root: scrollContainerRef?.current ?? null,
+            threshold: [0, 0.25, 0.5, 0.75, 1],
+        })
+        frames.forEach(frame => observer.observe(frame))
+        return () => observer.disconnect()
+    }, [project._id, project.media, scrollContainerRef])
 
     useEffect(() => {
         setActiveVideoId(null)
@@ -223,7 +204,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                     onAssetSelect={handleAssetSelect}
                 />
             </div>
-            <div className={styles.mediaPane} ref={mediaPaneRef} onScroll={handleMediaScroll}>
+            <div className={styles.mediaPane} ref={mediaPaneRef}>
                 <div className={styles.mediaList}>
                     {mediaView.media.map((item) => {
                         if (item.kind === 'gallery') {
@@ -231,22 +212,18 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                 <div key={item.key} className={styles.galleryContainer}>
                                     <div
                                         className={styles.galleryFrame}
-                                        ref={(element) => {
-                                            mediaFrameRefs.current[item.mediaIndex] = element
-                                        }}
                                     >
                                         {item.images.map((image) => (
                                             <div
                                                 key={image.key}
                                                 className={styles.mediaFrame}
-                                                ref={(element) => {
-                                                    const frames = galleryImageRefs.current[item.mediaIndex] ??= {}
-                                                    if (element) frames[image.key] = element
-                                                    else delete frames[image.key]
-                                                }}
+                                                data-media-index={item.mediaIndex}
+                                                data-image-key={image.key}
                                             >
                                             <ProjectImage
                                                 src={image.url}
+                                                width={image.width}
+                                                height={image.height}
                                                 srcSet={image.srcSet}
                                                 sizes={image.sizes}
                                                 alt={image.alt}
@@ -263,12 +240,12 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                 <div
                                     key={item.key}
                                     className={styles.mediaFrame}
-                                    ref={(element) => {
-                                        mediaFrameRefs.current[item.mediaIndex] = element
-                                    }}
+                                    data-media-index={item.mediaIndex}
                                 >
                                     <ProjectImage
                                         src={item.url}
+                                        width={item.width}
+                                        height={item.height}
                                         srcSet={item.srcSet}
                                         sizes={item.sizes}
                                         alt={item.alt}
@@ -283,9 +260,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                                 <div
                                     key={item.key}
                                     className={`${styles.mediaFrame} ${styles.videoFrame}`}
-                                    ref={(element) => {
-                                        mediaFrameRefs.current[item.mediaIndex] = element
-                                    }}
+                                    data-media-index={item.mediaIndex}
                                 >
                                     <Suspense
                                         fallback={
@@ -311,9 +286,7 @@ export default function ProjectDetailView({project, scrollContainerRef}: Project
                             <div
                                 key={item.key}
                                 className={`${styles.mediaFrame} ${styles.videoFrame}`}
-                                ref={(element) => {
-                                    mediaFrameRefs.current[item.mediaIndex] = element
-                                }}
+                                data-media-index={item.mediaIndex}
                             >
                                 <Suspense
                                     fallback={

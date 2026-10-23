@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, {useMemo, useRef, useState} from 'react'
+import React, {useMemo, useRef, useState, useSyncExternalStore} from 'react'
 import {Project} from '@/types'
 import styles from './ProjectCard.module.css'
 import {getProjectCardMedia} from '../../lib/media/projectMediaPresentation'
@@ -20,9 +20,25 @@ interface ProjectCardProps {
 const EAGER_PROJECT_CARD_COUNT = 8
 const HIGH_PRIORITY_PROJECT_CARD_COUNT = 2
 
+const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
+const TOUCH_QUERY = '(any-pointer: coarse)'
+
+function subscribeToInput(onChange: () => void) {
+    const queries = [HOVER_QUERY, TOUCH_QUERY].map(query => window.matchMedia(query))
+    queries.forEach(query => query.addEventListener('change', onChange))
+    return () => queries.forEach(query => query.removeEventListener('change', onChange))
+}
+
+const supportsVideoPreview = () => navigator.maxTouchPoints === 0
+    && window.matchMedia(HOVER_QUERY).matches
+    && !window.matchMedia(TOUCH_QUERY).matches
+// The server cannot detect touch input. Wait for the client before choosing media.
+const serverVideoPreview = () => null
+
 const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     const [isHovered, setIsHovered] = useState(false)
     const videoRef = useRef<HTMLVideoElement>(null)
+    const canPreview = useSyncExternalStore<boolean | null>(subscribeToInput, supportsVideoPreview, serverVideoPreview)
 
     const cardMedia = useMemo(
         () =>
@@ -34,14 +50,16 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     )
 
     const previewVideoUrl = cardMedia.previewVideoUrl
+    const showVideo = canPreview && Boolean(previewVideoUrl)
     const hoverImage = cardMedia.hoverImage
 
     const activeImage =
-        isHovered && !previewVideoUrl && hoverImage
+        canPreview && isHovered && !previewVideoUrl && hoverImage
             ? hoverImage
             : cardMedia.cardImage
 
     const handleMouseEnter = () => {
+        if (!canPreview) return
         setIsHovered(true)
         videoRef.current?.play()
     }
@@ -60,7 +78,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            {!previewVideoUrl && activeImage && (
+            {(!previewVideoUrl || canPreview === false) && activeImage && (
                 <img
                     src={activeImage.url}
                     srcSet={activeImage.srcSet}
@@ -80,7 +98,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
                 />
             )}
 
-            {previewVideoUrl && (
+            {showVideo && previewVideoUrl && (
                 <video
                     ref={videoRef}
                     src={previewVideoUrl}

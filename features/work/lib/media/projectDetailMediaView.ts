@@ -17,20 +17,6 @@ export type ProjectDetailMediaView = {
     activeMediaIndex: number
 }
 
-export type ProjectDetailMediaSelection = ProjectDetailMediaView & {
-    scrollTargetMediaIndex: number
-}
-
-type ProjectDetailMediaRect = {
-    top: number
-    height: number
-}
-
-type ProjectDetailMediaFrameRect = ProjectDetailMediaRect & {
-    mediaIndex: number
-    imageKey?: string
-}
-
 export function createProjectDetailMediaView(
     project: Project,
     options: ProjectDetailMediaViewOptions,
@@ -41,48 +27,4 @@ export function createProjectDetailMediaView(
         media,
         activeMediaIndex: media[0]?.mediaIndex ?? 0,
     }
-}
-
-export function selectProjectDetailMedia(
-    view: ProjectDetailMediaView,
-    mediaIndex: number,
-): ProjectDetailMediaSelection {
-    return {
-        ...view,
-        activeMediaIndex: mediaIndex,
-        scrollTargetMediaIndex: mediaIndex,
-    }
-}
-
-export function getProjectDetailMediaScrollSelection({
-    currentActiveMediaIndex,
-    paneRect,
-    frameRects,
-}: {
-    currentActiveMediaIndex: number
-    paneRect: ProjectDetailMediaRect
-    frameRects: ProjectDetailMediaFrameRect[]
-}) {
-    return getProjectDetailMediaScrollTarget({paneRect, frameRects})?.mediaIndex ?? currentActiveMediaIndex
-}
-
-export function getProjectDetailMediaScrollTarget({paneRect, frameRects}: {
-    paneRect: ProjectDetailMediaRect
-    frameRects: ProjectDetailMediaFrameRect[]
-}) {
-    const paneCenter = paneRect.top + paneRect.height / 2
-    let nearest: ProjectDetailMediaFrameRect | undefined
-    let nearestDistance = Number.POSITIVE_INFINITY
-
-    for (const frameRect of frameRects) {
-        const frameCenter = frameRect.top + frameRect.height / 2
-        const distance = Math.abs(frameCenter - paneCenter)
-
-        if (distance < nearestDistance) {
-            nearestDistance = distance
-            nearest = frameRect
-        }
-    }
-
-    return nearest
 }

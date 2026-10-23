@@ -28,6 +28,8 @@ export type ProjectImageSourceSetResolver = (
 export type ProjectPresentedImage = {
     url: string
     alt: string
+    width?: number
+    height?: number
     srcSet?: string
     sizes?: string
 }
@@ -160,9 +162,16 @@ function toPresentedImage(
 
     if (!src) return null
 
+    const dimensions = source.asset?._ref?.match(/-(\d+)x(\d+)-[^-]+$/)
+    const crop = source.crop
+    const width = dimensions ? Math.max(1, Math.round(Number(dimensions[1]) * (1 - (crop?.left ?? 0) - (crop?.right ?? 0)))) : undefined
+    const height = dimensions ? Math.max(1, Math.round(Number(dimensions[2]) * (1 - (crop?.top ?? 0) - (crop?.bottom ?? 0)))) : undefined
+
     return {
         url: src,
         alt,
+        width,
+        height,
         ...(sourceSet?.srcSet ? {srcSet: sourceSet.srcSet} : {}),
         ...(sourceSet?.sizes ? {sizes: sourceSet.sizes} : {}),
     }
@@ -287,7 +296,6 @@ export function getProjectDetailMedia(
                         ? [
                               {
                                   ...image,
-                                  sizes: '(max-width: 768px) 50vw, 25vw',
                                   key: source._key,
                                   mediaIndex,
                                   eager: mediaIndex === 0 && imageIndex === 0,
