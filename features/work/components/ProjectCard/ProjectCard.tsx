@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, {useMemo, useRef, useState} from 'react'
+import React, {useMemo, useRef, useState, useSyncExternalStore} from 'react'
 import {Project} from '@/types'
 import styles from './ProjectCard.module.css'
 import {getProjectCardMedia} from '../../lib/media/projectMediaPresentation'
@@ -20,9 +20,19 @@ interface ProjectCardProps {
 const EAGER_PROJECT_CARD_COUNT = 8
 const HIGH_PRIORITY_PROJECT_CARD_COUNT = 2
 
+const DESKTOP_QUERY = '(min-width: 769px)'
+function subscribeToViewport(onChange: () => void) {
+    const query = window.matchMedia(DESKTOP_QUERY)
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+}
+const isDesktopViewport = () => window.matchMedia(DESKTOP_QUERY).matches
+const serverViewport = () => false
+
 const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     const [isHovered, setIsHovered] = useState(false)
     const videoRef = useRef<HTMLVideoElement>(null)
+    const isDesktop = useSyncExternalStore(subscribeToViewport, isDesktopViewport, serverViewport)
 
     const cardMedia = useMemo(
         () =>
@@ -34,6 +44,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     )
 
     const previewVideoUrl = cardMedia.previewVideoUrl
+    const showVideo = isDesktop && Boolean(previewVideoUrl)
     const hoverImage = cardMedia.hoverImage
 
     const activeImage =
@@ -42,6 +53,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
             : cardMedia.cardImage
 
     const handleMouseEnter = () => {
+        if (!isDesktop) return
         setIsHovered(true)
         videoRef.current?.play()
     }
@@ -60,7 +72,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            {!previewVideoUrl && activeImage && (
+            {!showVideo && activeImage && (
                 <img
                     src={activeImage.url}
                     srcSet={activeImage.srcSet}
@@ -80,7 +92,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
                 />
             )}
 
-            {previewVideoUrl && (
+            {showVideo && previewVideoUrl && (
                 <video
                     ref={videoRef}
                     src={previewVideoUrl}
