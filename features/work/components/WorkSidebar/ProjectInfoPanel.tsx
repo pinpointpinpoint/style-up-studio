@@ -34,8 +34,9 @@ type ProjectInfoPanelProps = {
     displayedProject: Project | null
     expandDetails?: boolean
     headerAction?: ReactNode
-    onAssetSelect?: (mediaIndex: number) => void
+    onAssetSelect?: (mediaIndex: number, imageKey?: string) => void
     activeAssetIndex?: number
+    activeAssetKey?: string
     variant?: 'desktop' | 'mobile'
 }
 
@@ -45,6 +46,7 @@ const ProjectInfoPanel = ({
     headerAction,
     onAssetSelect,
     activeAssetIndex,
+    activeAssetKey,
     variant = 'desktop'
 }: ProjectInfoPanelProps) => {
     const imageSizeProps = expandDetails ? {} : {height: 30}
@@ -277,11 +279,12 @@ const ProjectInfoPanel = ({
                                 const isActiveAsset =
                                     expandDetails &&
                                     activeAssetIndex !== undefined &&
-                                    thumbnail.mediaIndex === activeAssetIndex
+                                    thumbnail.mediaIndex === activeAssetIndex &&
+                                    (activeAssetKey === undefined || thumbnail.key === activeAssetKey)
                                 const isInactiveAsset =
                                     expandDetails &&
                                     activeAssetIndex !== undefined &&
-                                    thumbnail.mediaIndex !== activeAssetIndex
+                                    !isActiveAsset
                                 const assetImage = (
                                     <img
                                         data-media-kind={thumbnail.kind}
@@ -300,7 +303,7 @@ const ProjectInfoPanel = ({
                                         className={styles.assetButton}
                                         data-media-kind={thumbnail.kind}
                                         type="button"
-                                        onClick={() => onAssetSelect(thumbnail.mediaIndex)}
+                                        onClick={() => onAssetSelect(thumbnail.mediaIndex, thumbnail.key)}
                                         aria-label={`Go to ${thumbnail.alt}`}
                                     >
                                         {assetImage}

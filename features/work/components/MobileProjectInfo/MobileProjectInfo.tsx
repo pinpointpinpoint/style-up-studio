@@ -7,12 +7,14 @@ import ProjectInfoPanel from '../WorkSidebar/ProjectInfoPanel'
 type MobileProjectInfoProps = {
     project: any
     activeAssetIndex: number
-    onAssetSelect: (index: number) => void
+    activeAssetKey?: string
+    onAssetSelect: (index: number, imageKey?: string) => void
 }
 
 export function MobileProjectInfo({
     project,
     activeAssetIndex,
+    activeAssetKey,
     onAssetSelect,
 }: MobileProjectInfoProps) {
     return (
@@ -27,6 +29,7 @@ export function MobileProjectInfo({
                 displayedProject={project}
                 expandDetails
                 activeAssetIndex={activeAssetIndex}
+                activeAssetKey={activeAssetKey}
                 onAssetSelect={onAssetSelect}
                 variant="mobile"
             />

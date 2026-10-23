@@ -28,6 +28,7 @@ type ProjectDetailMediaRect = {
 
 type ProjectDetailMediaFrameRect = ProjectDetailMediaRect & {
     mediaIndex: number
+    imageKey?: string
 }
 
 export function createProjectDetailMediaView(
@@ -62,8 +63,15 @@ export function getProjectDetailMediaScrollSelection({
     paneRect: ProjectDetailMediaRect
     frameRects: ProjectDetailMediaFrameRect[]
 }) {
+    return getProjectDetailMediaScrollTarget({paneRect, frameRects})?.mediaIndex ?? currentActiveMediaIndex
+}
+
+export function getProjectDetailMediaScrollTarget({paneRect, frameRects}: {
+    paneRect: ProjectDetailMediaRect
+    frameRects: ProjectDetailMediaFrameRect[]
+}) {
     const paneCenter = paneRect.top + paneRect.height / 2
-    let nearestIndex = currentActiveMediaIndex
+    let nearest: ProjectDetailMediaFrameRect | undefined
     let nearestDistance = Number.POSITIVE_INFINITY
 
     for (const frameRect of frameRects) {
@@ -72,9 +80,9 @@ export function getProjectDetailMediaScrollSelection({
 
         if (distance < nearestDistance) {
             nearestDistance = distance
-            nearestIndex = frameRect.mediaIndex
+            nearest = frameRect
         }
     }
 
-    return nearestIndex
+    return nearest
 }

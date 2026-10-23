@@ -7,6 +7,7 @@ import {
     useEffect,
     useRef,
     useState,
+    useSyncExternalStore,
     type FocusEvent,
     type MouseEvent,
     type PointerEvent,
@@ -14,6 +15,11 @@ import {
 import useExternalPlaybackFallback from '../../hooks/useExternalPlaybackFallback'
 import VideoControls from './VideoControls'
 import styles from './VideoPlayer.module.css'
+import {getExternalVideoProvider} from '../../lib/videoMedia'
+
+const subscribeToDevice = () => () => {}
+const isIPhone = () => /iPhone|iPod/.test(navigator.userAgent)
+const serverDevice = () => false
 
 interface VideoPlayerProps {
     activeVideoId?: string | null
@@ -23,7 +29,7 @@ interface VideoPlayerProps {
     videoId?: string
 }
 
-function VideoFrameToggle() {
+function VideoFrameToggle({onShowControls}: {onShowControls: () => void}) {
     const remote = useMediaRemote()
     const paused = useMediaState('paused')
 
@@ -32,16 +38,24 @@ function VideoFrameToggle() {
     }
 
     return (
+        <>
         <button
             type="button"
             className={styles.frameToggle}
             onClick={handleClick}
             aria-label={paused ? 'Play video' : 'Pause video'}
         />
+        <button
+            type="button"
+            className={styles.mobileReveal}
+            onClick={onShowControls}
+            aria-label="Show video controls"
+        />
+        </>
     )
 }
 
-function CustomVideoLayout({ src }: { src: string }) {
+function CustomVideoLayout({ src, onShowControls, nativeControls }: { src: string; onShowControls: () => void; nativeControls: boolean }) {
     const viewType = useMediaState('viewType')
     const streamType = useMediaState('streamType')
     const started = useMediaState('started')
@@ -52,7 +66,7 @@ function CustomVideoLayout({ src }: { src: string }) {
 
     return (
         <>
-            {(!started || ended) && <Poster className={styles.poster} />}
+            {!nativeControls && (!started || ended) && <Poster className={styles.poster} />}
             {fallback ? (
                 <div className={styles.playbackFallback}>
                     <p role="status">{fallback.message}</p>
@@ -60,10 +74,10 @@ function CustomVideoLayout({ src }: { src: string }) {
                         Watch on {fallback.label} ↗
                     </a>
                 </div>
-            ) : (
-                <VideoFrameToggle />
-            )}
-            {!fallback && <VideoControls />}
+            ) : !nativeControls ? (
+                <VideoFrameToggle onShowControls={onShowControls} />
+            ) : null}
+            {!fallback && !nativeControls && <VideoControls />}
         </>
     )
 }
@@ -94,6 +108,9 @@ export default function VideoPlayer({
     poster,
     videoId,
 }: VideoPlayerProps) {
+    const onIPhone = useSyncExternalStore(subscribeToDevice, isIPhone, serverDevice)
+    // YouTube's iframe must receive the tap itself to enter native fullscreen on iPhone.
+    const nativeControls = onIPhone && getExternalVideoProvider(src)?.provider === 'youtube'
     const hideControlsTimer = useRef<number | null>(null)
     const controlsHiddenAt = useRef(0)
     const lastPointerPosition = useRef<{ x: number; y: number } | null>(null)
@@ -118,7 +135,7 @@ export default function VideoPlayer({
 
         hideControlsTimer.current = window.setTimeout(() => {
             setControlsVisible(false)
-        }, 1800)
+        }, window.matchMedia('(max-width: 768px)').matches ? 4000 : 1800)
     }, [clearHideControlsTimer])
 
     const hideControls = useCallback(() => {
@@ -198,18 +215,26 @@ export default function VideoPlayer({
         >
             <MediaPlayer
                 src={src}
-                controls={false}
+                controls={nativeControls}
                 poster={poster}
                 viewType="video"
                 streamType="on-demand"
                 playsInline
                 className={styles.mediaPlayer}
                 onPlay={handlePlay}
+                onPlaying={showControls}
+                onPause={() => {
+                    clearHideControlsTimer()
+                    setControlsVisible(true)
+                }}
+                onPointerUp={(event) => {
+                    if (event.pointerType !== 'mouse') showControls()
+                }}
                 preload="metadata"
             >
                 <MediaProvider />
                 <ActiveVideoSync activeVideoId={activeVideoId} videoId={videoId} />
-                <CustomVideoLayout key={src} src={src} />
+                <CustomVideoLayout key={src} src={src} onShowControls={showControls} nativeControls={nativeControls} />
             </MediaPlayer>
         </div>
     )

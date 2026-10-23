@@ -89,13 +89,18 @@
     display: none;
 }
 
-.frameToggle {
+.frameToggle,
+.mobileReveal {
     background: transparent;
     border: 0;
     inset: 0;
     padding: 0;
     position: absolute;
     z-index: 20;
+}
+
+.mobileReveal {
+    display: none;
 }
 
 .playbackFallback {
@@ -253,7 +258,40 @@
     display: none;
 }
 
+@media (min-width: 769px) {
+    .mediaPlayer:not([data-started]) .controls {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
 @media (max-width: 768px) {
+    .mediaPlayer:not([data-started]) .time,
+    .mediaPlayer:not([data-started]) .progressTrack,
+    .mediaPlayer:not([data-started]) .fullscreenBtn {
+        display: none;
+    }
+
+    .playerWrapper .mediaPlayer:not([data-started]) .controls {
+        inset: 0;
+        height: auto;
+        background: transparent;
+        outline: none;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: none;
+    }
+
+    .mediaPlayer:not([data-started]) .playBtn {
+        border: var(--vp-border);
+    }
+
+    .mediaPlayer :global([data-media-provider]) {
+        position: absolute;
+        inset: 0;
+        aspect-ratio: auto;
+    }
+
     .desktopLabel {
         display: none;
     }
@@ -267,14 +305,28 @@
         display: none;
     }
 
+    .mobileReveal {
+        display: block;
+    }
+
     .controls,
     .playerWrapper[data-controls-visible='true'] .controls {
         background: transparent;
         height: auto;
         inset: 0;
-        opacity: 1;
+        opacity: 0;
+        visibility: hidden;
         outline: none;
         pointer-events: none;
+    }
+
+    .playerWrapper[data-controls-visible='true'] .controls,
+    .mediaPlayer[data-paused] .controls,
+    .mediaPlayer[data-ended] .controls,
+    .controls:has(:focus-visible),
+    .controls:has([data-dragging]) {
+        opacity: 1;
+        visibility: visible;
     }
 
     .playBtn,
@@ -291,6 +343,7 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
+        height: 60px;
     }
 
     .playBtn .desktopLabel {
@@ -320,6 +373,7 @@
     }
 
     .sliderTrack {
+        inset: auto 0 0;
         background: white;
         height: 5px;
         border-top: solid 1px var(--off-black);
