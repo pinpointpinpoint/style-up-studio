@@ -25,6 +25,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
         let view: CanvasView = {x: 0, y: 0, scale: initialScale}
         const pointers = new Map<number, CanvasPoint>()
         let moved = false
+        let pinched = false
         let origin: CanvasPoint | null = null
         let safariScale: number | null = null
         let momentumFrame = 0
@@ -107,6 +108,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             const pinch = event as Event & {scale: number; clientX: number; clientY: number}
             event.preventDefault()
             if (event.type === 'gesturestart') {
+                stopMomentum()
                 safariScale = pinch.scale
             } else if (event.type === 'gestureend') {
                 safariScale = null
@@ -132,9 +134,11 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             lastMoveTime = performance.now()
             if (pointers.size === 0) {
                 moved = false
+                pinched = false
                 origin = point(event)
             } else {
                 moved = true
+                pinched = true
             }
             pointers.set(event.pointerId, point(event))
             // Preserve normal button taps; capture them only once a pan starts.
@@ -151,7 +155,10 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             if (origin && Math.hypot(next.x - origin.x, next.y - origin.y) > 5) moved = true
             if (moved && !viewport.hasPointerCapture(event.pointerId)) viewport.setPointerCapture(event.pointerId)
             const time = performance.now()
-            const elastic = event.pointerType === 'touch' && pointers.size === 1 && !reducedMotion.matches
+            // Fingers rarely lift together after a pinch. Do not turn the remaining
+            // finger's last movement into a swipe or an overscroll spring.
+            const elastic = event.pointerType === 'touch' && pointers.size === 1
+                && !pinched && !reducedMotion.matches
             const previousView = view
             rawView = moveCanvasView(elastic ? rawView : view, before, [...pointers.values()], maxScale())
             paint(elastic ? softenCanvasEdge(rawView, constrain(rawView)) : rawView, elastic)
@@ -171,7 +178,7 @@ export function useStyleUpCanvasGestures(viewportRef: RefObject<HTMLDivElement |
             origin = pointers.values().next().value ?? null
             rawView = view
             if (pointers.size === 0) {
-                if (event.pointerType === 'touch' && !reducedMotion.matches) {
+                if (event.pointerType === 'touch' && !pinched && !reducedMotion.matches) {
                     if (event.type !== 'pointerup' || performance.now() - lastMoveTime > 80) velocity = {x: 0, y: 0}
                     release()
                 } else {
