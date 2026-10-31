@@ -44,7 +44,7 @@ export const viewport: Viewport = {
 }
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
-  const {data} = await sanityFetch({query: settingsQuery})
+  // const {data} = await sanityFetch({query: settingsQuery})
   return (
     <>
       <div className="flex min-h-screen flex-col bg-white text-black">
@@ -65,14 +65,23 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
           {/* <IntroTemplate /> */}
         </Suspense>
       </div>
-      <Toaster />
+
+
+      {/* Toast element from: https://ui.shadcn.com/ */}
+      {/* <Toaster /> */}
+
+      {/* Sanity Live */}
       <SanityLive onError={handleError} />
+
+      {/*  Draft Mode and Visual Editing */}
       {(await draftMode()).isEnabled && (
         <>
           <DraftModeToast />
           <VisualEditing />
         </>
       )}
+
+      {/* Speed Insights */}
       <SpeedInsights />
     </>
   )

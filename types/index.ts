@@ -22,3 +22,17 @@ export interface ShowcaseProject {
   tags?: string[]
   title?: string
 }
+
+export interface AboutPage {
+  _id: string
+  _type: 'about'
+  image?: Image
+  blurb?: PortableTextBlock[]
+}
+
+export interface ContactPage {
+  _id: string
+  _type: 'contact'
+  email: string
+  instagram: string
+}

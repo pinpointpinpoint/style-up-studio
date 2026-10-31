@@ -24,19 +24,18 @@ export async function generateMetadata(
     params,
     stega: false,
   })
-  const ogImage = urlForOpenGraphImage(
-    // @ts-expect-error - @TODO update @sanity/image-url types so it's compatible
-    project?.coverImage,
-  )
+  // const ogImage = urlForOpenGraphImage(
+  //   project?.coverImage,
+  // )
 
   return {
-    title: project?.title,
-    description: project?.overview ? toPlainText(project.overview) : (await parent).description,
-    openGraph: ogImage
-      ? {
-          images: [ogImage, ...((await parent).openGraph?.images || [])],
-        }
-      : {},
+    // title: project?.title,
+    // description: project?.overview ? toPlainText(project.overview) : (await parent).description,
+    // openGraph: ogImage
+    //   ? {
+    //       images: [ogImage, ...((await parent).openGraph?.images || [])],
+    //     }
+    //   : {},
   }
 }
 
@@ -70,8 +69,8 @@ export default async function ProjectSlugRoute({params}: Props) {
   // Default to an empty object to allow previews on non-existent documents
   const {client, coverImage, description, duration, overview, site, tags, title} = data ?? {}
 
-  const startYear = duration?.start ? new Date(duration.start).getFullYear() : undefined
-  const endYear = duration?.end ? new Date(duration?.end).getFullYear() : 'Now'
+  // const startYear = duration?.start ? new Date(duration.start).getFullYear() : undefined
+  // const endYear = duration?.end ? new Date(duration?.end).getFullYear() : 'Now'
 
   return (
     <div>
@@ -96,17 +95,7 @@ export default async function ProjectSlugRoute({params}: Props) {
           />
 
           <div className="divide-inherit grid grid-cols-1 divide-y lg:grid-cols-4 lg:divide-x lg:divide-y-0">
-            {/* Duration */}
-            {!!(startYear && endYear) && (
-              <div className="p-3 lg:p-4">
-                <div className="text-xs md:text-sm">Duration</div>
-                <div className="text-md md:text-lg">
-                  <span data-sanity={dataAttribute?.('duration.start')}>{startYear}</span>
-                  {' - '}
-                  <span data-sanity={dataAttribute?.('duration.end')}>{endYear}</span>
-                </div>
-              </div>
-            )}
+
 
             {/* Client */}
             {client && (
@@ -129,7 +118,7 @@ export default async function ProjectSlugRoute({params}: Props) {
             )}
 
             {/* Tags */}
-            <div className="p-3 lg:p-4">
+            {/* <div className="p-3 lg:p-4">
               <div className="text-xs md:text-sm">Tags</div>
               <div className="text-md flex flex-row flex-wrap md:text-lg">
                 {tags?.map((tag, key) => (
@@ -138,7 +127,7 @@ export default async function ProjectSlugRoute({params}: Props) {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

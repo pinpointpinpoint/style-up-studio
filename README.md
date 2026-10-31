@@ -1,3 +1,7 @@
+nvm use 22
+npm run dev
+
+
 # A Next.js Personal Website with a Native Authoring Experience<!-- omit in toc -->
 
 This starter is a statically generated personal website that uses [Next.js][nextjs] for the frontend and [Sanity][sanity-homepage] to handle its content. It comes with a native Sanity Studio that offers features like real-time collaboration and visual editing with live updates using [Presentation][presentation].

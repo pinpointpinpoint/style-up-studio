@@ -1,95 +1,212 @@
-import {DocumentIcon, ImageIcon} from '@sanity/icons'
+import {ProjectsIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
-  icon: DocumentIcon,
-  // Uncomment below to have edits publish automatically as you type
-  // liveEdit: true,
+  icon: ProjectsIcon,
   fields: [
     defineField({
       name: 'title',
-      description: 'This field is the title of your project.',
       title: 'Title',
+      description: 'This field is the title of your project.',
       type: 'string',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'date',
+      title: 'Project Date',
+      type: 'date',
+      validation: (rule) => rule.required(),
+      options: {
+        dateFormat: 'YYYY-MM-DD',
+      },
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-        isUnique: (value, context) => context.defaultIsUnique(value, context),
-      },
+      options: {source: 'title', maxLength: 96},
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'overview',
-      description: 'Used both for the <meta> description tag for SEO, and project subheader.',
-      title: 'Overview',
+      name: 'credits',
+      title: 'Credits',
       type: 'array',
       of: [
-        // Paragraphs
         defineArrayMember({
-          lists: [],
-          marks: {
-            annotations: [],
-            decorators: [
-              {
-                title: 'Italic',
-                value: 'em',
-              },
-              {
-                title: 'Strong',
-                value: 'strong',
-              },
-            ],
+          type: 'object',
+          name: 'credit',
+          title: 'Credit',
+          fields: [
+            defineField({
+              name: 'role',
+              title: 'Role / Title',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'name',
+              title: 'Name',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'link',
+              title: 'External Link (optional)',
+              type: 'url',
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'role',
+              subtitle: 'name',
+            },
           },
-          styles: [],
-          type: 'block',
         }),
       ],
-      validation: (rule) => rule.max(155).required(),
     }),
+
+    // ------------------------------------------------------------
+    // ⭐ MULTIPLE VIDEO FILES (clean + structured)
+    // ------------------------------------------------------------
+    defineField({
+      name: 'videos',
+      title: 'Project Videos',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'video',
+          title: 'Video Upload',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Video Title (optional)',
+              type: 'string',
+            }),
+            defineField({
+              name: 'file',
+              title: 'Video File',
+              type: 'file',
+              options: {
+                accept: 'video/*',
+              },
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'file.asset.originalFilename',
+            },
+          },
+        }),
+      ],
+    }),
+
+    // ------------------------------------------------------------
+    // ⭐ MULTIPLE VIDEO URLS (YouTube, Vimeo, TikTok, etc.)
+    // ------------------------------------------------------------
+    defineField({
+      name: 'videoUrls',
+      title: 'Video URLs',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'videoUrlItem',
+          title: 'Video URL',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Video Title (optional)',
+              type: 'string',
+            }),
+            defineField({
+              name: 'url',
+              title: 'URL',
+              type: 'url',
+              description: 'Paste a YouTube, Vimeo, TikTok, etc. link',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'url',
+            },
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'gallery',
+      title: 'Gallery',
+      description: 'Upload multiple images for this project. Bulk upload supported.',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'image',
+          options: {hotspot: true},
+          fields: [
+            {
+              name: 'caption',
+              title: 'Caption',
+              type: 'string',
+            },
+            {
+              name: 'alt',
+              title: 'Alt text',
+              type: 'string',
+              description: 'Alternative text for screenreaders. Falls back on caption if not set',
+            },
+          ],
+        }),
+      ],
+      options: {layout: 'grid'},
+    }),
+
     defineField({
       name: 'coverImage',
       title: 'Cover Image',
-      description:
-        'This image will be used as the cover image for the project. If you choose to add it to the show case projects, this is the image displayed in the list within the homepage.',
       type: 'image',
-      options: {
-        hotspot: true,
-      },
+      description: 'Choose a cover image from the gallery.',
+      options: {hotspot: true},
+      fields: [{name: 'alt', title: 'Alt text', type: 'string'}],
+      validation: (rule) => rule.required(),
+    }),
+
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'reference',
+      to: [{type: 'category'}],
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'duration',
-      title: 'Duration',
-      type: 'duration',
-    }),
-    defineField({
-      name: 'client',
-      title: 'Client',
-      type: 'string',
-    }),
-    defineField({
-      name: 'site',
-      title: 'Site',
-      type: 'url',
-    }),
-    defineField({
-      name: 'tags',
-      title: 'Tags',
-      type: 'array',
-      of: [{type: 'string'}],
+      name: 'subcategory',
+      title: 'Subcategory',
+      type: 'reference',
+      to: [{type: 'subcategory'}],
       options: {
-        layout: 'tags',
+        filter: ({document}) => {
+          const doc = document as any
+          const categoryId = doc?.category?._ref
+
+          return categoryId
+            ? {
+                filter: 'parent._ref == $categoryId',
+                params: {categoryId},
+              }
+            : {
+                filter: 'false',
+              }
+        },
       },
     }),
+
     defineField({
       name: 'description',
       title: 'Project Description',
@@ -103,52 +220,23 @@ export default defineType({
                 name: 'link',
                 type: 'object',
                 title: 'Link',
-                fields: [
-                  {
-                    name: 'href',
-                    type: 'url',
-                    title: 'Url',
-                  },
-                ],
+                fields: [{name: 'href', type: 'url', title: 'Url'}],
               },
             ],
           },
           styles: [],
         }),
-        // Custom blocks
-        defineArrayMember({
-          name: 'timeline',
-          type: 'timeline',
-        }),
-        defineField({
-          type: 'image',
-          icon: ImageIcon,
-          name: 'image',
-          title: 'Image',
-          options: {
-            hotspot: true,
-          },
-          preview: {
-            select: {
-              media: 'asset',
-              title: 'caption',
-            },
-          },
-          fields: [
-            defineField({
-              title: 'Caption',
-              name: 'caption',
-              type: 'string',
-            }),
-            defineField({
-              name: 'alt',
-              type: 'string',
-              title: 'Alt text',
-              description: 'Alternative text for screenreaders. Falls back on caption if not set',
-            }),
-          ],
-        }),
       ],
     }),
   ],
+
+  preview: {
+    select: {
+      title: 'title',
+      media: 'coverImage',
+    },
+    prepare({title, media}) {
+      return {title, media, subtitle: 'Project'}
+    },
+  },
 })

@@ -38,7 +38,7 @@ export async function HomePage({data}: HomePageProps) {
         />
       )}
       {/* Showcase projects */}
-      <div className="mx-auto max-w-[100rem] rounded-md border">
+      {/* <div className="mx-auto max-w-[100rem] rounded-md border">
         <OptimisticSortOrder id={data?._id} path={'showcaseProjects'}>
           {showcaseProjects &&
             showcaseProjects.length > 0 &&
@@ -59,7 +59,7 @@ export async function HomePage({data}: HomePageProps) {
               )
             })}
         </OptimisticSortOrder>
-      </div>
+      </div> */}
     </div>
   )
 }
