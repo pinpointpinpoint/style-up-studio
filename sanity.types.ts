@@ -23,6 +23,18 @@ export type ProjectType = {
     slug?: Slug
 }
 
+export type StyleThemUp = {
+    _id: string
+    _type: 'styleThemUp'
+    _createdAt: string
+    _updatedAt: string
+    _rev: string
+    head?: string
+    body?: string
+    legs?: string
+    date?: string
+}
+
 export type Brand = {
     _id: string
     _type: 'brand'
@@ -403,6 +415,7 @@ export type SanityAssetSourceData = {
 
 export type AllSanitySchemaTypes =
     | ProjectType
+    | StyleThemUp
     | Brand
     | Personality
     | Post
