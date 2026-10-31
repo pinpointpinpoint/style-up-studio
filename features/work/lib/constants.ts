@@ -1,1 +1,1 @@
-export const PROJECTS_PAGE_SIZE = 19
+export const PROJECTS_PAGE_SIZE = 15

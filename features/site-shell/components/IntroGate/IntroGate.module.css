@@ -1,48 +1,31 @@
-.intro {
-    align-items: center;
-    animation: intro-exit 700ms step-end forwards;
-    background-color: white;
-    display: flex;
-    inset: 0;
-    justify-content: center;
-    pointer-events: none;
+
+.introGate {
     position: fixed;
-    z-index: 9999;
+    inset: 0;
+    z-index: 999999;
 }
 
-.logo {
-    animation: logo-exit 700ms ease-out forwards;
-    height: auto;
-    max-width: 900px;
-    width: min(76vw, 900px);
+.flashGrid {
+    display: grid;
+    grid-template-columns: repeat(auto, 1fr);
+    grid-template-rows: repeat(auto, 1fr);
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
 }
 
-@keyframes intro-exit {
-    from {
-        opacity: 1;
-    }
+.gridItem {
+    min-width: 0;
+    min-height: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    animation: reveal 0s forwards;
+}
 
+@keyframes reveal {
     to {
-        opacity: 0;
-    }
-}
-
-@keyframes logo-exit {
-    0%,
-    48% {
         opacity: 1;
-        transform: scale(1);
-    }
-
-    100% {
-        opacity: 0;
-        transform: scale(1.02);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .intro,
-    .logo {
-        animation-duration: 1ms;
     }
 }

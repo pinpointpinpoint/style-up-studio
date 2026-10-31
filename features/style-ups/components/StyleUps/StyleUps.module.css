@@ -86,15 +86,26 @@
 .magnifierLens {
     position: absolute;
     background: var(--links);
-    opacity: 0.5;
     pointer-events: none;
 }
 
 .zoomPreview {
+    position: relative;
+    overflow: hidden;
     width: 100%;
     height: 100%;
+}
 
+.zoomPlaceholder,
+.zoomSharp {
+    position: absolute;
+    inset: 0;
     background-repeat: no-repeat;
+}
+
+.zoomPlaceholder {
+    /* filter: blur(4px); */
+    image-rendering: pixelated; 
 }
 
 .sidebarPrompt {
@@ -104,7 +115,6 @@
     align-items: center;
     justify-content: center;
 }
-
 
 
 .card {

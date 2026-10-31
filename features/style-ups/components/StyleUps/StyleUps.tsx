@@ -32,10 +32,43 @@ function imageUrl(image: SanityImageSource, size = IMAGE_SIZE) {
     return urlFor(image).width(size).height(size).fit('crop').quality(size === IMAGE_SIZE ? 90 : 80).auto('format').url()
 }
 
+function ZoomPreview({src, thumbnail, geometry}: {
+    src: string
+    thumbnail: string
+    geometry: ReturnType<typeof getMagnifierGeometry>
+}) {
+    const [ready, setReady] = useState(false)
+
+    useEffect(() => {
+        let cancelled = false
+        const image = new Image()
+        image.src = src
+        image.decode().then(() => {
+            if (!cancelled) setReady(true)
+        }).catch(() => {
+            // Keep the thumbnail visible if the full-size image fails to load.
+        })
+        return () => { cancelled = true }
+    }, [src])
+
+    const position = {
+        backgroundSize: `${geometry.backgroundSize}% auto`,
+        backgroundPosition: `${geometry.backgroundX}% ${geometry.backgroundY}%`,
+    }
+
+    return (
+        <div className={styles.zoomPreview} aria-hidden="true">
+            <div className={styles.zoomPlaceholder} style={{...position, backgroundImage: `url(${thumbnail})`}} />
+            <div className={styles.zoomSharp} style={{...position, backgroundImage: ready ? `url(${src})` : undefined, opacity: ready ? 1 : 0}} />
+        </div>
+    )
+}
+
 export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, onHoverNameChange }: StyleUpsProps) {
     const [magnifier, setMagnifier] = useState<{
         item: StyleUpItem
         cellKey: string
+        thumbnail: string
         geometry: ReturnType<typeof getMagnifierGeometry>
     } | null>(null)
     const hoveredCard = useRef<{
@@ -79,6 +112,7 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
         setMagnifier({
             item: hovered.item,
             cellKey: hovered.cellKey,
+            thumbnail: hovered.element.querySelector('img')?.currentSrc || (hovered.item.image ? imageUrl(hovered.item.image, 480) : ''),
             geometry: getMagnifierGeometry(x, y, rect.width, rect.height, sidebarAspectRatio),
         })
     }, [sidebarAspectRatio])
@@ -143,9 +177,10 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
                                             '--card-offset-x': `${cell.x}px`,
                                             '--card-offset-y': `${cell.y}px`,
                                         } as CSSProperties}
-                                        onPointerEnter={(event) => onHoverNameChange?.(
-                                            event.pointerType === 'mouse' ? su.name?.trim() || null : null,
-                                        )}
+                                        onPointerEnter={(event) => {
+                                            onHoverNameChange?.(event.pointerType === 'mouse' ? su.name?.trim() || null : null)
+                                            handlePointerMove(su, cell.key)(event)
+                                        }}
                                         onPointerMove={handlePointerMove(su, cell.key)}
                                         onPointerLeave={() => {
                                             hoveredCard.current = null
@@ -194,13 +229,11 @@ export function StyleUps({ styleUps, hasMore, isLoading, loadError, onLoadMore, 
                 </div>
                 <aside className={styles.sidebar} ref={sidebarRef}>
                     {magnifier?.item.image ? (
-                        <div
-                            className={styles.zoomPreview}
-                            style={{
-                                backgroundImage: `url(${imageUrl(magnifier.item.image)})`,
-                                backgroundSize: `${magnifier.geometry.backgroundSize}% auto`,
-                                backgroundPosition: `${magnifier.geometry.backgroundX}% ${magnifier.geometry.backgroundY}%`,
-                            }}
+                        <ZoomPreview
+                            key={imageUrl(magnifier.item.image)}
+                            src={imageUrl(magnifier.item.image)}
+                            thumbnail={magnifier.thumbnail}
+                            geometry={magnifier.geometry}
                         />
                     ) : (
                         <div className={styles.sidebarPrompt}>

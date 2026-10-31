@@ -1,27 +1,36 @@
+
 'use client'
 
-import {useState} from 'react'
+import { useEffect, useState } from 'react'
 import styles from './IntroGate.module.css'
 
-export default function IntroGate({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    const [showIntro, setShowIntro] = useState(true)
+const images = Array.from(
+    { length: 20 },
+    (_, i) => `/loading/img${i || ''}.svg`
+)
+
+export default function IntroGate() {
+    // const [isLoading, setIsLoading] = useState(true)
+
+    // useEffect(() => {
+    //     const timer = setTimeout(() => setIsLoading(false), 4500)
+    //     return () => clearTimeout(timer)
+    // }, [])
 
     return (
-        <>
-            {children}
-            {showIntro && (
-                <div
-                    className={styles.intro}
-                    aria-hidden="true"
-                    onAnimationEnd={() => setShowIntro(false)}
-                >
-                    <img className={styles.logo} src="/final_logo.svg" alt="" />
-                </div>
-            )}
-        </>
+        <div className={styles.introGate}>
+            <div className={styles.flashGrid}>
+                {images.map((image, i) => (
+                    <div
+                        key={image}
+                        className={styles.gridItem}
+                        style={{
+                            backgroundImage: `url('${image}')`,
+                            animationDelay: `${((i * 7) % 20) * 0.2}s`
+                        }}
+                    />
+                ))}
+            </div>
+        </div>
     )
 }

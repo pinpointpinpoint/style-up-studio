@@ -48,6 +48,7 @@ export const customPageStructure = (S: StructureBuilder, context: ConfigContext)
                 .title('Style Ups')
                 .icon(StarFilledIcon)
                 .child(S.documentTypeList('styleUp').title('Style Ups')),
+            S.documentTypeListItem('styleThemUp').title('Style Them Ups'),
             S.listItem()
                 .title('Remix Wall')
                 .icon(ComposeSparklesIcon)

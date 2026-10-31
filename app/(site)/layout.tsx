@@ -14,8 +14,8 @@ import {SpeedInsights} from '@vercel/speed-insights/next'
 import SiteSectionsAccordion from '@/features/site-shell/components/SiteSectionsAccordion/SiteSectionsAccordion'
 import Navbar from '@/features/site-shell/components/Navbar/Navbar'
 import {SiteRouteSelectionProvider} from '@/features/site-shell/routing/SiteRouteSelectionProvider'
-import EasterEgg from '@/features/site-shell/components/EasterEgg/EasterEgg'
 import SiteConsoleCredits from '@/features/site-shell/components/SiteConsoleCredits/SiteConsoleCredits'
+import IntroGate from '@/features/site-shell/components/IntroGate/IntroGate'
 
 const siteShellService = createSiteShellService({
     sanityFetch: ((args) => sanityFetch(args)) as <T>(
@@ -48,8 +48,9 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
 
     return (
         <>
+            {/* <IntroGate> */}
+                    <Suspense fallback={<IntroGate/>} defer={true}>
                 <div className="site">
-                    <Suspense fallback={null}>
                       <SiteRouteSelectionProvider>
                         <Navbar about={about} contact={contact} />
                         <SiteSectionsAccordion
@@ -60,11 +61,11 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
                             {children}
                         </SiteSectionsAccordion>
                       </SiteRouteSelectionProvider>
-                    </Suspense>
                 </div>
-                {/* <EasterEgg /> */}
                 <SiteConsoleCredits />
                 <SpeedInsights />
+                    </Suspense>
+            {/* </IntroGate> */}
         </>
     )
 }

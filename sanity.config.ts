@@ -15,6 +15,7 @@ import { customPageStructure } from './sanity/deskStructure'
 import personality from './sanity/schemas/documents/personality'
 import brand from './sanity/schemas/documents/brand'
 import settings from './sanity/schemas/singletons/settings'
+import styleThemUp from './sanity/schemas/documents/styleThemUp'
 
 const title =
   process.env.NEXT_PUBLIC_SANITY_PROJECT_TITLE
@@ -36,6 +37,7 @@ export default defineConfig({
       post,
       personality,
       brand,
+      styleThemUp,
       // Taxonomy
       projectType
     ],

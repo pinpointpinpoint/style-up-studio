@@ -60,8 +60,9 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
 
     const handleMouseEnter = () => {
         if (!canPreview) return
+
         setIsHovered(true)
-        videoRef.current?.play()
+        videoRef.current?.play().catch(() => {})
     }
 
     const handleMouseLeave = () => {
@@ -102,11 +103,6 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
                 <video
                     ref={videoRef}
                     src={previewVideoUrl}
-                    // className={`${styles.projectCardMedia} ${
-                    //     isHovered
-                    //         ? styles.previewVisible
-                    //         : styles.previewHidden
-                    // }`}
                     className={styles.projectCardMedia}
                     muted
                     loop

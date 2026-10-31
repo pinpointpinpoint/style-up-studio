@@ -31,6 +31,12 @@
     --focus: 4px dotted teal;
 }
 
+::selection {
+  color: #FFFFFF;
+  background: var(--links);
+}
+
+
 @media (max-width: 768px) {
     :root {
         --section-header-height: var(--mobile-header-height);
