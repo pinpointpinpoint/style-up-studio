@@ -48,9 +48,9 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
   return (
     <>
       <div className="flex min-h-screen flex-col bg-white text-black">
-        <Navbar data={data} />
-        <div className="mt-20 flex-grow px-4 md:px-16 lg:px-32">{children}</div>
-        <footer className="bottom-0 w-full bg-white py-12 text-center md:py-20">
+        {/* <Navbar data={data} /> */}
+        <div className="">{children}</div>
+        {/* <footer className="bottom-0 w-full bg-white py-12 text-center md:py-20">
           {data?.footer && (
             <CustomPortableText
               id={data._id}
@@ -60,9 +60,9 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
               value={data.footer as unknown as PortableTextBlock[]}
             />
           )}
-        </footer>
+        </footer> */}
         <Suspense>
-          <IntroTemplate />
+          {/* <IntroTemplate /> */}
         </Suspense>
       </div>
       <Toaster />
