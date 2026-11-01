@@ -39,6 +39,7 @@ type SiteSectionsAccordionProps = {
     children?: ReactNode
     initialProjects: Project[] | null
     initialFilter: Filter
+    initialStyleUps: StyleUpItem[]
     sidebarFilters: SidebarFiltersQueryResult | null
 }
 
@@ -46,6 +47,7 @@ export default function SiteSectionsAccordion({
     children,
     initialProjects,
     initialFilter,
+    initialStyleUps,
     sidebarFilters,
 }: SiteSectionsAccordionProps) {
     const router = useRouter()
@@ -62,10 +64,10 @@ export default function SiteSectionsAccordion({
     const workHeight = activeSection === 'work' ? OPEN_HEIGHT : CLOSED_HEIGHT
     const styleUpsHeight = activeSection === 'style-ups' ? OPEN_HEIGHT : CLOSED_HEIGHT
     const isActiveProjectDetail = activeSection === 'work' && isProjectDetail
-    const [styleUps, setStyleUps] = useState<StyleUpItem[] | null>(null)
+    const [styleUps, setStyleUps] = useState<StyleUpItem[] | null>(initialStyleUps)
     const [hoveredStyleUpName, setHoveredStyleUpName] = useState<string | null>(null)
     const [isStyleUpsLoading, setIsStyleUpsLoading] = useState(false)
-    const [hasMoreStyleUps, setHasMoreStyleUps] = useState(true)
+    const [hasMoreStyleUps, setHasMoreStyleUps] = useState(initialStyleUps.length >= STYLE_UPS_PAGE_SIZE)
     const [styleUpsLoadError, setStyleUpsLoadError] = useState(false)
     const styleUpsRequestRef = useRef<Promise<void> | null>(null)
     const shouldMountStyleUps =

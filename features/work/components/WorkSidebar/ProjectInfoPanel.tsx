@@ -1,16 +1,16 @@
 'use client'
 
-import {PortableText} from 'next-sanity'
-import React, {ReactNode, useEffect, useMemo, useRef, useState} from 'react'
-import {getVideoMediaProviderThumbnailRequest} from '@/features/video/lib/videoMedia'
-import {getExternalVideoThumbnail} from '@/features/video/services/externalVideoService'
-import {Project} from '@/types'
+import { PortableText } from 'next-sanity'
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { getVideoMediaProviderThumbnailRequest } from '@/features/video/lib/videoMedia'
+import { getExternalVideoThumbnail } from '@/features/video/services/externalVideoService'
+import { Project } from '@/types'
 import styles from './ProjectInfoPanel.module.css'
 import {
     getProjectSidebarMedia,
     getVisibleSidebarThumbnailCount,
 } from '../../lib/media/projectSidebarMedia'
-import {getSanityProjectImageUrl} from '../../lib/media/sanityProjectImageUrl'
+import { getSanityProjectImageUrl } from '../../lib/media/sanityProjectImageUrl'
 
 const COMPACT_THUMBNAIL_HEIGHT = 30
 const THUMBNAIL_GAP = 5
@@ -49,7 +49,7 @@ const ProjectInfoPanel = ({
     activeAssetKey,
     variant = 'desktop'
 }: ProjectInfoPanelProps) => {
-    const imageSizeProps = expandDetails ? {} : {height: 30}
+    const imageSizeProps = expandDetails ? {} : { height: 30 }
     const [videoUrlThumbnailState, setVideoUrlThumbnailState] = useState<{
         key: string
         thumbnails: Record<string, string | null>
@@ -75,8 +75,8 @@ const ProjectInfoPanel = ({
     )
     const resolvedVisibleThumbnailCount =
         !expandDetails &&
-        visibleThumbnailState &&
-        visibleThumbnailState.projectId === displayedProject?._id
+            visibleThumbnailState &&
+            visibleThumbnailState.projectId === displayedProject?._id
             ? visibleThumbnailState.count
             : undefined
     const sidebarMedia = useMemo(() => {
@@ -102,7 +102,7 @@ const ProjectInfoPanel = ({
         thumbnailImageHeight,
         videoUrlThumbnails,
     ])
-    const {thumbnails, visibleThumbnails, hiddenThumbnailCount} = sidebarMedia
+    const { thumbnails, visibleThumbnails, hiddenThumbnailCount } = sidebarMedia
     const thumbnailDisplayWidthKey = thumbnails
         .map((thumbnail) => String(thumbnail.displayWidth))
         .join(',')
@@ -158,7 +158,7 @@ const ProjectInfoPanel = ({
                 .filter((request): request is NonNullable<typeof request> => Boolean(request))
 
             const nextThumbnails = await Promise.all(
-                providerThumbnailRequests.map(async ({sourceUrl, width}) => ({
+                providerThumbnailRequests.map(async ({ sourceUrl, width }) => ({
                     sourceUrl,
                     thumbnailUrl: await getExternalVideoThumbnail(sourceUrl, {
                         width,
@@ -188,49 +188,49 @@ const ProjectInfoPanel = ({
 
     return (
         <div className={styles.container} data-variant={variant}>
-            <div className={`${styles.heading} ${!displayedProject ? styles.headingEmpty : ''}`}>
+            <div className={styles.heading}>
                 <span>INFO</span>
                 {headerAction}
             </div>
             <div className={`${styles.scrollContent} scrollbar`}>
                 <div className={styles.body}>
                     <div
-                        className={`${styles.title} ${!displayedProject?.client ? styles.titleEmpty : ''}`}
+                        className={styles.title}
                     >
-                        {displayedProject?.client || 'Client'}
-                    </div>
-                    <div
-                        className={`${styles.title} ${!displayedProject?.title ? styles.titleEmpty : ''}`}
-                    >
-                        {displayedProject?.title || 'Title'}
+                        {displayedProject?.title}
                     </div>
                 </div>
                 {shouldRevealDetails && (
                     <div className={styles.revealedDetails}>
-                        <div className={`${styles.title} ${!projectYear ? styles.titleEmpty : ''}`}>
-                            {projectYear || 'Year'}
+                        <div
+                            className={styles.title}
+                        >
+                            {displayedProject?.projectType?.title}
+                        </div>
+                        <div className={styles.title}>
+                            {projectYear}
                         </div>
                         {hasDescription && displayedProject?.description && (
-                        <section className={styles.description}>
-                            <div className={styles.portableText}>
-                            <PortableText
-                                value={displayedProject.description}
-                                components={{
-                                marks: {
-                                    link: ({ children, value }) => (
-                                    <a
-                                        href={value?.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {children}
-                                    </a>
-                                    ),
-                                },
-                                }}
-                            />
-                            </div>
-                        </section>
+                            <section className={styles.description}>
+                                <div className={styles.portableText}>
+                                    <PortableText
+                                        value={displayedProject.description}
+                                        components={{
+                                            marks: {
+                                                link: ({ children, value }) => (
+                                                    <a
+                                                        href={value?.href}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        {children}
+                                                    </a>
+                                                ),
+                                            },
+                                        }}
+                                    />
+                                </div>
+                            </section>
                         )}
                         {hasCredits && displayedProject?.credits && (
                             <section className={styles.credits}>
@@ -269,7 +269,11 @@ const ProjectInfoPanel = ({
                         )}
                     </div>
                 )}
-                {thumbnails.length > 0 ? (
+
+                {/* TODO: Remove redundant code that isnt relevant to the given details section */}
+
+                {/* Home Page Details */}
+                {thumbnails.length > 0 && !expandDetails &&
                     <>
                         <div
                             className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
@@ -324,11 +328,66 @@ const ProjectInfoPanel = ({
                             )}
                         </div>
                     </>
-                ) : (
-                    <div className={styles.assetsWrapper}>
-                        <div className={styles.assetEmpty}></div>
-                    </div>
-                )}
+                }
+
+                {/* Expanded Details */}
+                {thumbnails.length > 1 && expandDetails &&
+                    <>
+                        <div
+                            className={`${styles.assetsWrapper} ${expandDetails ? styles.assetsWrapperExpanded : ''}`}
+                            ref={assetsWrapperRef}
+                        >
+                            {visibleThumbnails.map((thumbnail, idx) => {
+                                const isActiveAsset =
+                                    expandDetails &&
+                                    activeAssetIndex !== undefined &&
+                                    thumbnail.mediaIndex === activeAssetIndex &&
+                                    (activeAssetKey === undefined || thumbnail.key === activeAssetKey)
+                                const isInactiveAsset =
+                                    expandDetails &&
+                                    activeAssetIndex !== undefined &&
+                                    !isActiveAsset
+                                const assetImage = (
+                                    <img
+                                        data-media-kind={thumbnail.kind}
+                                        src={thumbnail.url}
+                                        alt={thumbnail.alt}
+                                        className={`${styles.asset} ${expandDetails ? styles.assetExpanded : ''} ${isActiveAsset ? styles.assetActive : ''} ${isInactiveAsset ? styles.assetInactive : ''}`}
+                                        {...imageSizeProps}
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                )
+
+                                return onAssetSelect ? (
+                                    <button
+                                        key={`${thumbnail.key}-${idx}`}
+                                        className={styles.assetButton}
+                                        data-media-kind={thumbnail.kind}
+                                        type="button"
+                                        onClick={() => onAssetSelect(thumbnail.mediaIndex, thumbnail.key)}
+                                        aria-label={`Go to ${thumbnail.alt}`}
+                                    >
+                                        {assetImage}
+                                    </button>
+                                ) : (
+                                    <React.Fragment key={`${thumbnail.key}-${idx}`}>
+                                        {assetImage}
+                                    </React.Fragment>
+                                )
+                            })}
+                            {hiddenThumbnailCount > 0 && (
+                                <div
+                                    className={styles.assetCount}
+                                    aria-label={`${hiddenThumbnailCount} hidden assets`}
+                                >
+                                    +{hiddenThumbnailCount}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                }
+
             </div>
         </div>
     )

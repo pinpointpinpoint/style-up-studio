@@ -1,12 +1,9 @@
 import type {About, Contact, SidebarFiltersQueryResult} from '@/sanity.types'
-import type {Project, ProjectsQueryInput} from '@/types'
 import {
     aboutSectionQuery,
     contactSectionQuery,
     sidebarFiltersQuery,
 } from '../../../sanity/lib/queries'
-import {DEFAULT_PROJECT_FILTER} from '../../work/lib/projectFilters'
-import {PROJECTS_PAGE_SIZE} from '../../work/lib/constants'
 
 type SiteShellReadName = 'about' | 'contact' | 'sidebarFilters'
 
@@ -20,21 +17,18 @@ export type SiteShellServiceFetch = <T>(args: SiteShellServiceFetchArgs) => Prom
 
 type SiteShellServiceDependencies = {
     sanityFetch: SiteShellServiceFetch
-    getProjects(input: ProjectsQueryInput): Promise<Project[]>
 }
 
 export type SiteShellData = {
     about: Pick<About, 'bio' | 'image'> | null
     contact: Pick<Contact, 'email' | 'instagram'> | null
     sidebarFilters: SidebarFiltersQueryResult
-    initialProjects: Project[]
-    initialFilter: typeof DEFAULT_PROJECT_FILTER
 }
 
-export function createSiteShellService({sanityFetch, getProjects}: SiteShellServiceDependencies) {
+export function createSiteShellService({sanityFetch}: SiteShellServiceDependencies) {
     return {
         async getInitialData(): Promise<SiteShellData> {
-            const [{data: about}, {data: contact}, {data: sidebarFilters}, initialProjects] =
+            const [{data: about}, {data: contact}, {data: sidebarFilters}] =
                 await Promise.all([
                     sanityFetch<Pick<About, 'bio' | 'image'> | null>({
                         name: 'about',
@@ -51,18 +45,12 @@ export function createSiteShellService({sanityFetch, getProjects}: SiteShellServ
                         query: sidebarFiltersQuery,
                         stega: false
                     }),
-                    getProjects({
-                        filter: DEFAULT_PROJECT_FILTER,
-                        limit: PROJECTS_PAGE_SIZE,
-                    }),
                 ])
 
             return {
                 about,
                 contact,
                 sidebarFilters,
-                initialProjects,
-                initialFilter: DEFAULT_PROJECT_FILTER,
             }
         },
     }

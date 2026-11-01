@@ -14,7 +14,6 @@ type SidebarFilterSettings = {
 
 export type WorkIndexInput = {
     featuredCount?: number | null
-    allCount?: number | null
     projectTypes: SidebarFilterItem[]
     personalities: SidebarFilterItem[]
     brands: SidebarFilterItem[]
@@ -141,12 +140,6 @@ export function buildWorkIndex(sidebarFilters: WorkIndexInput): WorkIndex {
             count: sidebarFilters.featuredCount ?? 0,
             filter: {type: 'featured'},
         },
-        {
-            id: 'all',
-            title: 'All',
-            count: sidebarFilters.allCount ?? 0,
-            filter: {type: 'all'},
-        },
         ...sidebarFilters.projectTypes.filter((item) => item.slug).map(toProjectTypeOption),
     ]
 
@@ -207,10 +200,6 @@ export function parseWorkIndexPath(pathname: string, sidebarFilters: WorkIndexIn
         return {type: 'featured'}
     }
 
-    if (segments[1] === 'all') {
-        return {type: 'all'}
-    }
-
     if (segments[1] === 'type') {
         return (
             filterBySlug('projectType', sidebarFilters?.projectTypes, segments[2]) ?? {
@@ -239,10 +228,6 @@ export function getWorkIndexHref(filter: Filter, sidebarFilters: WorkIndexInput)
         return '/'
     }
 
-    if (filter.type === 'all') {
-        return '/work/all'
-    }
-
     const itemsByType = {
         projectType: sidebarFilters?.projectTypes,
         brand: isFilterTypeEnabled(sidebarFilters, 'brand') ? sidebarFilters?.brands : undefined,
@@ -266,10 +251,6 @@ export function getWorkIndexHref(filter: Filter, sidebarFilters: WorkIndexInput)
 export function getWorkIndexTitle(filter: Filter, sidebarFilters: WorkIndexInput) {
     if (filter.type === 'featured') {
         return 'Featured'
-    }
-
-    if (filter.type === 'all') {
-        return 'All'
     }
 
     const itemsByType = {

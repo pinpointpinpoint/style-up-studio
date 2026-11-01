@@ -27,11 +27,6 @@
     line-height: 22px;
 }
 
-.titleEmpty {
-    font-style: italic;
-    color: var(--disabled-gray);
-}
-
 .body {
     height: fit-content;
 }
@@ -277,10 +272,6 @@
     background-color: white;
     border-bottom: 1px solid var(--off-black);
     color: var(--off-black);
-}
-
-.headingEmpty {
-    color: var(--disabled-gray);
 }
 
 .container[data-variant='mobile'] .heading,

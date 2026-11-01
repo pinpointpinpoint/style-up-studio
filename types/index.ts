@@ -25,7 +25,7 @@ export type Project = Omit<
     'brands' | 'credits' | 'description' | 'featured' | 'media' | 'personalities' | 'projectType'
 > & {
     featured: boolean
-    projectType: NonNullable<ProjectQueryItem['projectType']>
+    projectType: ProjectQueryItem['projectType']
     personalities: NonNullable<ProjectQueryItem['personalities']>
     brands: NonNullable<ProjectQueryItem['brands']>
     media: NonNullable<ProjectQueryItem['media']>
@@ -64,7 +64,6 @@ export interface CollaboratorFilterOption extends FilterOption {
 
 export type Filter =
     | {type: 'featured'}
-    | {type: 'all'}
     | {type: 'projectType'; id: string}
     | {type: 'brand'; id: string}
     | {type: 'personality'; id: string}

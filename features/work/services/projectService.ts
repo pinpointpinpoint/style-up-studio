@@ -36,7 +36,7 @@ function normalizeProject(project: RawProject): Project | null {
     return {
         ...project,
         featured: project.featured ?? false,
-        projectType: project.projectType ?? [],
+        projectType: project.projectType ?? null,
         personalities: project.personalities ?? [],
         brands: project.brands ?? [],
         media: project.media ?? [],

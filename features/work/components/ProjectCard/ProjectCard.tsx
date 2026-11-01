@@ -29,16 +29,9 @@ function subscribeToInput(onChange: () => void) {
     return () => queries.forEach(query => query.removeEventListener('change', onChange))
 }
 
-const supportsVideoPreview = () => navigator.maxTouchPoints === 0
-    && window.matchMedia(HOVER_QUERY).matches
-    && !window.matchMedia(TOUCH_QUERY).matches
-// The server cannot detect touch input. Wait for the client before choosing media.
-const serverVideoPreview = () => null
-
 const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     const [isHovered, setIsHovered] = useState(false)
     const videoRef = useRef<HTMLVideoElement>(null)
-    const canPreview = useSyncExternalStore<boolean | null>(subscribeToInput, supportsVideoPreview, serverVideoPreview)
 
     const cardMedia = useMemo(
         () =>
@@ -50,17 +43,14 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
     )
 
     const previewVideoUrl = cardMedia.previewVideoUrl
-    const showVideo = canPreview && Boolean(previewVideoUrl)
     const hoverImage = cardMedia.hoverImage
 
     const activeImage =
-        canPreview && isHovered && !previewVideoUrl && hoverImage
+        isHovered && !previewVideoUrl && hoverImage
             ? hoverImage
             : cardMedia.cardImage
 
     const handleMouseEnter = () => {
-        if (!canPreview) return
-
         setIsHovered(true)
         videoRef.current?.play().catch(() => {})
     }
@@ -79,7 +69,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            {(!previewVideoUrl || canPreview === false) && activeImage && (
+            {!previewVideoUrl && activeImage && (
                 <img
                     src={activeImage.url}
                     srcSet={activeImage.srcSet}
@@ -99,7 +89,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
                 />
             )}
 
-            {showVideo && previewVideoUrl && (
+            {previewVideoUrl && (
                 <video
                     ref={videoRef}
                     src={previewVideoUrl}

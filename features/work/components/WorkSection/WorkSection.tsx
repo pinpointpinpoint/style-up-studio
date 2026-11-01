@@ -69,7 +69,6 @@ export function WorkSection({
         pageSize: PROJECTS_PAGE_SIZE,
     })
 
-    const displayedProject = hoveredProject ?? activeProject
     const scrollContainerKey = isProjectDetail
         ? `detail-${activeProject?._id ?? 'loading'}`
         : 'id' in filter
@@ -135,7 +134,7 @@ export function WorkSection({
                         </div>
                         <div className={styles.sidebarPane}>
                             <WorkSidebar
-                                displayedProject={displayedProject}
+                                displayedProject={hoveredProject}
                                 sidebarFilters={activeSidebarFilters}
                                 filter={filter}
                             />

@@ -44,15 +44,7 @@ export default defineType({
             type: 'string',
             validation: (rule) => rule.required().error('Title is required.'),
             fieldset: 'basic',
-        }),
-        defineField({
-            name: 'client',
-            title: 'Client/Primary Collaborator*',
-            description:
-                'The main associated name for this project, such as a client, brand, publication, agency, or key collaborator.',
-            type: 'string',
-            validation: (rule) => rule.required().error('Client/Primary Collaborator is required.'),
-            fieldset: 'basic',
+            description: 'Title of project, including the client. Suggested format: Entity “Project title”.'
         }),
         defineField({
             name: 'date',
@@ -91,15 +83,10 @@ export default defineType({
         defineField({
             name: 'projectType',
             title: 'Project Type*',
-            type: 'array',
+            type: 'reference',
+            to: [{type: 'projectType'}],
+            options: {disableNew: true},
             validation: (rule) => rule.required().error('Select project type.'),
-            of: [
-                {
-                    type: 'reference',
-                    to: [{type: 'projectType'}],
-                    options: {disableNew: true},
-                },
-            ],
             fieldset: 'basic',
         }),
         defineField({
@@ -474,11 +461,10 @@ validation: (Rule) =>
         select: {
             title: 'title',
             media: 'coverImage',
-            date: 'date',
-            client: 'client',
+            date: 'date'
         },
 
-        prepare({title, media, date, client}) {
+        prepare({title, media, date}) {
             const dateObj = date ? new Date(date) : null
 
             let subtitle = ''
@@ -488,12 +474,6 @@ validation: (Rule) =>
                     month: 'long',
                     year: 'numeric',
                 })
-
-                if (client) {
-                    subtitle += ` • ${client}`
-                }
-            } else {
-                subtitle = client
             }
             return {
                 title,

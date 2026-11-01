@@ -68,11 +68,11 @@ export function WorkSidebar({displayedProject, sidebarFilters, filter}: WorkSide
             <div ref={filterSectionRef} className={styles.filterSection}>
                 <WorkIndexMenu sidebarFilters={sidebarFilters} filter={filter} />
             </div>
-            <div
+            {displayedProject && <div
                 className={`${styles.detailsSection} ${hasFilterOverflow ? styles.detailsSectionOverflow : ''}`}
             >
                 <ProjectInfoPanel displayedProject={displayedProject} />
-            </div>
+            </div>}
         </aside>
     )
 }

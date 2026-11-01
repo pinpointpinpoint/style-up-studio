@@ -419,13 +419,14 @@ export function getProjectThumbnails(
         }
 
         if (item._type === 'uploadedVideo') {
-            if (!item.thumbnail) return []
+            const thumbnail = item.thumbnail
+            if (!thumbnail) return []
 
             const url = getVideoMediaAsset({
                 sourceKind: 'uploadedVideo',
                 sourceUrl: item.fileUrl ?? '',
                 assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
-                sanityThumbnail: item.thumbnail,
+                sanityThumbnail: thumbnail,
                 sanityThumbnailUrl: imageUrl,
             })
 
@@ -439,7 +440,7 @@ export function getProjectThumbnails(
                     url,
                     alt: `Video thumbnail ${mediaIndex + 1} for ${projectTitle}`,
                     displayWidth: getThumbnailDisplayWidth(
-                        getSanityAssetAspectRatio(item.thumbnail.asset?._ref) ??
+                        getSanityAssetAspectRatio(thumbnail.asset?._ref) ??
                             FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
                         options,
                     ),
@@ -449,12 +450,13 @@ export function getProjectThumbnails(
 
         if (item._type === 'videoUrl') {
             if (!item.url) return []
+            const thumbnail = item.thumbnail
 
             const url = getVideoMediaAsset({
                 sourceKind: 'videoUrl',
                 sourceUrl: item.url,
                 assetUse: getProjectInfoThumbnailAssetUse(options.thumbnailHeight),
-                sanityThumbnail: item.thumbnail,
+                sanityThumbnail: thumbnail,
                 sanityThumbnailUrl: imageUrl,
                 providerThumbnailUrl: (videoUrl, providerPreset) =>
                     options.externalVideoThumbnailUrl?.(videoUrl, providerPreset),
@@ -470,7 +472,7 @@ export function getProjectThumbnails(
                     url,
                     alt: `Video link thumbnail ${mediaIndex + 1} for ${projectTitle}`,
                     displayWidth: getThumbnailDisplayWidth(
-                        getSanityAssetAspectRatio(item.thumbnail?.asset?._ref) ??
+                        getSanityAssetAspectRatio(thumbnail?.asset?._ref) ??
                             FALLBACK_VIDEO_THUMBNAIL_ASPECT_RATIO,
                         options,
                     ),

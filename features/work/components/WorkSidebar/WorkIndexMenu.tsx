@@ -5,7 +5,7 @@ import {usePathname} from 'next/navigation'
 import type {MouseEvent} from 'react'
 import type {Filter} from '@/types'
 import type {SidebarFiltersQueryResult} from '@/sanity.types'
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import styles from './WorkIndexMenu.module.css'
 import {createWorkIndexCatalog} from '@/features/work/lib/workIndex'
 import ArrowIcon from '@/features/site-shell/components/ArrowIcon/ArrowIcon'
@@ -65,7 +65,6 @@ export default function WorkIndexMenu({sidebarFilters, filter, variant = 'sideba
                 targetPathname: getHrefPathname(href),
             })
         }
-
     return (
         <div className={styles.menu} data-variant={variant}>
             {showHeading && <div className={styles.heading}>INDEX</div>}
@@ -76,7 +75,6 @@ export default function WorkIndexMenu({sidebarFilters, filter, variant = 'sideba
                         const href = indexCatalog.getHref(nextFilter)
                         const isActive =
                             (activeFilter.type === 'featured' && type.filter.type === 'featured') ||
-                            (activeFilter.type === 'all' && type.filter.type === 'all') ||
                             ('id' in activeFilter &&
                                 'id' in type.filter &&
                                 activeFilter.type === type.filter.type &&
@@ -112,7 +110,7 @@ export default function WorkIndexMenu({sidebarFilters, filter, variant = 'sideba
                 <div className={`${styles.collaboratorSection} scrollbar`} data-sidebar-scroll-area>
                     {collaborators.map((c) => {
                         const isActiveGroup = activeFilter.type === c.filterType
-                        const isOpen = openGroups[c.filterType] ?? false
+                        const isOpen = openGroups[c.filterType] ?? isActiveGroup
                         const activeItem =
                             'id' in activeFilter && isActiveGroup
                                 ? c.options.find((item) => item.id === activeFilter.id)

@@ -43,9 +43,6 @@ export const sidebarFiltersQuery = defineQuery(`
     _type == "project" &&
     featured == true
   ]),
-  "allCount": count(*[
-    _type == "project"
-  ]),
   "settings": {
     "showPersonalities": coalesce(*[_type == "settings"][0].sidebarFilters.showPersonalities, true),
     "showBrands": coalesce(*[_type == "settings"][0].sidebarFilters.showBrands, true)
@@ -131,10 +128,9 @@ const projectBaseProjection = `
   _id,
   _type,
   title,
-  client,
   date,
   "slug": slug.current,
-  "projectType": projectType[]->{_id, title, "slug": slug.current},
+  "projectType": coalesce(projectType->, projectType[0]->){_id, title, "slug": slug.current},
   featured,
   "personalities": personalities[]->{_id, name, "slug": slug.current},
   "brands": brands[]->{_id, name, "slug": slug.current},
@@ -184,7 +180,7 @@ export const projectsQuery = defineQuery(`
     (
       $filterType == "all" ||
       ($filterType == "featured" && featured == true) ||
-      ($filterType == "projectType" && $filterId in projectType[]._ref) ||
+      ($filterType == "projectType" && (projectType._ref == $filterId || $filterId in projectType[]._ref)) ||
       ($filterType == "brand" && $filterId in brands[]._ref) ||
       ($filterType == "personality" && $filterId in personalities[]._ref)
     ) &&

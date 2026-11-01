@@ -8,7 +8,7 @@ type DelayedLoadingMessageProps = {
 }
 
 export default function DelayedLoadingMessage({
-    children = '[LOADING...]',
+    children = '[LOADING]',
     delay = 300,
 }: DelayedLoadingMessageProps) {
     const [isVisible, setIsVisible] = useState(false)

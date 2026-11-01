@@ -90,7 +90,6 @@ export function useWorkSectionSession({
             pageSize,
         })
     })
-    const inFlightRefreshFilterKeyRef = useRef<string | null>(null)
     const sessionRef = useRef(session)
     const projectPagesByFilterRef = useRef(
         new Map<string, CachedProjectPage>([
@@ -134,13 +133,12 @@ export function useWorkSectionSession({
             cachedProjectPages: projectPagesByFilterRef.current,
         })
 
-        if (!request || inFlightRefreshFilterKeyRef.current === request.filterKey) {
+        if (!request) {
             return
         }
 
         const refreshRequest = request
         let isCurrent = true
-        inFlightRefreshFilterKeyRef.current = refreshRequest.filterKey
 
         async function refreshProjects() {
             setSession((currentSession) => ({...currentSession, isLoading: true}))
@@ -167,10 +165,6 @@ export function useWorkSectionSession({
                     return result.state
                 })
             } finally {
-                if (inFlightRefreshFilterKeyRef.current === refreshRequest.filterKey) {
-                    inFlightRefreshFilterKeyRef.current = null
-                }
-
                 if (isCurrent) {
                     setSession((currentSession) => applyWorkBrowsingRequestEnd(currentSession))
                 }
@@ -180,6 +174,8 @@ export function useWorkSectionSession({
         refreshProjects()
 
         return () => {
+            // A restored route gets a new effect and may start its own request.
+            // Ignore this response without leaving a stale in-flight guard behind.
             isCurrent = false
         }
     }, [activeFilterKey])
