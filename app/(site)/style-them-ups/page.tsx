@@ -54,9 +54,9 @@ return (
         date: string
       }) => (
         <div className={styles.submission} key={submission._id}>
-          <img src={`${submission.head}`} alt="" />
-          <img src={`${submission.body}`} alt="" />
-          <img src={`${submission.legs}`} alt="" />
+          <img src={`${submission.head}`} alt="" loading="lazy"/>
+          <img src={`${submission.body}`} alt="" loading="lazy"/>
+          <img src={`${submission.legs}`} alt="" loading="lazy"/>
           <div>{new Date(submission.date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
         </div>
       ))}
