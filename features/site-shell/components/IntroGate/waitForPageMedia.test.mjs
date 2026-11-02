@@ -53,3 +53,34 @@ test('cancelling the wait prevents the timeout from dismissing the intro', async
     await new Promise(resolve => setTimeout(resolve, 30))
     assert.equal(calls, 0)
 })
+
+test('all-media pages decode offscreen lazy images before revealing content', async () => {
+    const frames = new Map()
+    let nextId = 0
+    globalThis.requestAnimationFrame = callback => { frames.set(++nextId, callback); return nextId }
+    globalThis.cancelAnimationFrame = id => frames.delete(id)
+    const paint = () => { const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(callback => callback()) }
+    let finishDecode
+    const image = Object.assign(new HTMLImageElement(), {
+        complete: false,
+        loading: 'lazy',
+        decode: () => new Promise(resolve => { finishDecode = resolve }),
+    })
+    const root = {
+        querySelector: selector => selector === '[data-intro-media="all"]' ? {} : null,
+        querySelectorAll: () => [image],
+    }
+    let ready = false
+    const stop = waitForPageMedia(root, () => { ready = true })
+    paint()
+    assert.equal(image.loading, 'eager')
+    image.dispatchEvent(new Event('load'))
+    paint()
+    assert.equal(ready, false)
+    finishDecode()
+    await new Promise(resolve => setImmediate(resolve))
+    paint()
+    paint()
+    assert.equal(ready, true)
+    stop()
+})

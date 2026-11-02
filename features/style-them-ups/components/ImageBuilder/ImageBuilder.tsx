@@ -1,9 +1,9 @@
 'use client'
 
 import ImageSelector, { ImageSelectorProps } from '@/features/style-them-ups/components/ImageSelector/ImageSelector'
-import type { Metadata } from 'next'
 import styles from './ImageBuilder.module.css';
-import { use, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import {waitForPageMedia} from '@/features/site-shell/components/IntroGate/waitForPageMedia'
 import { useRouter } from 'next/navigation'
 
 type ImageBuilderProps = {
@@ -11,6 +11,12 @@ type ImageBuilderProps = {
 }
 
 export default function ImageBuilder({ selectors }: ImageBuilderProps) {
+    const builderRef = useRef<HTMLDivElement>(null)
+    const [ready, setReady] = useState(false)
+    useEffect(() => {
+        if (!builderRef.current) return
+        return waitForPageMedia(builderRef.current, () => setReady(true))
+    }, [])
     const [builderHidden, setBuilderHidden] = useState(false);
     // find the one with activeFrame true and get its type
     const [selection, setSelection] = useState({
@@ -46,7 +52,8 @@ export default function ImageBuilder({ selectors }: ImageBuilderProps) {
     }
 
     return (
-        <div className={styles.form} data-collapsed={builderHidden}>
+        <div ref={builderRef} className={styles.form} data-collapsed={builderHidden} aria-busy={!ready}>
+            <div className={styles.contents} data-intro-media="all" inert={!ready} style={{visibility: ready ? 'visible' : 'hidden'}}>
             {selectors && selectors.map(({ type, images }) => (
                 <ImageSelector key={type} type={type} images={images} hidden={builderHidden} onChange={src =>
                     setSelection(current => ({ ...current, [type]: src }))
@@ -57,6 +64,19 @@ export default function ImageBuilder({ selectors }: ImageBuilderProps) {
                 <button onClick={submitSelection}>[STYLE IT]</button>
                 <button onClick={toggleImageSelector}>{builderHidden ? '[EXPAND]' : '[COLLAPSE]'}</button>
             </div>
+            </div>
+            {!ready && (
+                <div className={styles.loading} role="status" aria-label="Loading image builder">
+                    <div className={styles.skeletonRows} aria-hidden="true">
+                        {['head', 'body', 'legs'].map(part => (
+                            <div key={part} className={styles.skeletonRow}>
+                            </div>
+                        ))}
+                    </div>
+                    <div className={styles.skeletonFooter} aria-hidden="true">
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

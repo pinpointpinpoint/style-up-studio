@@ -52,7 +52,7 @@ export default function ImageSelector({type, images, hidden, value, onChange}: I
     }
 
     return (
-        <div className={styles.selector} role="group" aria-label={`${type} selector`} aria-hidden={hidden}>
+        <div className={styles.selector} data-part={type} role="group" aria-label={`${type} selector`} aria-hidden={hidden}>
             {images.length ? (
                 <div className={styles.activeFrame}>
                     <img

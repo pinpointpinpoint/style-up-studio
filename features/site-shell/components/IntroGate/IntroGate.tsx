@@ -3,6 +3,7 @@
 import {Suspense, useEffect, useRef, useState, type ReactNode, type RefObject} from 'react'
 import {waitForPageMedia} from './waitForPageMedia'
 import styles from './IntroGate.module.css'
+import {usePathname} from 'next/navigation'
 
 const MINIMUM_INTRO_MS = 2500
 const FLASH_INTERVAL_MS = 400
@@ -59,10 +60,13 @@ function ContentReady({root, onReady}: {root: RefObject<HTMLDivElement | null>; 
 }
 
 export default function IntroGate({children}: {children: ReactNode}) {
+    const pathname = usePathname()
+    const isBuilder = pathname === '/style-them-ups'
     const contentRef = useRef<HTMLDivElement>(null)
     const [minimumElapsed, setMinimumElapsed] = useState(false)
     const [contentReady, setContentReady] = useState(false)
-    const [dismissed, setDismissed] = useState(false)
+    const [dismissed, setDismissed] = useState(isBuilder)
+    const covered = !dismissed && !isBuilder
     const showIntro = !minimumElapsed || !contentReady
 
     useEffect(() => {
@@ -79,13 +83,13 @@ export default function IntroGate({children}: {children: ReactNode}) {
 
     return (
         <>
-            <div ref={contentRef} inert={!dismissed} aria-hidden={!dismissed ? true : undefined}>
+            <div ref={contentRef} inert={covered} aria-hidden={covered ? true : undefined}>
                 <Suspense fallback={null}>
                     {children}
                     <ContentReady root={contentRef} onReady={setContentReady} />
                 </Suspense>
             </div>
-            {!dismissed && (
+            {covered && (
                 <div
                     className={styles.introGate}
                     role="status"

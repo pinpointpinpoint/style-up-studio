@@ -1,6 +1,48 @@
-.form {
+.contents {
+  display: contents;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.skeletonRows {
   flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-rows: 119fr 175fr 306fr;
+}
+
+.skeletonRow {
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  border-bottom: 1px solid var(--off-black);
+}
+
+.skeletonArrow {
+  width: 20px;
+  height: 20px;
+}
+
+.skeletonFooter {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid var(--off-black);
+  height: 40px;
+}
+
+.form {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 300px;
@@ -9,6 +51,7 @@
 }
 
 .footer {
+  flex: 0 0 auto;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);

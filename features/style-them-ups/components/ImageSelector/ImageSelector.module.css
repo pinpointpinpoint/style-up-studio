@@ -1,4 +1,5 @@
 .selector {
+    flex: var(--part-height) 1 0px;
     position: relative;
     display: flex;
     justify-content: center;
@@ -7,6 +8,18 @@
     width: 100%;
     overflow: hidden;
     border-bottom: 1px solid black;
+}
+
+.selector[data-part='head'] {
+    --part-height: 119;
+}
+
+.selector[data-part='body'] {
+    --part-height: 175;
+}
+
+.selector[data-part='legs'] {
+    --part-height: 306;
 }
 
 .activeFrame {
@@ -48,11 +61,16 @@
     display: flex;
     flex: none;
     height: 100%;
+    aspect-ratio: 320 / var(--part-height);
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
     opacity: 0.35;
+}
+
+.option .image {
+    width: 100%;
 }
 
 .button {

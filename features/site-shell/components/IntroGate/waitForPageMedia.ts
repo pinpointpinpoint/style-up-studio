@@ -70,6 +70,13 @@ export function waitForPageMedia(root: HTMLElement, onReady: () => void, timeout
                 })
             })
         }
+        // The builder's offscreen options and submissions also affect layout.
+        // Decode them before revealing the page, including lazy images.
+        if (root.querySelector('[data-intro-media="all"]')) {
+            media.forEach(item => visible.add(item))
+            finish()
+            return
+        }
         if (!media.length) { finish(); return }
         observer = new IntersectionObserver(entries => {
             for (const entry of entries) {
