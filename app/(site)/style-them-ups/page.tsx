@@ -5,6 +5,7 @@ import path from 'node:path'
 import styles from './page.module.css'
 import { client } from '@/sanity/lib/client'
 import ImageBuilder from '@/features/style-them-ups/components/ImageBuilder/ImageBuilder'
+import Navbar from '@/features/site-shell/components/Navbar/Navbar'
 
 const sections = [
   {type: 'head', folder: 'heads'},
@@ -44,6 +45,10 @@ export default async function StyleThemUpsPage() {
 
 return (
   <main className={styles.main}>
+    <nav className={styles.nav}>
+      
+      <img src="/minimal_logo.svg" alt="Style Up Studio logo" className={styles.logo} />
+    </nav>
     <ImageBuilder selectors={selectors}/>
     <div className={styles.submissions}>
       {submissions.map((submission: {

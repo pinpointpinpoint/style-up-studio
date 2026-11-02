@@ -44,3 +44,19 @@
     margin: 2px;
 }
 
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid var(--off-black);
+  height: 40px;
+}
+
+.nav .logo {
+  width: auto;
+  height: 18px;
+  object-fit: contain;
+  margin: 20px auto;
+}
+
