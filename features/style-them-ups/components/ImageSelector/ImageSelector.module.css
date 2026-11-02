@@ -81,6 +81,9 @@
     border-left: solid 1px black;
     border-right: solid 1px black;
     width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .previous {
@@ -89,4 +92,8 @@
 
 .next {
     right: 0;
+}
+
+.previous, .next {
+    color: var(--off-black);
 }

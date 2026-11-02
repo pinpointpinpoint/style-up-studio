@@ -80,7 +80,3 @@
   flex: 0 0 auto;
   min-height: 0;
 }
-
-.previous, .next {
-  color: var(--off-black);
-}
