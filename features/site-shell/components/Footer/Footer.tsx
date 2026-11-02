@@ -6,8 +6,9 @@ export default function Footer() {
     return (
         <footer className={styles.footer}>
             <Link href="/style-them-ups">
-                <img src="/final_logo.svg" alt="Style Up Studio logo" className={styles.logo} />         
+                <img src="/Scan.png" alt="Style Up Studio logo" className={styles.logo} />         
             </Link>
+            {/* <div>Angie Jayasinghe</div> */}
         </footer>
     )
 }

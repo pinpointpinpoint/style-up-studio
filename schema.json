@@ -381,13 +381,6 @@
         },
         "optional": true
       },
-      "client": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "date": {
         "type": "objectAttribute",
         "value": {

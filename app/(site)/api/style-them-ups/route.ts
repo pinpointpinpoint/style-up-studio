@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     }).create({
       _type: 'styleThemUp',
       ...selections,
+      date: new Date().toISOString(),
     })
 
     return NextResponse.json({ id: result._id })

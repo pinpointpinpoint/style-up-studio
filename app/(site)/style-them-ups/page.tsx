@@ -1,10 +1,10 @@
-import ImageSelector from '@/features/style-them-ups/components/ImageSelector'
+import ImageSelector from '@/features/style-them-ups/components/ImageSelector/ImageSelector'
 import type { Metadata } from 'next'
 import {readdir} from 'node:fs/promises'
 import path from 'node:path'
 import styles from './page.module.css'
-import StyleThemUpsForm from '@/features/style-them-ups/components/Form'
 import { client } from '@/sanity/lib/client'
+import ImageBuilder from '@/features/style-them-ups/components/ImageBuilder/ImageBuilder'
 
 const sections = [
   {type: 'head', folder: 'heads'},
@@ -30,35 +30,36 @@ export default async function StyleThemUpsPage() {
     return {type, images}
   }))
 
-const submissions = await client.fetch(
-  `*[_type == "styleThemUp"] | order(_createdAt desc)[0...100] {
-    _id,
-    head,
-    body,
-    legs
-  }`,
-  {},
-  { cache: 'no-store' }
-)
+  const submissions = await client.fetch(
+    `*[_type == "styleThemUp"] | order(_createdAt desc)[0...100] {
+      _id,
+      head,
+      body,
+      legs,
+      date
+    }`,
+    {},
+    { cache: 'no-store' }
+  )
 
 return (
   <main className={styles.main}>
-    <StyleThemUpsForm selectors={selectors} />
+    <ImageBuilder selectors={selectors}/>
     <div className={styles.submissions}>
       {submissions.map((submission: {
         _id: string
         head: string
         body: string
         legs: string
+        date: string
       }) => (
         <div className={styles.submission} key={submission._id}>
           <img src={`${submission.head}`} alt="" />
           <img src={`${submission.body}`} alt="" />
           <img src={`${submission.legs}`} alt="" />
+          <div>{new Date(submission.date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
         </div>
       ))}
-
-
     </div>
   </main>
 )

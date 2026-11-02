@@ -1,0 +1,74 @@
+.selector {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid black;
+}
+
+.activeFrame {
+    position: relative;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    width: 300px;
+}
+
+.image {
+    display: block;
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+}
+
+.activeFrame > .image {
+    max-width: 100%;
+}
+
+.neighbors {
+    position: absolute;
+    top: 0;
+    display: flex;
+    height: 100%;
+    width: max-content;
+}
+
+.before {
+    right: 100%;
+}
+
+.after {
+    left: 100%;
+}
+
+.option {
+    display: flex;
+    flex: none;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.35;
+}
+
+.button {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    height: 100%;
+    border-left: solid 1px black;
+    border-right: solid 1px black;
+    width: 30px;
+}
+
+.previous {
+    left: 0;
+}
+
+.next {
+    right: 0;
+}

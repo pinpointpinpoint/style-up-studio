@@ -1,37 +1,94 @@
-
 'use client'
 
-import { useEffect, useState } from 'react'
+import {Suspense, useEffect, useState, type ReactNode} from 'react'
 import styles from './IntroGate.module.css'
 
-const images = Array.from(
-    { length: 6 },
-    (_, i) => `/loading/Cutout${i+1}.png`
-)
+const MINIMUM_INTRO_MS = 2500
+const FLASH_INTERVAL_MS = 400
+const LAST_IMAGE_HOLD_MS = 400
+const images = Array.from({length: 19}, (_, i) => `/loading/Cutout${i + 1}.png`)
 
-export default function IntroGate() {
-    const [isLoading, setIsLoading] = useState(true)
+function FlashImages({paused}: {paused: boolean}) {
+    const [activeImage, setActiveImage] = useState<number | null>(null)
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 4000)
-        return () => clearTimeout(timer)
+        const firstFrame = window.requestAnimationFrame(() => {
+            setActiveImage(Math.floor(Math.random() * images.length))
+        })
+        return () => window.cancelAnimationFrame(firstFrame)
     }, [])
 
+    useEffect(() => {
+        if (paused) return
+
+        const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const timer = window.setInterval(() => {
+            if (motionPreference.matches) return
+
+            // Pick a different image each time, without immediate repeats.
+            const offset = 1 + Math.floor(Math.random() * (images.length - 1))
+            setActiveImage((current) => ((current ?? 0) + offset) % images.length)
+        }, FLASH_INTERVAL_MS)
+
+        return () => window.clearInterval(timer)
+    }, [paused])
+
     return (
-        isLoading &&
-        <div className={styles.introGate}>
-            <div className={styles.flashGrid}>
-                {images.map((image, i) => (
-                    <div
-                        key={image}
-                        className={styles.gridItem}
-                        style={{
-                            backgroundImage: `url('${image}')`,
-                            animationDelay: `${((i * 7) % 20) * 0.2}s`
-                        }}
-                    />
-                ))}
-            </div>
+        <div className={styles.flashImages} aria-hidden="true">
+            {images.map((image, i) => (
+                <img
+                    key={image}
+                    className={styles.flashImage}
+                    src={image}
+                    alt=""
+                    hidden={i !== activeImage}
+                />
+            ))}
         </div>
+    )
+}
+
+// This effect runs once the surrounding Suspense boundary reveals its content.
+function ContentReady({onReady}: {onReady: (ready: boolean) => void}) {
+    useEffect(() => onReady(true), [onReady])
+    return null
+}
+
+export default function IntroGate({children}: {children: ReactNode}) {
+    const [minimumElapsed, setMinimumElapsed] = useState(false)
+    const [contentReady, setContentReady] = useState(false)
+    const [dismissed, setDismissed] = useState(false)
+    const showIntro = !minimumElapsed || !contentReady
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => setMinimumElapsed(true), MINIMUM_INTRO_MS)
+        return () => window.clearTimeout(timer)
+    }, [])
+
+    useEffect(() => {
+        if (showIntro) return
+
+        const timer = window.setTimeout(() => setDismissed(true), LAST_IMAGE_HOLD_MS)
+        return () => window.clearTimeout(timer)
+    }, [showIntro])
+
+    return (
+        <>
+            <div inert={!dismissed} aria-hidden={!dismissed ? true : undefined}>
+                <Suspense fallback={null}>
+                    {children}
+                    <ContentReady onReady={setContentReady} />
+                </Suspense>
+            </div>
+            {!dismissed && (
+                <div
+                    className={styles.introGate}
+                    role="status"
+                    aria-label="Loading Style Up Studio"
+                >
+                    <FlashImages paused={!showIntro} />
+                </div>
+            )}
+        </>
     )
 }
