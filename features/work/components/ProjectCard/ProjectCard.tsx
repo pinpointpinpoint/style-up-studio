@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, {useMemo, useRef, useState, useSyncExternalStore} from 'react'
+import React, {useMemo, useRef, useState} from 'react'
 import {Project} from '@/types'
 import styles from './ProjectCard.module.css'
 import {getProjectCardMedia} from '../../lib/media/projectMediaPresentation'
@@ -20,17 +20,8 @@ interface ProjectCardProps {
 const EAGER_PROJECT_CARD_COUNT = 8
 const HIGH_PRIORITY_PROJECT_CARD_COUNT = 2
 
-const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
-const TOUCH_QUERY = '(any-pointer: coarse)'
-
-function subscribeToInput(onChange: () => void) {
-    const queries = [HOVER_QUERY, TOUCH_QUERY].map(query => window.matchMedia(query))
-    queries.forEach(query => query.addEventListener('change', onChange))
-    return () => queries.forEach(query => query.removeEventListener('change', onChange))
-}
-
 const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
-    const [isHovered, setIsHovered] = useState(false)
+    const [failedVideoUrl, setFailedVideoUrl] = useState<string | null>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
 
     const cardMedia = useMemo(
@@ -42,21 +33,15 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
         [project],
     )
 
-    const previewVideoUrl = cardMedia.previewVideoUrl
-    const hoverImage = cardMedia.hoverImage
-
-    const activeImage =
-        isHovered && !previewVideoUrl && hoverImage
-            ? hoverImage
-            : cardMedia.cardImage
+    const previewVideoUrl = cardMedia.previewVideoUrl?.trim() || null
+    const showVideo = Boolean(previewVideoUrl && previewVideoUrl !== failedVideoUrl)
+    const activeImage = cardMedia.cardImage
 
     const handleMouseEnter = () => {
-        setIsHovered(true)
         videoRef.current?.play().catch(() => {})
     }
 
     const handleMouseLeave = () => {
-        setIsHovered(false)
         videoRef.current?.pause()
     }
 
@@ -69,7 +54,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
             onMouseLeave={handleMouseLeave}
             onClick={onOpen}
         >
-            {!previewVideoUrl && activeImage && (
+            {!showVideo && activeImage && (
                 <img
                     src={activeImage.url}
                     srcSet={activeImage.srcSet}
@@ -89,11 +74,14 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
                 />
             )}
 
-            {previewVideoUrl && (
+            {showVideo && previewVideoUrl && (
                 <video
+                    key={previewVideoUrl}
                     data-intro-preview
                     ref={videoRef}
                     src={previewVideoUrl}
+                    poster={activeImage?.url}
+                    onError={() => setFailedVideoUrl(previewVideoUrl)}
                     className={styles.projectCardMedia}
                     muted
                     loop

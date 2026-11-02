@@ -303,9 +303,9 @@ export default defineType({
         }),
         defineField({
             name: 'previewClip',
-            title: 'Preview Clip*',
+            title: 'Preview Clip',
             description:
-                'Required for video projects. Upload a 3-5 second MP4 used for project-card hover previews.',
+                'Optional. Upload a 3–5 second MP4 for project-card hover previews. Without a clip, the card uses the cover image.',
             type: 'file',
             hidden: ({document}) => document?.projectFormat !== 'video',
             options: {
@@ -314,16 +314,6 @@ export default defineType({
             },
 validation: (Rule) =>
     Rule.custom(async (file, context) => {
-        const projectFormat = (
-            context.document as {
-                projectFormat?: 'photo' | 'video'
-            } | undefined
-        )?.projectFormat
-
-        if (projectFormat === 'video' && !file?.asset?._ref) {
-            return 'Add a 3–5 second preview clip for video projects.'
-        }
-
         if (!file?.asset?._ref) {
             return true
         }
