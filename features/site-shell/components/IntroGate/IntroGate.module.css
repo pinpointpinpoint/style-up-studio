@@ -19,3 +19,8 @@
     width: 100%;
 }
 
+.flashImages img {
+    width: 250px;
+    height: auto;
+    object-fit: contain;
+}

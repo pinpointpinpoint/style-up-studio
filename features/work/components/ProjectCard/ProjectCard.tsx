@@ -91,6 +91,7 @@ const ProjectCard = ({project, index, href, onOpen}: ProjectCardProps) => {
 
             {previewVideoUrl && (
                 <video
+                    data-intro-preview
                     ref={videoRef}
                     src={previewVideoUrl}
                     className={styles.projectCardMedia}

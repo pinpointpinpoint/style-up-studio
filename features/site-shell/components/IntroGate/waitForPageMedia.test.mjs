@@ -35,3 +35,21 @@ test('waits for visible video frames and painting, without waiting for offscreen
     assert.equal(ready, true)
     stop()
 })
+
+test('releases the intro when media stalls, even if visibility never resolves', async () => {
+    const root = {querySelector: () => null, querySelectorAll: () => []}
+    let calls = 0
+    const stop = waitForPageMedia(root, () => { calls++ }, 10)
+    await new Promise(resolve => setTimeout(resolve, 30))
+    assert.equal(calls, 1)
+    stop()
+})
+
+test('cancelling the wait prevents the timeout from dismissing the intro', async () => {
+    const root = {querySelector: () => null, querySelectorAll: () => []}
+    let calls = 0
+    const stop = waitForPageMedia(root, () => { calls++ }, 10)
+    stop()
+    await new Promise(resolve => setTimeout(resolve, 30))
+    assert.equal(calls, 0)
+})

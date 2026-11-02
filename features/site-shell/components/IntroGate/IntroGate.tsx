@@ -1,6 +1,7 @@
 'use client'
 
-import {Suspense, useEffect, useState, type ReactNode} from 'react'
+import {Suspense, useEffect, useRef, useState, type ReactNode, type RefObject} from 'react'
+import {waitForPageMedia} from './waitForPageMedia'
 import styles from './IntroGate.module.css'
 
 const MINIMUM_INTRO_MS = 2500
@@ -49,12 +50,16 @@ function FlashImages({paused}: {paused: boolean}) {
 }
 
 // This effect runs once the surrounding Suspense boundary reveals its content.
-function ContentReady({onReady}: {onReady: (ready: boolean) => void}) {
-    useEffect(() => onReady(true), [onReady])
+function ContentReady({root, onReady}: {root: RefObject<HTMLDivElement | null>; onReady: (ready: boolean) => void}) {
+    useEffect(() => {
+        if (!root.current) return
+        return waitForPageMedia(root.current, () => onReady(true))
+    }, [root, onReady])
     return null
 }
 
 export default function IntroGate({children}: {children: ReactNode}) {
+    const contentRef = useRef<HTMLDivElement>(null)
     const [minimumElapsed, setMinimumElapsed] = useState(false)
     const [contentReady, setContentReady] = useState(false)
     const [dismissed, setDismissed] = useState(false)
@@ -74,10 +79,10 @@ export default function IntroGate({children}: {children: ReactNode}) {
 
     return (
         <>
-            <div inert={!dismissed} aria-hidden={!dismissed ? true : undefined}>
+            <div ref={contentRef} inert={!dismissed} aria-hidden={!dismissed ? true : undefined}>
                 <Suspense fallback={null}>
                     {children}
-                    <ContentReady onReady={setContentReady} />
+                    <ContentReady root={contentRef} onReady={setContentReady} />
                 </Suspense>
             </div>
             {!dismissed && (

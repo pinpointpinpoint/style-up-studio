@@ -1,9 +1,30 @@
-export function waitForPageMedia(root: HTMLElement, onReady: () => void) {
+export function waitForPageMedia(root: HTMLElement, onReady: () => void, timeoutMs = 8000) {
     let stopped = false
     let observer: IntersectionObserver | undefined
     let frame = 0
+    let generation = 0
     const cleanups: (() => void)[] = []
     const mutation = new MutationObserver(inspect)
+    const timeout = setTimeout(complete, timeoutMs)
+
+    function clearWaits() {
+        cancelAnimationFrame(frame)
+        observer?.disconnect()
+        cleanups.splice(0).forEach(cleanup => cleanup())
+    }
+
+    function stop() {
+        stopped = true
+        clearTimeout(timeout)
+        mutation.disconnect()
+        clearWaits()
+    }
+
+    function complete() {
+        if (stopped) return
+        stop()
+        onReady()
+    }
 
     function wait(media: HTMLImageElement | HTMLVideoElement) {
         return new Promise<void>(resolve => {
@@ -29,18 +50,23 @@ export function waitForPageMedia(root: HTMLElement, onReady: () => void) {
     }
 
     function inspect() {
-        if (stopped || observer || root.querySelector('[data-intro-pending="true"]')) return
-        const media = [...root.querySelectorAll<HTMLImageElement | HTMLVideoElement>('img, video')]
+        if (stopped) return
+        const currentGeneration = ++generation
+        clearWaits()
+        if (root.querySelector('[data-intro-pending="true"]')) return
+        // Full players wait for user interaction; only preview videos block the intro.
+        const media = [...root.querySelectorAll<HTMLImageElement | HTMLVideoElement>('img, video[data-intro-preview]')]
         const remaining = new Set<Element>(media)
         const visible = new Set<HTMLImageElement | HTMLVideoElement>()
         const finish = () => {
-            mutation.disconnect()
             observer?.disconnect()
             void Promise.all([...visible].map(wait)).then(() => {
-                if (stopped) return
+                if (stopped || currentGeneration !== generation) return
                 // Allow decoded frames to be painted beneath the overlay before removing it.
                 frame = requestAnimationFrame(() => {
-                    frame = requestAnimationFrame(() => { if (!stopped) onReady() })
+                    frame = requestAnimationFrame(() => {
+                        if (currentGeneration === generation) complete()
+                    })
                 })
             })
         }
@@ -54,13 +80,7 @@ export function waitForPageMedia(root: HTMLElement, onReady: () => void) {
         })
         media.forEach(item => observer!.observe(item))
     }
-    mutation.observe(root, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-intro-pending']})
+    mutation.observe(root, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-intro-pending', 'src', 'srcset']})
     frame = requestAnimationFrame(inspect)
-    return () => {
-        stopped = true
-        cancelAnimationFrame(frame)
-        mutation.disconnect()
-        observer?.disconnect()
-        cleanups.forEach(cleanup => cleanup())
-    }
+    return stop
 }
